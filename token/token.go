@@ -2,13 +2,16 @@ package token
 
 import "strconv"
 
-type TokenType int
+// Type is the type of a token
+type Type int
 
 const (
-	ILLEGAL TokenType = iota
+	// ILLEGAL is a type of token that is not specified in language spec (should not exist)
+	ILLEGAL Type = iota
 	EOF
 	COMMENT
 
+	// data types
 	IDENTIFIER
 	INT
 	FLOAT
@@ -16,18 +19,29 @@ const (
 	BOOLEAN
 	STRING
 
+	// operators
 	ADD
 	SUB
 	MUL
 	DIV
 
-	AND
-	OR
-	NOT
+	LAND
+	LOR
+	LNOT
+
+	ASSIGN
+	EQUAL
+
+	SEMI // SEMI: semi-colon (;)
+
+	// keywords
+	LET
+	CONST
 )
 
+// A Token represents a mainingful word in a program.
 type Token struct {
-	TokenType TokenType
+	TokenType Type
 	Raw       string
 }
 
@@ -43,14 +57,39 @@ var tokens = [...]string{
 	BOOLEAN:    "BOOLEAN",
 	STRING:     "STRING",
 
-	ADD: "ADD",
-	SUB: "SUB",
-	MUL: "MUL",
-	DIV: "DIV",
+	ADD: "+",
+	SUB: "-",
+	MUL: "*",
+	DIV: "/",
 
-	AND: "AND",
-	OR:  "OR",
-	NOT: "NOT",
+	LAND: "&&", // logic and
+	LOR:  "||", // logic or
+	LNOT: "!",  // logic not
+
+	ASSIGN: "=",
+	EQUAL:  "==",
+
+	SEMI: ";",
+
+	LET:   "let",
+	CONST: "const",
+}
+
+var keywords map[string]Type
+var operators map[string]Type
+
+func init() {
+	// init keywords mapping
+	keywords = make(map[string]Type)
+	for i := LET; i < CONST; i++ {
+		keywords[tokens[i]] = i
+	}
+
+	operators = make(map[string]Type)
+	for i := ADD; i < SEMI; i++ {
+		operators[tokens[i]] = i
+	}
+
 }
 
 func (tok *Token) String() string {
@@ -66,6 +105,17 @@ func IllegalToken(raw string) *Token {
 	return &Token{TokenType: ILLEGAL, Raw: raw}
 }
 
+// EOFToken is a factory for generating a default EOF token
 func EOFToken() *Token {
 	return &Token{TokenType: EOF, Raw: ""}
+}
+
+// IsKeyword returns a token containing info about that keyword, or nil if
+// input is not a keyword
+func IsKeyword(reading string) *Token {
+	if tokenType, isKeyword := keywords[reading]; isKeyword {
+		return &Token{TokenType: tokenType, Raw: reading}
+	}
+
+	return nil
 }

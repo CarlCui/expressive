@@ -21,25 +21,32 @@ func (scanner *Scanner) Init(file *file.File) {
 func (scanner *Scanner) Next() (*token.Token, error) {
 	scanner.skipWhitespaces()
 
+	tok := token.EOFToken()
+	var err error
+
 	if !scanner.file.IsEOF() {
 		ch := scanner.file.NextChar()
 
+		scanner.cur = string(ch)
+
 		switch {
 		case isDigit(ch):
-			scanner.cur = string(ch)
+			tok = scanner.parseNumber()
 			break
+		case isIdentifierStart(ch):
+
 		default:
 		}
 	}
 
-	return token.EOFToken(), nil
+	return tok, err
 }
 
 /*
- a number is either:
+	a number is either:
 
- 1. an integer: [0-9]+
- 2. a float: [0-9]+.[0-9]+
+	1. an integer: [0-9]+
+	2. a float: [0-9]+.[0-9]+
 
 */
 func (scanner *Scanner) parseNumber() *token.Token {
@@ -56,7 +63,6 @@ func (scanner *Scanner) parseNumber() *token.Token {
 	}
 
 	return &token.Token{TokenType: token.INT, Raw: scanner.cur}
-
 }
 
 func (scanner *Scanner) appendConsequentDigits() {
@@ -65,6 +71,24 @@ func (scanner *Scanner) appendConsequentDigits() {
 
 		scanner.cur += string(ch)
 	}
+}
+
+/*
+	identifier := [_a-zA-Z][_0-9a-zA-Z]*
+
+*/
+func (scanner *Scanner) parseIdentifier() *token.Token {
+	for !scanner.file.IsEOF() && (isIdentifierStart(scanner.file.Peek()) || isDigit(scanner.file.Peek())) {
+		scanner.cur += string(scanner.file.NextChar())
+	}
+
+	tok := token.IsKeyword(scanner.cur)
+
+	if tok != nil {
+		tok = &token.Token{TokenType: token.IDENTIFIER, Raw: scanner.cur}
+	}
+
+	return tok
 }
 
 func (scanner *Scanner) skipWhitespaces() {
@@ -92,4 +116,8 @@ func isLetter(ch rune) bool {
 
 func isUnderscore(ch rune) bool {
 	return ch == '_'
+}
+
+func isIdentifierStart(ch rune) bool {
+	return isUnderscore(ch) || isLetter(ch)
 }
