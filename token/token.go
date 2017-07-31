@@ -1,6 +1,7 @@
 package token
 
 import "strconv"
+import "strings"
 
 // Type is the type of a token
 type Type int
@@ -19,6 +20,7 @@ const (
 	BOOLEAN
 	STRING
 
+	operatorStart
 	// operators
 	ADD
 	SUB
@@ -33,10 +35,13 @@ const (
 	EQUAL
 
 	SEMI // SEMI: semi-colon (;)
+	operatorEnd
 
+	keywordStart
 	// keywords
 	LET
 	CONST
+	keywordEnd
 )
 
 // A Token represents a mainingful word in a program.
@@ -81,12 +86,12 @@ var operators map[string]Type
 func init() {
 	// init keywords mapping
 	keywords = make(map[string]Type)
-	for i := LET; i < CONST; i++ {
+	for i := keywordStart + 1; i < keywordEnd; i++ {
 		keywords[tokens[i]] = i
 	}
 
 	operators = make(map[string]Type)
-	for i := ADD; i < SEMI; i++ {
+	for i := operatorStart + 1; i < operatorEnd; i++ {
 		operators[tokens[i]] = i
 	}
 
@@ -110,12 +115,29 @@ func EOFToken() *Token {
 	return &Token{TokenType: EOF, Raw: ""}
 }
 
-// IsKeyword returns a token containing info about that keyword, or nil if
+// MatchKeyword returns a token containing info about that keyword, or nil if
 // input is not a keyword
-func IsKeyword(reading string) *Token {
+func MatchKeyword(reading string) *Token {
 	if tokenType, isKeyword := keywords[reading]; isKeyword {
 		return &Token{TokenType: tokenType, Raw: reading}
 	}
 
 	return nil
+}
+
+func MatchOperator(reading string) *Token {
+	if tokenType, isOperator := operators[reading]; isOperator {
+		return &Token{TokenType: tokenType, Raw: reading}
+	}
+
+	return nil
+}
+
+func HasOperatorPrefix(reading string) bool {
+	for i := operatorStart + 1; i < operatorEnd; i++ {
+		if strings.HasPrefix(tokens[i], reading) {
+			return true
+		}
+	}
+	return false
 }

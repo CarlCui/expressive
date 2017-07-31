@@ -34,8 +34,13 @@ func (scanner *Scanner) Next() (*token.Token, error) {
 			tok = scanner.parseNumber()
 			break
 		case isIdentifierStart(ch):
-
+			tok = scanner.parseIdentifier()
+			break
+		case token.HasOperatorPrefix(string(ch)):
+			tok = scanner.parseOperator()
+			break
 		default:
+			tok = token.IllegalToken(scanner.cur)
 		}
 	}
 
@@ -82,10 +87,27 @@ func (scanner *Scanner) parseIdentifier() *token.Token {
 		scanner.cur += string(scanner.file.NextChar())
 	}
 
-	tok := token.IsKeyword(scanner.cur)
+	tok := token.MatchKeyword(scanner.cur)
 
 	if tok != nil {
 		tok = &token.Token{TokenType: token.IDENTIFIER, Raw: scanner.cur}
+	}
+
+	return tok
+}
+
+/*
+	operators
+*/
+func (scanner *Scanner) parseOperator() *token.Token {
+	for token.HasOperatorPrefix(scanner.cur + string(scanner.file.Peek())) {
+		scanner.cur += string(scanner.file.NextChar())
+	}
+
+	tok := token.MatchOperator(scanner.cur)
+
+	if tok == nil {
+		tok = token.IllegalToken(scanner.cur)
 	}
 
 	return tok
