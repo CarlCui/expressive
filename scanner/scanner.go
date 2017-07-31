@@ -19,6 +19,8 @@ func (scanner *Scanner) Init(file *file.File) {
 
 // Next returns the next valid token, or ILLEGAL with none-nil error
 func (scanner *Scanner) Next() (*token.Token, error) {
+	scanner.skipWhitespaces()
+
 	if !scanner.file.IsEOF() {
 		ch := scanner.file.NextChar()
 
@@ -30,7 +32,7 @@ func (scanner *Scanner) Next() (*token.Token, error) {
 		}
 	}
 
-	return token.IllegalToken(), nil
+	return token.EOFToken(), nil
 }
 
 /*
@@ -42,13 +44,33 @@ func (scanner *Scanner) Next() (*token.Token, error) {
 */
 func (scanner *Scanner) parseNumber() *token.Token {
 	// parse int
+	scanner.appendConsequentDigits()
+
+	// parse float
+	if !scanner.file.IsEOF() && isDot(scanner.file.Peek()) {
+		scanner.cur += string(scanner.file.NextChar())
+
+		scanner.appendConsequentDigits()
+
+		return &token.Token{TokenType: token.FLOAT, Raw: scanner.cur}
+	}
+
+	return &token.Token{TokenType: token.INT, Raw: scanner.cur}
+
+}
+
+func (scanner *Scanner) appendConsequentDigits() {
 	for !scanner.file.IsEOF() && isDigit(scanner.file.Peek()) {
 		ch := scanner.file.NextChar()
 
 		scanner.cur += string(ch)
 	}
+}
 
-	return token.IllegalToken()
+func (scanner *Scanner) skipWhitespaces() {
+	for !scanner.file.IsEOF() && isWhitespace(scanner.file.Peek()) {
+		scanner.file.NextChar()
+	}
 }
 
 // char helpers

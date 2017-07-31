@@ -62,6 +62,10 @@ func (tok *Token) String() string {
 }
 
 // IllegalToken is a factory for generating a default illegal token
-func IllegalToken() *Token {
-	return &Token{TokenType: ILLEGAL, Raw: ""}
+func IllegalToken(raw string) *Token {
+	return &Token{TokenType: ILLEGAL, Raw: raw}
+}
+
+func EOFToken() *Token {
+	return &Token{TokenType: EOF, Raw: ""}
 }
