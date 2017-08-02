@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/carlcui/expressive/file"
@@ -19,6 +20,9 @@ func TestScanTokens(t *testing.T) {
 
 	var expected = []token.Token{
 		token.Token{TokenType: token.INT, Raw: "123"},
+		token.Token{TokenType: token.FLOAT, Raw: "12.1"},
+		token.Token{TokenType: token.IDENTIFIER, Raw: "abc"},
+		token.Token{TokenType: token.LET, Raw: "let"},
 	}
 
 	for _, expectedToken := range expected {
@@ -38,7 +42,10 @@ func compareTokens(actual token.Token, expected token.Token, t *testing.T) {
 
 	if !equal {
 		reportTokenParsingError(actual, expected, t)
+	} else {
+		fmt.Println(actual)
 	}
+
 }
 
 func reportTokenParsingError(actual token.Token, expected token.Token, t *testing.T) {

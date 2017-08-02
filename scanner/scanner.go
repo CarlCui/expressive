@@ -83,13 +83,13 @@ func (scanner *Scanner) appendConsequentDigits() {
 
 */
 func (scanner *Scanner) parseIdentifier() *token.Token {
-	for !scanner.file.IsEOF() && (isIdentifierStart(scanner.file.Peek()) || isDigit(scanner.file.Peek())) {
+	for !scanner.file.IsEOF() && !isWhitespace(scanner.file.Peek()) && (isIdentifierStart(scanner.file.Peek()) || isDigit(scanner.file.Peek())) {
 		scanner.cur += string(scanner.file.NextChar())
 	}
 
 	tok := token.MatchKeyword(scanner.cur)
 
-	if tok != nil {
+	if tok == nil {
 		tok = &token.Token{TokenType: token.IDENTIFIER, Raw: scanner.cur}
 	}
 
