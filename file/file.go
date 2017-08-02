@@ -3,6 +3,7 @@ package file
 import (
 	"io/ioutil"
 	"log"
+	"path"
 	"strconv"
 	"unicode/utf8"
 )
@@ -21,7 +22,7 @@ type File struct {
 
 // Init initializes File by reading and storing the contents in the file to src
 func (file *File) Init(dirname, filename string) {
-	filePath := dirname + filename
+	filePath := path.Join(dirname, filename)
 
 	src, err := ioutil.ReadFile(filePath)
 
