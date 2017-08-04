@@ -23,6 +23,13 @@ func TestScanTokens(t *testing.T) {
 		token.Token{TokenType: token.FLOAT, Raw: "12.1"},
 		token.Token{TokenType: token.IDENTIFIER, Raw: "abc"},
 		token.Token{TokenType: token.LET, Raw: "let"},
+		token.Token{TokenType: token.ADD, Raw: "+"},
+		token.Token{TokenType: token.SUB, Raw: "-"},
+		token.Token{TokenType: token.MUL, Raw: "*"},
+		token.Token{TokenType: token.DIV, Raw: "/"},
+		token.Token{TokenType: token.LAND, Raw: "&&"},
+		token.Token{TokenType: token.LOR, Raw: "||"},
+		token.Token{TokenType: token.LNOT, Raw: "!"},
 	}
 
 	for _, expectedToken := range expected {

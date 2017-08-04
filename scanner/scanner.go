@@ -100,7 +100,7 @@ func (scanner *Scanner) parseIdentifier() *token.Token {
 	operators
 */
 func (scanner *Scanner) parseOperator() *token.Token {
-	for token.HasOperatorPrefix(scanner.cur + string(scanner.file.Peek())) {
+	for !scanner.file.IsEOF() && token.HasOperatorPrefix(scanner.cur+string(scanner.file.Peek())) {
 		scanner.cur += string(scanner.file.NextChar())
 	}
 
