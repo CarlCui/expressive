@@ -17,12 +17,11 @@ func (scanner *Scanner) Init(file *file.File) {
 	scanner.cur = ""
 }
 
-// Next returns the next valid token, or ILLEGAL with none-nil error
-func (scanner *Scanner) Next() (*token.Token, error) {
+// Next returns the next valid token, or ILLEGAL if parsing failed
+func (scanner *Scanner) Next() *token.Token {
 	scanner.skipWhitespaces()
 
 	tok := token.EOFToken()
-	var err error
 
 	if !scanner.file.IsEOF() {
 		ch := scanner.file.NextChar()
@@ -44,7 +43,7 @@ func (scanner *Scanner) Next() (*token.Token, error) {
 		}
 	}
 
-	return tok, err
+	return tok
 }
 
 /*

@@ -33,11 +33,7 @@ func TestScanTokens(t *testing.T) {
 	}
 
 	for _, expectedToken := range expected {
-		tok, err := scanner.Next()
-
-		if err != nil {
-			t.Error(err)
-		}
+		tok := scanner.Next()
 
 		compareTokens(*tok, expectedToken, t)
 	}
