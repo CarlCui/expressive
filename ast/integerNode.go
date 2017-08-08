@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/carlcui/expressive/token"
+
 // IntegerNode represents an integer constant node.
 type IntegerNode struct {
 	BaseNode
@@ -14,4 +16,10 @@ func (node *IntegerNode) Accept(visitor Visitor) {
 // VisitChildren is part of visitor pattern. Literal node does not have any child.
 func (node *IntegerNode) VisitChildren(visitor Visitor) {
 
+}
+
+func (node *IntegerNode) Init(tok *token.Token) {
+	node.BaseNode = BaseNode{tok: tok, parent: nil}
+
+	// TODO: parse val
 }

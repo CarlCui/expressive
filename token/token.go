@@ -13,6 +13,7 @@ const (
 	COMMENT
 
 	// data types
+	LITERAL
 	IDENTIFIER
 	INT
 	FLOAT
@@ -55,6 +56,7 @@ var tokens = [...]string{
 	EOF:     "EOF",
 	COMMENT: "COMMENT",
 
+	LITERAL:    "LITERAL",
 	IDENTIFIER: "IDENTIFIER",
 	INT:        "INT",
 	FLOAT:      "FLOAT",
