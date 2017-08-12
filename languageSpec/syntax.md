@@ -22,9 +22,9 @@ _expr_ :=
 
 _exprOr_ := _exprAnd_ (`||` _exprAnd_)*
 
-_exprAnd_ := _exprNumCmp_ (`&&` _exprNumCmp_)*
+_exprAnd_ := _exprCmp_ (`&&` _exprCmp_)*
 
-_exprNumCmp_ := _exprAdd_ ((`>`|`<`|`>=`|`<=`|`==`|`!=`) _exprAdd_)*
+_exprCmp_ := _exprAdd_ ((`>`|`<`|`>=`|`<=`|`==`|`!=`) _exprAdd_)*
 
 _exprAdd_ := _exprMul_ ((`+`|`-`) _exprMul_)*
 
