@@ -34,7 +34,7 @@
 
 1. `typeof` _identifier_: gives the type of the identifier
 1. _identifier_ `instanceof` _type_: type reasoning
-1. `cast` _identifier_ `to` _type_: type casting
+1. _identifier_ `as` _type_: type casting
 
 ## function
 
