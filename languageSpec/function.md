@@ -2,7 +2,7 @@
 
 ## productions
 
-_functionDefinitionStmt_ := `func` (`throwable`)? `(` _formalParameterList_? `)` `->` (_functionReturn_)? _functionDefinitionBlock_
+_functionDefinitionStmt_ := `func` (`throwable`)? `(` _formalParameterList_? `)` (`->` _functionReturn_)? _functionDefinitionBlock_
 
 _lambdaDefinitionExpr_ := `(` _formalParameterList_? `)` `->` (_functionReturn)? (_expr_ | _functionDefinitionBlock_)
 
@@ -53,3 +53,21 @@ If the function type is not specified, the return type will be inferred.
 When declaring a function variable, if no definition is given, you have to specify the function type.
 
 `let someFunc: (int, int) -> int;`
+
+## defer
+
+A defer statement is executed before the function returns.
+
+_deferStmt_ := `defer` _expr_ `;`
+
+A function can have multiple defer statements, and they are executed in the order of their apparencies.
+
+```
+func doSomething() {
+    defer doSomething1();
+    defer doSomething2();
+    defer doSomething3();
+}
+```
+
+In this case, `doSomething1()` will be executed first, then `doSomething2()`, then `doSomething3()`.

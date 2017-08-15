@@ -16,7 +16,13 @@ _elseStmt_ := `else` _blockStmt_
 
 ## switch
 
-_switchStmt_ := `switch`
+_switchStmt_ := `switch` `(` _expr_ `)` `{` _switchCase_* _defaultCase_? `}`
+
+_switchCase_ := `case` _expr_ `:` _stmt_* _breakStmt_?
+
+_breakStmt_ := `break` `;`
+
+_defaultCase_ := `default` `:` _stmt_*
 
 
 ```
@@ -41,13 +47,29 @@ switch (true) {
 
 ## while
 
+_whileStmt_ := `while` `(` _expr_ `)` _blockStmt_ .
+
 ```
 while (i < 4) {
 
-} 
+}
 ```
 
 ## for
+
+_forStmt_ := `for` `(` _forExpr_ | _forInExpr_ `)` _blockStmt_
+
+_forExpr_ := _forInitialization_? `;` _forConditionExpr_? `;` _forIterationStmt_?
+
+_forInitialization_ := _assignmentStmt_
+
+_forConditionExpr_ := _expr_
+
+_forIterationStmt_ := _stmt_
+
+_forInExpr_ := _identifier_ (`,` _identifier_)? `in` _expr_
+
+### normal for
 
 ```
 for (i = 0; i < 5; i ++) {
@@ -55,10 +77,16 @@ for (i = 0; i < 5; i ++) {
 }
 ```
 
-## for in
+### for in
 
 ```
-for i in someList {
+for (ele in someList) {
+
+}
+```
+
+```
+for (ele, i in someList) {
 
 }
 ```
