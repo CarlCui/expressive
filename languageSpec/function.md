@@ -2,7 +2,9 @@
 
 ## productions
 
-_functionDefinitionStmt_ := `func` (`throwable`)? `(` _formalParameterList_? `)` (`->` _functionReturn_)? _functionDefinitionBlock_
+_functionDefinitionStmt_ := `func` _functionDefinition_
+
+_functionDefinition_ := (`throwable`)? _identifier `(` _formalParameterList_? `)` (`->` _functionReturn_)? _functionDefinitionBlock_
 
 _lambdaDefinitionExpr_ := `(` _formalParameterList_? `)` `->` (_functionReturn)? (_expr_ | _functionDefinitionBlock_)
 
@@ -71,3 +73,27 @@ func doSomething() {
 ```
 
 In this case, `doSomething1()` will be executed first, then `doSomething2()`, then `doSomething3()`.
+
+## closure
+
+For example:
+
+```
+func doSomething() {
+    let var1 = 5;
+
+    return () -> int {
+        var1 ++;
+
+        return var1;
+    }
+}
+
+let foo = doSomething();
+
+print(foo()) // 5
+print(foo()) // 6
+
+```
+
+

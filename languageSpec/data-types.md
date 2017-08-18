@@ -8,4 +8,5 @@
 1. boolean
 1. char
 1. string
-1. array
+1. list
+1. function
