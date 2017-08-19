@@ -6,6 +6,7 @@ import (
 	"github.com/carlcui/expressive/token"
 )
 
+// Parser is a LL1 parser of expressive
 type Parser struct {
 	scanner *scanner.Scanner
 
@@ -27,15 +28,59 @@ func (parser *Parser) parseProgram() ast.Node {
 	return nil
 }
 
+// Stmts
+
+func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseAssignmentStmt() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parsePrintStmt() ast.Node {
+	return nil
+}
+
+// Exprs
+
 func (parser *Parser) parseExpr() ast.Node {
 	return nil
 }
 
-func (parser *Parser) parseAddExpr() ast.Node {
+func (parser *Parser) parseExprTernaryIfElse() ast.Node {
 	return nil
 }
 
-func (parser *Parser) parseMulExpr() ast.Node {
+func (parser *Parser) parseExprOr() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseExprAnd() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseExprComp() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseExprAdd() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseExprMul() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseExprNot() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseExprFinal() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseExprParen() ast.Node {
 	return nil
 }
 

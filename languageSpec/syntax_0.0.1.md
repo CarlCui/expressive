@@ -30,9 +30,9 @@ _printStmt_ := `print` `(` _expr_ `)` `;`
 
 ### Expressions
 
-_expr_ := _ternaryIfElseExpr_
+_expr_ := _exprTernaryIfElse_
 
-_ternaryIfElseExpr_ := _exprOr_ `?` _exprOr_ `: `_exprOr_
+_exprTernaryIfElse_ := _exprOr_ `?` _exprOr_ `: `_exprOr_
 
 _exprOr_ := _exprAnd_ (`||` _exprAnd)*
 
