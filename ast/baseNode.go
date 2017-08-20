@@ -11,8 +11,8 @@ type BaseNode struct {
 }
 
 // CreateBaseNode is a factory
-func CreateBaseNode(tok *token.Token, parent Node) BaseNode {
-	return BaseNode{tok: tok, parent: parent}
+func CreateBaseNode(tok *token.Token, parent Node) *BaseNode {
+	return &BaseNode{tok: tok, parent: parent}
 }
 
 func (node *BaseNode) SetParent(parent Node) {

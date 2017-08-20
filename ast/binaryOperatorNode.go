@@ -2,7 +2,7 @@ package ast
 
 // BinaryOperatorNode represents a node with a binary operation (+, -, etc)
 type BinaryOperatorNode struct {
-	BaseNode
+	*BaseNode
 	Lhs Node
 	Rhs Node
 }

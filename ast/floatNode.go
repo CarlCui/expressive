@@ -4,7 +4,7 @@ import "github.com/carlcui/expressive/token"
 
 // FloatNode represents a float constant node.
 type FloatNode struct {
-	BaseNode
+	*BaseNode
 	val float32
 }
 

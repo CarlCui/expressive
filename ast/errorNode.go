@@ -2,7 +2,7 @@ package ast
 
 // ErrorNode represents a node with syntax error.
 type ErrorNode struct {
-	BaseNode
+	*BaseNode
 }
 
 // Accept is part of visitor pattern.

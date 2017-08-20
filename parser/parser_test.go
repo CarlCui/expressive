@@ -1,6 +1,10 @@
 package parser
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"reflect"
 	"testing"
 
 	"github.com/carlcui/expressive/file"
@@ -24,5 +28,16 @@ func TestParser(t *testing.T) {
 	var parser Parser
 	parser.Init(initScanner("test1.txt"))
 
-	parser.Parse()
+	root := parser.Parse()
+
+	fmt.Println(reflect.TypeOf(root))
+
+	b, err := json.MarshalIndent(root, "", "    ")
+
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+
+	os.Stdout.Write(b)
+	fmt.Println()
 }

@@ -1,10 +1,14 @@
 package ast
 
-import "github.com/carlcui/expressive/token"
+import (
+	"encoding/json"
+
+	"github.com/carlcui/expressive/token"
+)
 
 // ProgramNode represents an integer constant node.
 type ProgramNode struct {
-	BaseNode
+	*BaseNode
 	Chilren []Node
 }
 
@@ -24,4 +28,12 @@ func (node *ProgramNode) VisitChildren(visitor Visitor) {
 
 func (node *ProgramNode) Init(tok *token.Token) {
 	node.BaseNode = CreateBaseNode(tok, nil)
+}
+
+func (node *ProgramNode) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		NodeType string
+		Token    *token.Token
+		Children []Node
+	}{NodeType: "Program node", Token: node.BaseNode.tok, Children: node.Chilren})
 }

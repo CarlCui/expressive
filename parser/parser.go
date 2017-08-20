@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/carlcui/expressive/ast"
 	"github.com/carlcui/expressive/scanner"
 	"github.com/carlcui/expressive/token"
@@ -29,7 +31,7 @@ func (parser *Parser) parseProgram() ast.Node {
 	var node ast.ProgramNode
 	node.Init(parser.cur)
 
-	children := make([]ast.Node, 3)
+	children := make([]ast.Node, 0)
 
 	for parser.isStmtStart(parser.cur) {
 		stmt := parser.parseStmt()
@@ -79,6 +81,8 @@ func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
 
 	var node ast.VariableDeclarationNode
 	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+	parser.read()
 
 	identifier := parser.parseIdentifier()
 
@@ -188,11 +192,13 @@ func (parser *Parser) parseIdentifier() ast.Node {
 		return parser.syntaxErrorNode("identifier")
 	}
 
-	node := &ast.IdentifierNode{BaseNode: ast.CreateBaseNode(parser.cur, nil)}
+	node := ast.IdentifierNode{BaseNode: ast.CreateBaseNode(parser.cur, nil)}
+
+	fmt.Println(node)
 
 	parser.read()
 
-	return node
+	return &node
 }
 
 func (parser *Parser) syntaxErrorNode(expected string) ast.Node {

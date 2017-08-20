@@ -4,7 +4,7 @@ import "github.com/carlcui/expressive/token"
 
 // IntegerNode represents an integer constant node.
 type IntegerNode struct {
-	BaseNode
+	*BaseNode
 	val int
 }
 
@@ -20,7 +20,7 @@ func (node *IntegerNode) VisitChildren(visitor Visitor) {
 
 // Init initializes an integer node with a token
 func (node *IntegerNode) Init(tok *token.Token) {
-	node.BaseNode = BaseNode{tok: tok, parent: nil}
+	node.BaseNode = CreateBaseNode(tok, nil)
 
 	// TODO: parse val
 }

@@ -2,7 +2,7 @@ package ast
 
 // AssignmentNode represents a node with assignment statement
 type AssignmentNode struct {
-	BaseNode
+	*BaseNode
 	Identifier Node
 	Expr       Node
 }
