@@ -21,21 +21,82 @@ func (parser *Parser) Init(scanner *scanner.Scanner) {
 
 // Parse the current program
 func (parser *Parser) Parse() ast.Node {
+	parser.read()
 	return parser.parseProgram()
 }
 
 func (parser *Parser) parseProgram() ast.Node {
-	return nil
+	var node ast.ProgramNode
+	node.Init(parser.cur)
+
+	children := make([]ast.Node, 3)
+
+	for parser.isStmtStart(parser.cur) {
+		stmt := parser.parseStmt()
+
+		stmt.SetParent(&node)
+
+		children = append(children, stmt)
+	}
+
+	node.Chilren = children
+
+	return &node
 }
 
 // Stmts
 
+func (parser *Parser) isStmtStart(tok *token.Token) bool {
+	return parser.isVariableDeclarationStmtStart(tok) || parser.isAssignmentStmtStart(tok) || parser.isPrintStmtStart(tok)
+}
+
+func (parser *Parser) parseStmt() ast.Node {
+	if !parser.isStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("statement")
+	}
+
+	if parser.isVariableDeclarationStmtStart(parser.cur) {
+		return parser.parseVariableDeclarationStmt()
+	} else if parser.isAssignmentStmtStart(parser.cur) {
+		return parser.parseAssignmentStmt()
+	} else if parser.isPrintStmtStart(parser.cur) {
+		return parser.parsePrintStmt()
+	}
+
+	panic("parseStmt: unreachable")
+}
+
+func (parser *Parser) isVariableDeclarationStmtStart(tok *token.Token) bool {
+	curTokenType := tok.TokenType
+
+	return curTokenType == token.LET || curTokenType == token.CONST
+}
+
 func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
-	return nil
+	if !parser.isVariableDeclarationStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("variable declaration")
+	}
+
+	var node ast.VariableDeclarationNode
+	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+	identifier := parser.parseIdentifier()
+
+	node.Identifier = identifier
+
+	return &node
+}
+
+func (parser *Parser) isAssignmentStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.IDENTIFIER
 }
 
 func (parser *Parser) parseAssignmentStmt() ast.Node {
 	return nil
+}
+
+func (parser *Parser) isPrintStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.PRINT
 }
 
 func (parser *Parser) parsePrintStmt() ast.Node {
@@ -93,12 +154,12 @@ func (parser *Parser) parseLiteral() ast.Node {
 		return parser.parseIdentifier()
 	}
 
-	return parser.syntaxErrorNode(token.LITERAL)
+	return parser.syntaxErrorNode("literal")
 }
 
 func (parser *Parser) parserInt() ast.Node {
 	if parser.cur.TokenType != token.INT {
-		return parser.syntaxErrorNode(token.INT)
+		return parser.syntaxErrorNode("int")
 	}
 
 	var node ast.IntegerNode
@@ -111,7 +172,7 @@ func (parser *Parser) parserInt() ast.Node {
 
 func (parser *Parser) parseFloat() ast.Node {
 	if parser.cur.TokenType != token.FLOAT {
-		return parser.syntaxErrorNode(token.FLOAT)
+		return parser.syntaxErrorNode("float")
 	}
 
 	var node ast.FloatNode
@@ -124,7 +185,7 @@ func (parser *Parser) parseFloat() ast.Node {
 
 func (parser *Parser) parseIdentifier() ast.Node {
 	if parser.cur.TokenType != token.IDENTIFIER {
-		return parser.syntaxErrorNode(token.IDENTIFIER)
+		return parser.syntaxErrorNode("identifier")
 	}
 
 	node := &ast.IdentifierNode{BaseNode: ast.CreateBaseNode(parser.cur, nil)}
@@ -134,7 +195,7 @@ func (parser *Parser) parseIdentifier() ast.Node {
 	return node
 }
 
-func (parser *Parser) syntaxErrorNode(expected token.Type) ast.Node {
+func (parser *Parser) syntaxErrorNode(expected string) ast.Node {
 	return nil
 }
 

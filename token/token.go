@@ -42,6 +42,8 @@ const (
 	// keywords
 	LET
 	CONST
+
+	PRINT
 	keywordEnd
 )
 
@@ -80,6 +82,8 @@ var tokens = [...]string{
 
 	LET:   "let",
 	CONST: "const",
+
+	PRINT: "print",
 }
 
 var keywords map[string]Type

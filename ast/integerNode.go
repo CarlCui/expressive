@@ -18,6 +18,7 @@ func (node *IntegerNode) VisitChildren(visitor Visitor) {
 
 }
 
+// Init initializes an integer node with a token
 func (node *IntegerNode) Init(tok *token.Token) {
 	node.BaseNode = BaseNode{tok: tok, parent: nil}
 
