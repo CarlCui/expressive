@@ -86,7 +86,31 @@ func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
 
 	identifier := parser.parseIdentifier()
 
+	identifier.SetParent(&node)
+
 	node.Identifier = identifier
+
+	if parser.cur.TokenType == token.COLON {
+		parser.read()
+
+		declaredType := parser.parseTypeLiteral()
+
+		declaredType.SetParent(&node)
+
+		node.DeclaredType = declaredType
+	}
+
+	if parser.cur.TokenType == token.ASSIGN {
+		parser.read()
+
+		expr := parser.parseExpr()
+
+		expr.SetParent(&node)
+
+		node.Expr = expr
+	}
+
+	parser.expect(token.SEMI)
 
 	return &node
 }
@@ -96,7 +120,26 @@ func (parser *Parser) isAssignmentStmtStart(tok *token.Token) bool {
 }
 
 func (parser *Parser) parseAssignmentStmt() ast.Node {
-	return nil
+	if !parser.isAssignmentStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("assignment statement")
+	}
+
+	var node ast.AssignmentNode
+	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+	identifier := parser.parseIdentifier()
+	identifier.SetParent(&node)
+
+	node.Identifier = identifier
+
+	parser.expect(token.ASSIGN)
+
+	expr := parser.parseExpr()
+	expr.SetParent(&node)
+
+	node.Expr = expr
+
+	return &node
 }
 
 func (parser *Parser) isPrintStmtStart(tok *token.Token) bool {
@@ -104,7 +147,21 @@ func (parser *Parser) isPrintStmtStart(tok *token.Token) bool {
 }
 
 func (parser *Parser) parsePrintStmt() ast.Node {
-	return nil
+	if !parser.isPrintStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("print statement")
+	}
+
+	var node ast.PrintNode
+	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+	parser.expect(token.PRINT)
+
+	expr := parser.parseExpr()
+	expr.SetParent(&node)
+
+	node.Expr = expr
+
+	return &node
 }
 
 // Exprs
@@ -146,6 +203,10 @@ func (parser *Parser) parseExprFinal() ast.Node {
 }
 
 func (parser *Parser) parseExprParen() ast.Node {
+	return nil
+}
+
+func (parser *Parser) parseTypeLiteral() ast.Node {
 	return nil
 }
 

@@ -13,6 +13,11 @@ type Visitor interface {
 	VisitEnterAssignmentNode(node *AssignmentNode)
 	VisitLeaveAssignmentNode(node *AssignmentNode)
 
+	VisitEnterPrintNode(node *PrintNode)
+	VisitLeavePrintNode(node *PrintNode)
+
+	// exprs
+
 	VisitEnterBinaryOepratorNode(node *BinaryOperatorNode)
 	VisitLeaveBinaryOperatorNode(node *BinaryOperatorNode)
 

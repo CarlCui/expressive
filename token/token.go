@@ -36,6 +36,7 @@ const (
 	EQUAL
 
 	SEMI // SEMI: semi-colon (;)
+	COLON
 	operatorEnd
 
 	keywordStart
@@ -78,7 +79,8 @@ var tokens = [...]string{
 	ASSIGN: "=",
 	EQUAL:  "==",
 
-	SEMI: ";",
+	SEMI:  ";",
+	COLON: ":",
 
 	LET:   "let",
 	CONST: "const",
