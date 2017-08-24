@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/carlcui/expressive/token"
+
 // BinaryOperatorNode represents a node with a binary operation (+, -, etc)
 type BinaryOperatorNode struct {
 	*BaseNode
@@ -18,4 +20,17 @@ func (node *BinaryOperatorNode) Accept(visitor Visitor) {
 func (node *BinaryOperatorNode) VisitChildren(visitor Visitor) {
 	node.Lhs.Accept(visitor)
 	node.Rhs.Accept(visitor)
+}
+
+func CreateBinaryOperatorNode(tok *token.Token, lhs Node, rhs Node) Node {
+	var node BinaryOperatorNode
+	node.BaseNode = CreateBaseNode(tok, nil)
+
+	lhs.SetParent(&node)
+	rhs.SetParent(&node)
+
+	node.Lhs = lhs
+	node.Rhs = rhs
+
+	return &node
 }

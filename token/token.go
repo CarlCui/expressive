@@ -12,14 +12,15 @@ const (
 	EOF
 	COMMENT
 
-	// data types
 	LITERAL
 	IDENTIFIER
-	INT
-	FLOAT
-	CHAR
-	BOOLEAN
-	STRING
+
+	// consts
+	INT_LITERAL
+	FLOAT_LITERAL
+	CHAR_LITERAL
+	BOOLEAN_LITERAL
+	STRING_LITERAL
 
 	operatorStart
 	// operators
@@ -27,13 +28,28 @@ const (
 	SUB
 	MUL
 	DIV
+	MOD
+	POW
 
 	LAND
 	LOR
 	LNOT
 
 	ASSIGN
+
 	EQUAL
+	NOT_EQUAL // not equal
+	LESS
+	LEQ // less or equal
+	GREATER
+	GEQ              // greater or equal
+	TRIPLE_EQUAL     // deep equal
+	TRIPLE_NOT_EQUAL // deep not equal
+
+	LEFT_PAREN
+	RIGHT_PAREN
+
+	QUESTION_MARK
 
 	SEMI // SEMI: semi-colon (;)
 	COLON
@@ -43,6 +59,12 @@ const (
 	// keywords
 	LET
 	CONST
+
+	INT
+	FLOAT
+	CHAR
+	BOOL
+	STRING
 
 	PRINT
 	keywordEnd
@@ -59,31 +81,52 @@ var tokens = [...]string{
 	EOF:     "EOF",
 	COMMENT: "COMMENT",
 
-	LITERAL:    "LITERAL",
-	IDENTIFIER: "IDENTIFIER",
-	INT:        "INT",
-	FLOAT:      "FLOAT",
-	CHAR:       "CHAR",
-	BOOLEAN:    "BOOLEAN",
-	STRING:     "STRING",
+	LITERAL:         "LITERAL",
+	IDENTIFIER:      "IDENTIFIER",
+	INT_LITERAL:     "INTLITERAL",
+	FLOAT_LITERAL:   "FLOATLITERAL",
+	CHAR_LITERAL:    "CHARLITERAL",
+	BOOLEAN_LITERAL: "BOOLEANLITERAL",
+	STRING_LITERAL:  "STRINGLITERAL",
 
 	ADD: "+",
 	SUB: "-",
 	MUL: "*",
 	DIV: "/",
+	MOD: "%",
+	POW: "^^",
 
 	LAND: "&&", // logic and
 	LOR:  "||", // logic or
 	LNOT: "!",  // logic not
 
 	ASSIGN: "=",
-	EQUAL:  "==",
+
+	EQUAL:            "==",
+	NOT_EQUAL:        "!=",
+	LESS:             "<",
+	LEQ:              "<=",
+	GREATER:          ">",
+	GEQ:              ">=",
+	TRIPLE_EQUAL:     "===",
+	TRIPLE_NOT_EQUAL: "!==",
+
+	LEFT_PAREN:  "(",
+	RIGHT_PAREN: ")",
+
+	QUESTION_MARK: "?",
 
 	SEMI:  ";",
 	COLON: ":",
 
 	LET:   "let",
 	CONST: "const",
+
+	INT:    "int",
+	FLOAT:  "float",
+	CHAR:   "char",
+	BOOL:   "bool",
+	STRING: "string",
 
 	PRINT: "print",
 }

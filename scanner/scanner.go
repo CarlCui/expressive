@@ -63,10 +63,10 @@ func (scanner *Scanner) parseNumber() *token.Token {
 
 		scanner.appendConsequentDigits()
 
-		return &token.Token{TokenType: token.FLOAT, Raw: scanner.cur}
+		return &token.Token{TokenType: token.FLOAT_LITERAL, Raw: scanner.cur}
 	}
 
-	return &token.Token{TokenType: token.INT, Raw: scanner.cur}
+	return &token.Token{TokenType: token.INT_LITERAL, Raw: scanner.cur}
 }
 
 func (scanner *Scanner) appendConsequentDigits() {

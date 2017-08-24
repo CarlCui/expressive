@@ -19,8 +19,8 @@ func TestScanTokens(t *testing.T) {
 	scanner.Init(&file)
 
 	var expected = []token.Token{
-		token.Token{TokenType: token.INT, Raw: "123"},
-		token.Token{TokenType: token.FLOAT, Raw: "12.1"},
+		token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
+		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "12.1"},
 		token.Token{TokenType: token.IDENTIFIER, Raw: "abc"},
 		token.Token{TokenType: token.LET, Raw: "let"},
 		token.Token{TokenType: token.ADD, Raw: "+"},

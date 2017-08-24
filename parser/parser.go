@@ -166,56 +166,270 @@ func (parser *Parser) parsePrintStmt() ast.Node {
 
 // Exprs
 
+func (parser *Parser) isExprStart(tok *token.Token) bool {
+	return parser.isExprTernaryIfElseStart(tok)
+}
+
 func (parser *Parser) parseExpr() ast.Node {
-	return nil
+	if !parser.isExprStart(parser.cur) {
+		return parser.syntaxErrorNode("expression")
+	}
+
+	return parser.parseExprTernaryIfElse()
+}
+
+func (parser *Parser) isExprTernaryIfElseStart(tok *token.Token) bool {
+	return parser.isExprOrStart(tok)
 }
 
 func (parser *Parser) parseExprTernaryIfElse() ast.Node {
-	return nil
+	if !parser.isExprTernaryIfElseStart(parser.cur) {
+		return parser.syntaxErrorNode("ternary if else expression")
+	}
+
+	expr1 := parser.parseExprOr()
+
+	if parser.cur.TokenType == token.QUESTION_MARK {
+		cur := parser.cur
+
+		parser.read()
+
+		expr2 := parser.parseExprOr()
+
+		parser.expect(token.COLON)
+
+		expr3 := parser.parseExprOr()
+
+		expr1 = ast.CreateTernaryOperatorNode(cur, expr1, expr2, expr3)
+	}
+
+	return expr1
+}
+
+func (parser *Parser) isExprOrStart(tok *token.Token) bool {
+	return parser.isExprAndStart(tok)
 }
 
 func (parser *Parser) parseExprOr() ast.Node {
-	return nil
+	if !parser.isExprOrStart(parser.cur) {
+		return parser.syntaxErrorNode("logical or expression")
+	}
+
+	lhs := parser.parseExprAnd()
+
+	for parser.cur.TokenType == token.LOR {
+		cur := parser.cur
+
+		parser.read()
+
+		rhs := parser.parseExprAnd()
+
+		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+	}
+	return lhs
+}
+
+func (parser *Parser) isExprAndStart(tok *token.Token) bool {
+	return parser.isExprCompStart(tok)
 }
 
 func (parser *Parser) parseExprAnd() ast.Node {
-	return nil
+	if !parser.isExprAndStart(parser.cur) {
+		return parser.syntaxErrorNode("logical and expression")
+	}
+
+	lhs := parser.parseExprComp()
+
+	for parser.cur.TokenType == token.LAND {
+		cur := parser.cur
+
+		parser.read()
+
+		rhs := parser.parseExprComp()
+
+		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+	}
+
+	return lhs
+}
+
+func (parser *Parser) isExprCompStart(tok *token.Token) bool {
+	return parser.isExprAddStart(tok)
+}
+
+func (parser *Parser) isExprCompOperator(tok *token.Token) bool {
+	tokenType := tok.TokenType
+
+	return tokenType == token.LESS ||
+		tokenType == token.LEQ ||
+		tokenType == token.GREATER ||
+		tokenType == token.GEQ ||
+		tokenType == token.EQUAL ||
+		tokenType == token.NOT_EQUAL ||
+		tokenType == token.TRIPLE_EQUAL ||
+		tokenType == token.TRIPLE_NOT_EQUAL
 }
 
 func (parser *Parser) parseExprComp() ast.Node {
-	return nil
+	if !parser.isExprCompStart(parser.cur) {
+		return parser.syntaxErrorNode("comparison expression")
+	}
+
+	lhs := parser.parseExprAdd()
+
+	for parser.isExprCompOperator(parser.cur) {
+		cur := parser.cur
+
+		parser.read()
+
+		rhs := parser.parseExprAdd()
+
+		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+	}
+
+	return lhs
+}
+
+func (parser *Parser) isExprAddStart(tok *token.Token) bool {
+	return parser.isExprMulStart(tok)
+}
+
+func (parser *Parser) isExprAddOperator(tok *token.Token) bool {
+	tokenType := tok.TokenType
+
+	return tokenType == token.ADD || tokenType == token.SUB
 }
 
 func (parser *Parser) parseExprAdd() ast.Node {
-	return nil
+	if !parser.isExprAddStart(parser.cur) {
+		return parser.syntaxErrorNode("addition expression")
+	}
+
+	lhs := parser.parseExprMul()
+
+	for parser.isExprAddOperator(parser.cur) {
+		cur := parser.cur
+
+		parser.read()
+
+		rhs := parser.parseExprMul()
+
+		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+	}
+
+	return lhs
+}
+
+func (parser *Parser) isExprMulStart(tok *token.Token) bool {
+	return parser.isExprNotStart(tok)
+}
+
+func (parser *Parser) isExprMulOperator(tok *token.Token) bool {
+	return tok.TokenType == token.MUL || tok.TokenType == token.DIV || tok.TokenType == token.MOD || tok.TokenType == token.POW
 }
 
 func (parser *Parser) parseExprMul() ast.Node {
-	return nil
+	if !parser.isExprMulStart(parser.cur) {
+		return parser.syntaxErrorNode("multiplication expression")
+	}
+
+	lhs := parser.parseExprNot()
+
+	for parser.isExprMulOperator(parser.cur) {
+		cur := parser.cur
+
+		parser.read()
+
+		rhs := parser.parseExprNot()
+
+		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+	}
+
+	return lhs
+}
+
+func (parser *Parser) isExprNotStart(tok *token.Token) bool {
+	return tok.TokenType == token.LNOT || parser.isExprFinalStart(tok)
 }
 
 func (parser *Parser) parseExprNot() ast.Node {
-	return nil
+	if !parser.isExprNotStart(parser.cur) {
+		return parser.syntaxErrorNode("logic not expression")
+	}
+
+	if parser.cur.TokenType == token.LNOT {
+		var node ast.UnaryOperatorNode
+		node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+		rhs := parser.parseExprNot()
+
+		rhs.SetParent(&node)
+
+		return &node
+	}
+
+	return parser.parseExprFinal()
+}
+
+func (parser *Parser) isExprFinalStart(tok *token.Token) bool {
+	return parser.isExprParenStart(tok) || parser.isLiteralStart(tok)
 }
 
 func (parser *Parser) parseExprFinal() ast.Node {
-	return nil
+	if !parser.isExprFinalStart(parser.cur) {
+		return parser.syntaxErrorNode("final expression (literal or paren)")
+	}
+
+	if parser.isExprParenStart(parser.cur) {
+		return parser.parseExprParen()
+	}
+
+	return parser.parseLiteral()
+}
+
+func (parser *Parser) isExprParenStart(tok *token.Token) bool {
+	return tok.TokenType == token.LEFT_PAREN
 }
 
 func (parser *Parser) parseExprParen() ast.Node {
-	return nil
+	if !parser.isExprParenStart(parser.cur) {
+		return parser.syntaxErrorNode("parenthesis expression")
+	}
+
+	parser.expect(token.LEFT_PAREN)
+
+	expr := parser.parseExpr()
+
+	parser.expect(token.RIGHT_PAREN)
+
+	return expr
+}
+
+func (parser *Parser) isTypeLiteralStart(tok *token.Token) bool {
+	return tok.TokenType == token.INT || tok.TokenType == token.FLOAT || tok.TokenType == token.CHAR || tok.TokenType == token.STRING || tok.TokenType == token.BOOL
 }
 
 func (parser *Parser) parseTypeLiteral() ast.Node {
-	return nil
+	if !parser.isTypeLiteralStart(parser.cur) {
+		return parser.syntaxErrorNode("type literal")
+	}
+
+	var node ast.TypeLiteralNode
+	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+	parser.read()
+
+	return &node
 }
 
 func (parser *Parser) parseLiteral() ast.Node {
-	if parser.readingInteger() {
+	cur := parser.cur
+
+	if parser.isIntegerLiteralStart(cur) {
 		return parser.parserInt()
-	} else if parser.readingFloat() {
+	} else if parser.isFLoatLiteralStart(cur) {
 		return parser.parseFloat()
-	} else if parser.readingIdentifier() {
+	} else if parser.isIdentifierStart(cur) {
 		return parser.parseIdentifier()
 	}
 
@@ -223,7 +437,7 @@ func (parser *Parser) parseLiteral() ast.Node {
 }
 
 func (parser *Parser) parserInt() ast.Node {
-	if parser.cur.TokenType != token.INT {
+	if parser.cur.TokenType != token.INT_LITERAL {
 		return parser.syntaxErrorNode("int")
 	}
 
@@ -236,7 +450,7 @@ func (parser *Parser) parserInt() ast.Node {
 }
 
 func (parser *Parser) parseFloat() ast.Node {
-	if parser.cur.TokenType != token.FLOAT {
+	if parser.cur.TokenType != token.FLOAT_LITERAL {
 		return parser.syntaxErrorNode("float")
 	}
 
@@ -263,22 +477,26 @@ func (parser *Parser) parseIdentifier() ast.Node {
 }
 
 func (parser *Parser) syntaxErrorNode(expected string) ast.Node {
-	return nil
+	var node ast.ErrorNode
+	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+	node.Expected = expected
+	return &node
 }
 
-func (parser *Parser) readingLiteral() bool {
-	return parser.readingInteger() || parser.readingFloat() || parser.readingIdentifier()
+func (parser *Parser) isLiteralStart(tok *token.Token) bool {
+	return parser.isIntegerLiteralStart(tok) || parser.isFLoatLiteralStart(tok) || parser.isIdentifierStart(tok)
 }
 
-func (parser *Parser) readingInteger() bool {
-	return parser.cur.TokenType == token.INT
+func (parser *Parser) isIntegerLiteralStart(tok *token.Token) bool {
+	return parser.cur.TokenType == token.INT_LITERAL
 }
 
-func (parser *Parser) readingFloat() bool {
-	return parser.cur.TokenType == token.FLOAT
+func (parser *Parser) isFLoatLiteralStart(tok *token.Token) bool {
+	return parser.cur.TokenType == token.FLOAT_LITERAL
 }
 
-func (parser *Parser) readingIdentifier() bool {
+func (parser *Parser) isIdentifierStart(tok *token.Token) bool {
 	return parser.cur.TokenType == token.IDENTIFIER
 }
 

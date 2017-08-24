@@ -32,7 +32,7 @@ _printStmt_ := `print` `(` _expr_ `)` `;`
 
 _expr_ := _exprTernaryIfElse_
 
-_exprTernaryIfElse_ := _exprOr_ `?` _exprOr_ `: `_exprOr_
+_exprTernaryIfElse_ := _exprOr_ (`?` _exprOr_ `: `_exprOr_)?
 
 _exprOr_ := _exprAnd_ (`||` _exprAnd)*
 
@@ -44,7 +44,7 @@ _exprAdd_ := _exprMul_ (`+`|`-` _exprMul_)*
 
 _exprMul_ := _exprNot_ (`*`|`/`|`%`|`^^` _exprNot_)*
 
-_exprNot_ := `!` _exprFinal_
+_exprNot_ := (`!`)* _exprFinal_
 
 _exprFinal_ := _exprParen_ | _literal_
 
@@ -61,13 +61,13 @@ _typeLiteral_ := `int` | `bool` | `float` | `char` | `string`
 
 ## Operator precedence
 
-| Precedence | operator |
-| ---------- | ---------|
-| 1          | `()`     |
-| 2          | `!` |
-| 3          | `*`, `/`, `%`, `^^` |
-| 4          | `+`, `-`|
-| 5          | `>`, `<`, `>=`, `<=`, `==`, `!=`, `===`, `!==` |
-| 6 | `&&` |
-| 7 | `||` |
-| 8          | `? :` |
+| Precedence | operator | associativity |
+| ---------- | ---------| ------------- |
+| 1          | `()`     | not applicable |
+| 2          | `!` | right-to-left |
+| 3          | `*`, `/`, `%`, `^^` | left-to-right |
+| 4          | `+`, `-`| left-to-right |
+| 5          | `>`, `<`, `>=`, `<=`, `==`, `!=`, `===`, `!==` | left-to-right |
+| 6 | `&&` | left-to-right |
+| 7 | `||` | left-to-right |
+| 8          | `? :` | not applicable? (very rare case) |
