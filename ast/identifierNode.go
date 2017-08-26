@@ -27,5 +27,6 @@ func (node *IdentifierNode) MarshalJSON() ([]byte, error) {
 		Token    *token.Token
 	}{
 		NodeType: "identifier",
-		Token:    node.BaseNode.tok})
+		Token:    node.BaseNode.tok,
+	})
 }

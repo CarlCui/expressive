@@ -38,5 +38,6 @@ func (node *VariableDeclarationNode) MarshalJSON() ([]byte, error) {
 		Token:        node.BaseNode.tok,
 		Identifier:   node.Identifier,
 		DeclaredType: node.DeclaredType,
-		Expr:         node.Expr})
+		Expr:         node.Expr,
+	})
 }

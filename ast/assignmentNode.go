@@ -1,5 +1,11 @@
 package ast
 
+import (
+	"encoding/json"
+
+	"github.com/carlcui/expressive/token"
+)
+
 // AssignmentNode represents a node with assignment statement
 type AssignmentNode struct {
 	*BaseNode
@@ -18,4 +24,18 @@ func (node *AssignmentNode) Accept(visitor Visitor) {
 func (node *AssignmentNode) VisitChildren(visitor Visitor) {
 	node.Identifier.Accept(visitor)
 	node.Expr.Accept(visitor)
+}
+
+func (node *AssignmentNode) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		NodeType   string
+		Token      *token.Token
+		Identifier Node
+		Expr       Node
+	}{
+		NodeType:   "assignment",
+		Token:      node.BaseNode.tok,
+		Identifier: node.Identifier,
+		Expr:       node.Expr,
+	})
 }

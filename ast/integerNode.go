@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/carlcui/expressive/token"
+import (
+	"encoding/json"
+
+	"github.com/carlcui/expressive/token"
+)
 
 // IntegerNode represents an integer constant node.
 type IntegerNode struct {
@@ -23,4 +27,16 @@ func (node *IntegerNode) Init(tok *token.Token) {
 	node.BaseNode = CreateBaseNode(tok, nil)
 
 	// TODO: parse val
+}
+
+func (node *IntegerNode) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		NodeType string
+		Token    *token.Token
+		Val      int
+	}{
+		NodeType: "integer literal",
+		Token:    node.BaseNode.tok,
+		Val:      node.val,
+	})
 }

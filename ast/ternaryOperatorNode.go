@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/carlcui/expressive/token"
+import (
+	"encoding/json"
+
+	"github.com/carlcui/expressive/token"
+)
 
 // TernaryOperatorNode represents a node with a binary operation (+, -, etc)
 type TernaryOperatorNode struct {
@@ -37,4 +41,20 @@ func CreateTernaryOperatorNode(tok *token.Token, expr1 Node, expr2 Node, expr3 N
 	node.Expr3 = expr3
 
 	return &node
+}
+
+func (node *TernaryOperatorNode) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		NodeType string
+		Token    *token.Token
+		Expr1    Node
+		Expr2    Node
+		Expr3    Node
+	}{
+		NodeType: "ternary operator",
+		Token:    node.BaseNode.tok,
+		Expr1:    node.Expr1,
+		Expr2:    node.Expr2,
+		Expr3:    node.Expr3,
+	})
 }

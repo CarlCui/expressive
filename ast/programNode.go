@@ -35,5 +35,9 @@ func (node *ProgramNode) MarshalJSON() ([]byte, error) {
 		NodeType string
 		Token    *token.Token
 		Children []Node
-	}{NodeType: "Program node", Token: node.BaseNode.tok, Children: node.Chilren})
+	}{
+		NodeType: "Program node",
+		Token:    node.BaseNode.tok,
+		Children: node.Chilren,
+	})
 }
