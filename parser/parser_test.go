@@ -7,18 +7,18 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/carlcui/expressive/file"
+	"github.com/carlcui/expressive/input"
 	"github.com/carlcui/expressive/scanner"
 )
 
-func initScanner(fileName string) *scanner.Scanner {
+func initScanner(fileName string) scanner.Scanner {
 	testFileDir := "."
 	testFileName := fileName
 
-	var file file.File
+	var file input.File
 	file.Init(testFileDir, testFileName)
 
-	var scanner scanner.Scanner
+	var scanner scanner.ExpressiveScanner
 	scanner.Init(&file)
 
 	return &scanner

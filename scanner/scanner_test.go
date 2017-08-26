@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/carlcui/expressive/file"
+	"github.com/carlcui/expressive/input"
 	"github.com/carlcui/expressive/token"
 )
 
@@ -12,10 +12,10 @@ func TestScanTokens(t *testing.T) {
 	testFileDir := "."
 	testFileName := "tokens.txt"
 
-	var file file.File
+	var file input.File
 	file.Init(testFileDir, testFileName)
 
-	var scanner Scanner
+	var scanner ExpressiveScanner
 	scanner.Init(&file)
 
 	var expected = []token.Token{

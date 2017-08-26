@@ -10,14 +10,14 @@ import (
 
 // Parser is a LL1 parser of expressive
 type Parser struct {
-	scanner *scanner.Scanner
+	scanner scanner.Scanner
 
 	cur  *token.Token
 	prev *token.Token
 }
 
 // Init initializes a new parser with given scanner
-func (parser *Parser) Init(scanner *scanner.Scanner) {
+func (parser *Parser) Init(scanner scanner.Scanner) {
 	parser.scanner = scanner
 }
 
@@ -42,6 +42,8 @@ func (parser *Parser) parseProgram() ast.Node {
 	}
 
 	node.Chilren = children
+
+	parser.expect(token.EOF)
 
 	return &node
 }
