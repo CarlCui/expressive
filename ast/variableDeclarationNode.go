@@ -35,7 +35,7 @@ func (node *VariableDeclarationNode) MarshalJSON() ([]byte, error) {
 		Expr         Node
 	}{
 		NodeType:     "variable declaration",
-		Token:        node.BaseNode.tok,
+		Token:        node.BaseNode.Tok,
 		Identifier:   node.Identifier,
 		DeclaredType: node.DeclaredType,
 		Expr:         node.Expr,

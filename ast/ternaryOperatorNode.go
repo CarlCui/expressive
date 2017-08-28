@@ -52,7 +52,7 @@ func (node *TernaryOperatorNode) MarshalJSON() ([]byte, error) {
 		Expr3    Node
 	}{
 		NodeType: "ternary operator",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 		Expr1:    node.Expr1,
 		Expr2:    node.Expr2,
 		Expr3:    node.Expr3,

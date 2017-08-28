@@ -31,7 +31,7 @@ func (node *PrintNode) MarshalJSON() ([]byte, error) {
 		Expr     Node
 	}{
 		NodeType: "print",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 		Expr:     node.Expr,
 	})
 }

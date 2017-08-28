@@ -36,7 +36,7 @@ func (node *IntegerNode) MarshalJSON() ([]byte, error) {
 		Val      int
 	}{
 		NodeType: "integer literal",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 		Val:      node.val,
 	})
 }

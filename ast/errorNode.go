@@ -29,7 +29,7 @@ func (node *ErrorNode) MarshalJSON() ([]byte, error) {
 		Message  string
 	}{
 		NodeType: "error",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 		Message:  "expected " + node.Expected,
 	})
 }

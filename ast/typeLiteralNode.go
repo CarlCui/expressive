@@ -26,6 +26,6 @@ func (node *TypeLiteralNode) MarshalJSON() ([]byte, error) {
 		Token    *token.Token
 	}{
 		NodeType: "type literal",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 	})
 }

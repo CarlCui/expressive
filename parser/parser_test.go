@@ -1,43 +1,82 @@
 package parser
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
-	"reflect"
 	"testing"
 
-	"github.com/carlcui/expressive/input"
-	"github.com/carlcui/expressive/scanner"
+	"github.com/carlcui/expressive/ast"
+	"github.com/carlcui/expressive/token"
 )
 
-func initScanner(fileName string) scanner.Scanner {
-	testFileDir := "."
-	testFileName := fileName
-
-	var file input.File
-	file.Init(testFileDir, testFileName)
-
-	var scanner scanner.ExpressiveScanner
-	scanner.Init(&file)
-
-	return &scanner
-}
-
-func TestParser(t *testing.T) {
-	var parser Parser
-	parser.Init(initScanner("test1.txt"))
-
-	root := parser.Parse()
-
-	fmt.Println(reflect.TypeOf(root))
-
-	b, err := json.MarshalIndent(root, "", "    ")
-
-	if err != nil {
-		fmt.Println("error: ", err)
+func TestParseValidVariableDelarationStmt_LetStmt(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.LET, Raw: "let"},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
+		&token.Token{TokenType: token.SEMI},
 	}
 
-	os.Stdout.Write(b)
-	fmt.Println()
+	root := parseWithMockTokens(toks)
+
+	stmtNode := root.(*ast.ProgramNode).Chilren[0]
+
+	if stmt, ok := stmtNode.(*ast.VariableDeclarationNode); ok {
+		if stmt.Tok.TokenType != token.LET {
+			t.Error()
+		}
+
+		if identifier, ok := stmt.Identifier.(*ast.IdentifierNode); ok {
+			if identifier.Tok.Raw != "foo" {
+				t.Error()
+			}
+		} else {
+			t.Error()
+		}
+
+		if stmt.DeclaredType != nil || stmt.Expr != nil {
+			t.Error()
+		}
+	} else {
+		t.Error()
+	}
+}
+
+func TestParseValidVariableDeclarationStmt_LetStmtWithDeclaredType(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.INT_KEYWORD},
+		&token.Token{TokenType: token.SEMI},
+	}
+
+	root := parseWithMockTokens(toks)
+
+	stmtNode := root.(*ast.ProgramNode).Chilren[0]
+
+	if stmt, ok := stmtNode.(*ast.VariableDeclarationNode); ok {
+		if stmt.Tok.TokenType != token.LET {
+			t.Error()
+		}
+
+		if identifier, ok := stmt.Identifier.(*ast.IdentifierNode); ok {
+			if identifier.Tok.Raw != "foo" {
+				t.Error()
+			}
+		} else {
+			t.Error()
+		}
+
+		if declaredType, ok := stmt.DeclaredType.(*ast.TypeLiteralNode); ok {
+			if declaredType.Tok.TokenType != token.INT_KEYWORD {
+				t.Error()
+			}
+		} else {
+			t.Error()
+		}
+
+		if stmt.Expr != nil {
+			t.Error()
+		}
+	} else {
+		t.Error()
+	}
 }

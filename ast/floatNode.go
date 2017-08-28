@@ -35,7 +35,7 @@ func (node *FloatNode) MarshalJSON() ([]byte, error) {
 		Val      float32
 	}{
 		NodeType: "float literal",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 		Val:      node.val,
 	})
 }

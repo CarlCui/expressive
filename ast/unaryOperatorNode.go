@@ -31,7 +31,7 @@ func (node *UnaryOperatorNode) MarshalJSON() ([]byte, error) {
 		Rhs      Node
 	}{
 		NodeType: "unary operator",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 		Rhs:      node.Rhs,
 	})
 }

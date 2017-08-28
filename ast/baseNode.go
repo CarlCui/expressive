@@ -6,21 +6,21 @@ import (
 
 // BaseNode has properties that all nodes have
 type BaseNode struct {
-	tok    *token.Token
-	parent Node
+	Tok    *token.Token
+	Parent Node
 }
 
 // CreateBaseNode is a factory
 func CreateBaseNode(tok *token.Token, parent Node) *BaseNode {
-	return &BaseNode{tok: tok, parent: parent}
+	return &BaseNode{Tok: tok, Parent: parent}
 }
 
 func (node *BaseNode) SetParent(parent Node) {
-	node.parent = parent
+	node.Parent = parent
 }
 
 func (node *BaseNode) GetParent() Node {
-	return node.parent
+	return node.Parent
 }
 
 // Accept is part of visitor pattern.

@@ -34,7 +34,7 @@ func (node *AssignmentNode) MarshalJSON() ([]byte, error) {
 		Expr       Node
 	}{
 		NodeType:   "assignment",
-		Token:      node.BaseNode.tok,
+		Token:      node.BaseNode.Tok,
 		Identifier: node.Identifier,
 		Expr:       node.Expr,
 	})

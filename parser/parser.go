@@ -408,7 +408,11 @@ func (parser *Parser) parseExprParen() ast.Node {
 }
 
 func (parser *Parser) isTypeLiteralStart(tok *token.Token) bool {
-	return tok.TokenType == token.INT || tok.TokenType == token.FLOAT || tok.TokenType == token.CHAR || tok.TokenType == token.STRING || tok.TokenType == token.BOOL
+	return tok.TokenType == token.INT_KEYWORD ||
+		tok.TokenType == token.FLOAT_KEYWORD ||
+		tok.TokenType == token.CHAR_KEYWORD ||
+		tok.TokenType == token.STRING_KEYWORD ||
+		tok.TokenType == token.BOOL_KEYWORD
 }
 
 func (parser *Parser) parseTypeLiteral() ast.Node {

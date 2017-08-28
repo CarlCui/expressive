@@ -34,7 +34,7 @@ func (node *BinaryOperatorNode) MarshalJSON() ([]byte, error) {
 		Rhs      Node
 	}{
 		NodeType: "binary operator",
-		Token:    node.BaseNode.tok,
+		Token:    node.BaseNode.Tok,
 		Lhs:      node.Lhs,
 		Rhs:      node.Rhs,
 	})

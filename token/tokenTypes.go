@@ -57,11 +57,11 @@ const (
 	LET
 	CONST
 
-	INT
-	FLOAT
-	CHAR
-	BOOL
-	STRING
+	INT_KEYWORD
+	FLOAT_KEYWORD
+	CHAR_KEYWORD
+	BOOL_KEYWORD
+	STRING_KEYWORD
 
 	PRINT
 	keywordEnd
@@ -113,11 +113,11 @@ var tokens = [...]string{
 	LET:   "let",
 	CONST: "const",
 
-	INT:    "int",
-	FLOAT:  "float",
-	CHAR:   "char",
-	BOOL:   "bool",
-	STRING: "string",
+	INT_KEYWORD:    "int",
+	FLOAT_KEYWORD:  "float",
+	CHAR_KEYWORD:   "char",
+	BOOL_KEYWORD:   "bool",
+	STRING_KEYWORD: "string",
 
 	PRINT: "print",
 }
