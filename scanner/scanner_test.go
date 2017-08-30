@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/carlcui/expressive/file"
+	"github.com/carlcui/expressive/input"
 	"github.com/carlcui/expressive/token"
 )
 
@@ -12,15 +12,15 @@ func TestScanTokens(t *testing.T) {
 	testFileDir := "."
 	testFileName := "tokens.txt"
 
-	var file file.File
+	var file input.File
 	file.Init(testFileDir, testFileName)
 
-	var scanner Scanner
+	var scanner ExpressiveScanner
 	scanner.Init(&file)
 
 	var expected = []token.Token{
-		token.Token{TokenType: token.INT, Raw: "123"},
-		token.Token{TokenType: token.FLOAT, Raw: "12.1"},
+		token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
+		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "12.1"},
 		token.Token{TokenType: token.IDENTIFIER, Raw: "abc"},
 		token.Token{TokenType: token.LET, Raw: "let"},
 		token.Token{TokenType: token.ADD, Raw: "+"},
@@ -38,6 +38,52 @@ func TestScanTokens(t *testing.T) {
 		compareTokens(*tok, expectedToken, t)
 	}
 
+}
+
+func TestScanInteger(t *testing.T) {
+	var input input.StringInput
+
+	input.Init("123 456 0")
+
+	var scanner ExpressiveScanner
+	scanner.Init(&input)
+
+	var expected = []token.Token{
+		token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
+		token.Token{TokenType: token.INT_LITERAL, Raw: "456"},
+		token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
+		token.Token{TokenType: token.EOF, Raw: ""},
+	}
+
+	for _, expectedToken := range expected {
+		tok := scanner.Next()
+
+		compareTokens(*tok, expectedToken, t)
+	}
+}
+
+func TestScanFloat(t *testing.T) {
+	var input input.StringInput
+
+	input.Init("123.123 123. 0.3 000.2 0123.5")
+
+	var scanner ExpressiveScanner
+	scanner.Init(&input)
+
+	var expected = []token.Token{
+		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.123"},
+		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123."},
+		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "0.3"},
+		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "000.2"},
+		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "0123.5"},
+		token.Token{TokenType: token.EOF, Raw: ""},
+	}
+
+	for _, expectedToken := range expected {
+		tok := scanner.Next()
+
+		compareTokens(*tok, expectedToken, t)
+	}
 }
 
 func compareTokens(actual token.Token, expected token.Token, t *testing.T) {

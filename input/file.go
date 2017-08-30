@@ -1,4 +1,4 @@
-package file
+package input
 
 import (
 	"io/ioutil"
@@ -6,6 +6,8 @@ import (
 	"path"
 	"strconv"
 	"unicode/utf8"
+
+	"github.com/carlcui/expressive/locator"
 )
 
 // File encapsulates all operations related to file IO
@@ -50,7 +52,7 @@ func (file *File) NextChar() rune {
 	r, size := utf8.DecodeRune(file.src[file.curRead:])
 
 	if r == utf8.RuneError {
-		file.ReportError("Unable to parse UTF-8 rune")
+		file.reportError("Unable to parse UTF-8 rune")
 	}
 
 	file.curRead += size
@@ -74,7 +76,7 @@ func (file *File) Peek() rune {
 	r, _ := utf8.DecodeRune(file.src[file.curRead:])
 
 	if r == utf8.RuneError {
-		file.ReportError("Unable to parse UTF-8 rune")
+		file.reportError("Unable to parse UTF-8 rune")
 	}
 
 	return r
@@ -85,7 +87,17 @@ func (file *File) IsEOF() bool {
 	return file.curRead >= len(file.src)
 }
 
+func (file *File) CurLoc() locator.Locator {
+	var loc locator.FileLocation
+	loc.Col = file.curColumn
+	loc.Row = file.curRow
+	loc.FileName = file.filename
+	loc.DirName = file.dirname
+
+	return &loc
+}
+
 // ReportError reports error message at current reading location
-func (file *File) ReportError(message string) {
+func (file *File) reportError(message string) {
 	log.Fatal(message + " at row " + strconv.Itoa(file.curRow) + ", column " + strconv.Itoa(file.curColumn))
 }
