@@ -5,6 +5,7 @@ import (
 
 	"github.com/carlcui/expressive/ast"
 	"github.com/carlcui/expressive/scanner"
+	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/token"
 )
 
@@ -202,7 +203,7 @@ func (parser *Parser) parseExprTernaryIfElse() ast.Node {
 
 		expr3 := parser.parseExprOr()
 
-		expr1 = ast.CreateTernaryOperatorNode(cur, expr1, expr2, expr3)
+		expr1 = ast.CreateTernaryOperatorNode(cur, signature.IF_ELSE, expr1, expr2, expr3)
 	}
 
 	return expr1
@@ -226,7 +227,7 @@ func (parser *Parser) parseExprOr() ast.Node {
 
 		rhs := parser.parseExprAnd()
 
-		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+		lhs = ast.CreateBinaryOperatorNode(cur, signature.LOGIC_OR, lhs, rhs)
 	}
 	return lhs
 }
@@ -249,7 +250,7 @@ func (parser *Parser) parseExprAnd() ast.Node {
 
 		rhs := parser.parseExprComp()
 
-		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+		lhs = ast.CreateBinaryOperatorNode(cur, signature.GetOperator(cur), lhs, rhs)
 	}
 
 	return lhs
@@ -286,7 +287,7 @@ func (parser *Parser) parseExprComp() ast.Node {
 
 		rhs := parser.parseExprAdd()
 
-		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+		lhs = ast.CreateBinaryOperatorNode(cur, signature.GetOperator(cur), lhs, rhs)
 	}
 
 	return lhs
@@ -316,7 +317,7 @@ func (parser *Parser) parseExprAdd() ast.Node {
 
 		rhs := parser.parseExprMul()
 
-		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+		lhs = ast.CreateBinaryOperatorNode(cur, signature.GetOperator(cur), lhs, rhs)
 	}
 
 	return lhs
@@ -344,7 +345,7 @@ func (parser *Parser) parseExprMul() ast.Node {
 
 		rhs := parser.parseExprNot()
 
-		lhs = ast.CreateBinaryOperatorNode(cur, lhs, rhs)
+		lhs = ast.CreateBinaryOperatorNode(cur, signature.GetOperator(cur), lhs, rhs)
 	}
 
 	return lhs

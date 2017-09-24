@@ -3,15 +3,17 @@ package ast
 import (
 	"encoding/json"
 
+	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/token"
 )
 
 // TernaryOperatorNode represents a node with a binary operation (+, -, etc)
 type TernaryOperatorNode struct {
 	*BaseNode
-	Expr1 Node
-	Expr2 Node
-	Expr3 Node
+	Expr1    Node
+	Expr2    Node
+	Expr3    Node
+	Operator signature.Operator
 }
 
 // Accept is part of visitor pattern.
@@ -28,7 +30,7 @@ func (node *TernaryOperatorNode) VisitChildren(visitor Visitor) {
 	node.Expr3.Accept(visitor)
 }
 
-func CreateTernaryOperatorNode(tok *token.Token, expr1 Node, expr2 Node, expr3 Node) Node {
+func CreateTernaryOperatorNode(tok *token.Token, operator signature.Operator, expr1 Node, expr2 Node, expr3 Node) Node {
 	var node TernaryOperatorNode
 	node.BaseNode = CreateBaseNode(tok, nil)
 
@@ -39,6 +41,8 @@ func CreateTernaryOperatorNode(tok *token.Token, expr1 Node, expr2 Node, expr3 N
 	node.Expr1 = expr1
 	node.Expr2 = expr2
 	node.Expr3 = expr3
+
+	node.Operator = operator
 
 	return &node
 }

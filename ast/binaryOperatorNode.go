@@ -3,14 +3,16 @@ package ast
 import (
 	"encoding/json"
 
+	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/token"
 )
 
 // BinaryOperatorNode represents a node with a binary operation (+, -, etc)
 type BinaryOperatorNode struct {
 	*BaseNode
-	Lhs Node
-	Rhs Node
+	Lhs      Node
+	Rhs      Node
+	Operator signature.Operator
 }
 
 // Accept is part of visitor pattern.
@@ -40,7 +42,7 @@ func (node *BinaryOperatorNode) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func CreateBinaryOperatorNode(tok *token.Token, lhs Node, rhs Node) Node {
+func CreateBinaryOperatorNode(tok *token.Token, operator signature.Operator, lhs Node, rhs Node) Node {
 	var node BinaryOperatorNode
 	node.BaseNode = CreateBaseNode(tok, nil)
 
@@ -49,6 +51,8 @@ func CreateBinaryOperatorNode(tok *token.Token, lhs Node, rhs Node) Node {
 
 	node.Lhs = lhs
 	node.Rhs = rhs
+
+	node.Operator = operator
 
 	return &node
 }
