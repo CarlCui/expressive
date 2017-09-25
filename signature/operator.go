@@ -26,6 +26,36 @@ const (
 	ERROR_OPERATOR
 )
 
+var operatorStrings = [...]string{
+	ADD:               "+(Addition)",
+	SUBTRACT:          "-(Subtraction)",
+	MULTIPLY:          "*(Multiplication)",
+	DIVIDE:            "/(Division)",
+	MODULO:            "%(Modulus)",
+	EXPONENTIATE:      "^^(Exponentiation)",
+	LOGIC_AND:         "&&(Logical and)",
+	LOGIC_NOT:         "!(Logical not)",
+	LOGIC_OR:          "||(Logical or)",
+	IF_ELSE:           "? :(Ternary if else)",
+	GREATER:           ">(Greater)",
+	GREATER_OR_EQUAL:  ">=(Greater or equal)",
+	LESS:              "<(Less)",
+	LESS_OR_EQUAL:     "<=(Less or equal)",
+	SHALLOW_EQUAL:     "==(Shallow equal)",
+	SHALLOW_NOT_EQUAL: "!=(Shallow not euqal)",
+	DEEP_EQUAL:        "===(Deep equal)",
+	DEEP_NOT_EQUAL:    "!== (Deep not equal)",
+	ERROR_OPERATOR:    "??? (Error operator)",
+}
+
+func (operator Operator) String() string {
+	if operator >= ADD && operator <= ERROR_OPERATOR {
+		return operatorStrings[operator]
+	}
+
+	return operatorStrings[ERROR_OPERATOR]
+}
+
 func GetOperator(tok *token.Token) Operator {
 	switch tok.TokenType {
 	case token.ADD:

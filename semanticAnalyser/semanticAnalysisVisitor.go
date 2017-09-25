@@ -5,6 +5,8 @@ import "github.com/carlcui/expressive/symbolTable"
 import "github.com/carlcui/expressive/typing"
 import "github.com/carlcui/expressive/token"
 import "github.com/carlcui/expressive/logger"
+import "github.com/carlcui/expressive/signature"
+import "fmt"
 
 // SemanticAnalysisVisitor is the general semantic analyser using visitor pattern
 type SemanticAnalysisVisitor struct {
@@ -138,20 +140,17 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveTernaryOperatorNode(node *ast.
 	typing2 := node.Expr2.GetTyping()
 	typing3 := node.Expr3.GetTyping()
 
-	if !typing1.Equals(typing.BOOL) {
+	operator := node.Operator
+
+	if !signature.HasSignature(operator, typing1, typing2, typing3) {
 		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(node.Expr1.GetLocation(), "requires bool, but got "+typing1.String())
+		visitor.TypeCheckError(node.GetLocation(), operator, typing1, typing2, typing3)
 		return
 	}
 
-	if !typing2.Equals(typing3) {
-		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(node.Expr2.GetLocation(),
-			"ternary operator ? : requires both expression to evaluate to the same type, but got "+typing2.String()+" and "+typing3.String())
-		return
-	}
+	resultTyping := signature.ResultTyping(operator, typing1, typing2, typing3)
 
-	node.SetTyping(typing2)
+	node.SetTyping(resultTyping)
 }
 
 // VisitEnterBinaryOepratorNode do something
@@ -164,14 +163,17 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveBinaryOperatorNode(node *ast.B
 	lhsTyping := node.Lhs.GetTyping()
 	rhsTyping := node.Rhs.GetTyping()
 
-	if !lhsTyping.Equals(rhsTyping) {
+	operator := node.Operator
+
+	if !signature.HasSignature(operator, lhsTyping, rhsTyping) {
 		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(node.Lhs.GetLocation(), "operator "+node.Tok.Raw+" does not support "+
-			lhsTyping.String()+" and "+rhsTyping.String())
+		visitor.TypeCheckError(node.GetLocation(), operator, lhsTyping, rhsTyping)
 		return
 	}
 
-	// get a way to do this efficiently
+	resultTyping := signature.ResultTyping(operator, lhsTyping, rhsTyping)
+
+	node.SetTyping(resultTyping)
 }
 
 // VisitEnterUnaryOperatorNode do something
@@ -181,7 +183,19 @@ func (visitor *SemanticAnalysisVisitor) VisitEnterUnaryOperatorNode(node *ast.Un
 
 // VisitLeaveUnaryOperatorNode do something
 func (visitor *SemanticAnalysisVisitor) VisitLeaveUnaryOperatorNode(node *ast.UnaryOperatorNode) {
+	paramTyping := node.Expr.GetTyping()
 
+	operator := node.Operator
+
+	if !signature.HasSignature(operator, paramTyping) {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.TypeCheckError(node.GetLocation(), operator, paramTyping)
+		return
+	}
+
+	resultTyping := signature.ResultTyping(operator, paramTyping)
+
+	node.SetTyping(resultTyping)
 }
 
 // literal nodes
@@ -237,6 +251,11 @@ func (visitor *SemanticAnalysisVisitor) VisitTypeLiteralNode(node *ast.TypeLiter
 // VisitErrorNode do something
 func (visitor *SemanticAnalysisVisitor) VisitErrorNode(node *ast.ErrorNode) {
 	node.SetTyping(typing.ERROR_TYPE)
+}
+
+func (visitor *SemanticAnalysisVisitor) TypeCheckError(location string, key interface{}, params ...typing.Typing) {
+	err := fmt.Errorf("%v does not support operation on %v", key, params)
+	visitor.log(location, err.Error())
 }
 
 func (visitor *SemanticAnalysisVisitor) log(location string, message string) {

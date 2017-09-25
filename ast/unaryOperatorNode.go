@@ -10,7 +10,7 @@ import (
 // UnaryOperatorNode represents a node with a left-associated unary operator
 type UnaryOperatorNode struct {
 	*BaseNode
-	Rhs      Node
+	Expr     Node
 	Operator signature.Operator
 }
 
@@ -23,7 +23,7 @@ func (node *UnaryOperatorNode) Accept(visitor Visitor) {
 
 // VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
 func (node *UnaryOperatorNode) VisitChildren(visitor Visitor) {
-	node.Rhs.Accept(visitor)
+	node.Expr.Accept(visitor)
 }
 
 func CreateUnaryOperatorNode(tok *token.Token, operator signature.Operator, expr Node) Node {
@@ -32,7 +32,7 @@ func CreateUnaryOperatorNode(tok *token.Token, operator signature.Operator, expr
 
 	expr.SetParent(&node)
 
-	node.Rhs = expr
+	node.Expr = expr
 
 	node.Operator = operator
 
@@ -47,6 +47,6 @@ func (node *UnaryOperatorNode) MarshalJSON() ([]byte, error) {
 	}{
 		NodeType: "unary operator",
 		Token:    node.BaseNode.Tok,
-		Rhs:      node.Rhs,
+		Rhs:      node.Expr,
 	})
 }
