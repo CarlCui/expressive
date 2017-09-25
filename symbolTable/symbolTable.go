@@ -4,8 +4,8 @@ package symbolTable
 type SymbolTable map[string]*Binding
 
 func (symbolTable *SymbolTable) Install(identifier string, binding *Binding) {
-	if _, ok := (*symbolTable)[identifier]; ok {
-		// re-declared, error
+	if symbolTable.Lookup(identifier) != nil {
+		panic("Check if not declared first!")
 	}
 
 	(*symbolTable)[identifier] = binding
