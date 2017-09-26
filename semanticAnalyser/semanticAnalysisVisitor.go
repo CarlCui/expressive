@@ -70,7 +70,7 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 
 	if scope.VariableDeclared(identifier.Tok.Raw) {
 		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(identifier.GetLocation(), "variable "+identifier.Tok.Raw+" already declared at ")
+		visitor.log(identifier.GetLocation(), "variable \""+identifier.Tok.Raw+"\" already declared")
 		return
 	}
 
