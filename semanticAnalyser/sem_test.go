@@ -1,6 +1,7 @@
 package semanticAnalyser
 
 import (
+	"io/ioutil"
 	"testing"
 
 	"github.com/carlcui/expressive/ast"
@@ -10,9 +11,9 @@ import (
 	"github.com/carlcui/expressive/scanner"
 )
 
-func parseFile(fileName string) ast.Node {
+func parseFile(dirName string, fileName string) ast.Node {
 	var fileInput input.File
-	fileInput.Init("./tests", fileName)
+	fileInput.Init(dirName, fileName)
 
 	var s scanner.ExpressiveScanner
 	s.Init(&fileInput)
@@ -23,12 +24,51 @@ func parseFile(fileName string) ast.Node {
 	return p.Parse()
 }
 
-func TestAnalzingCorrectPrograms(t *testing.T) {
-	root := parseFile("correct1.exp")
-
+func newLogger() *logger.StdError {
 	var logger logger.StdError
+	return &logger
+}
 
-	Analyze(root, logger)
+func TestAnalzingCorrectPrograms(t *testing.T) {
+	dirName := "./testFiles/correct"
 
-	ast.PrintAst(root)
+	files, err := ioutil.ReadDir(dirName)
+
+	if err != nil {
+		panic("Incorrect test file directory!")
+	}
+
+	for _, file := range files {
+		root := parseFile(dirName, file.Name())
+
+		logger := newLogger()
+
+		Analyze(root, logger)
+
+		if logger.ErrorsCount() > 0 {
+			t.Errorf("File %v: error(s) encountered: %v", file.Name(), logger.ErrorsCount())
+		}
+	}
+}
+
+func TestAnalzingIncorrectPrograms(t *testing.T) {
+	dirName := "./testFiles/incorrect"
+
+	files, err := ioutil.ReadDir(dirName)
+
+	if err != nil {
+		panic("Incorrect test file directory!")
+	}
+
+	for _, file := range files {
+		root := parseFile(dirName, file.Name())
+
+		logger := newLogger()
+
+		Analyze(root, logger)
+
+		if logger.ErrorsCount() == 0 {
+			t.Errorf("File %v: error not found", file.Name())
+		}
+	}
 }
