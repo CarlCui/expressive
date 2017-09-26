@@ -22,7 +22,7 @@ func (node *ProgramNode) Accept(visitor Visitor) {
 // VisitChildren is part of visitor pattern. Literal node does not have any child.
 func (node *ProgramNode) VisitChildren(visitor Visitor) {
 	for _, child := range node.Chilren {
-		child.Accept(visitor)
+		Accept(child, visitor)
 	}
 }
 

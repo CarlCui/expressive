@@ -1,6 +1,7 @@
 package typing
 
 import (
+	"encoding/json"
 	"strconv"
 )
 
@@ -44,4 +45,8 @@ func (primitiveType PrimitiveType) String() string {
 	}
 
 	return strconv.Itoa(int(primitiveType))
+}
+
+func (primitiveType PrimitiveType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(primitiveType.String())
 }

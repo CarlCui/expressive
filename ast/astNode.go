@@ -19,3 +19,9 @@ type Node interface {
 	SetTyping(typing typing.Typing)
 	GetTyping() typing.Typing
 }
+
+func Accept(node Node, visitor Visitor) {
+	if node != nil {
+		node.Accept(visitor)
+	}
+}

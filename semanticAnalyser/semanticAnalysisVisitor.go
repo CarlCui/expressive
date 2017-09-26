@@ -38,8 +38,6 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 
 	var resolvedTyping typing.Typing
 
-	declaredTyping := node.DeclaredType.GetTyping()
-
 	if node.DeclaredType == nil && node.Expr == nil {
 		node.SetTyping(typing.ERROR_TYPE)
 		visitor.log(node.GetLocation(), "Missing variable type")
@@ -47,16 +45,22 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 	}
 
 	if node.DeclaredType != nil {
-		exprTyping := node.Expr.GetTyping()
+		declaredTyping := node.DeclaredType.GetTyping()
 
-		if !exprTyping.Equals(declaredTyping) {
-			visitor.log(node.GetLocation(),
-				"variable declared as "+declaredTyping.String()+","+
-					"but expression evaluated to "+exprTyping.String())
-
-			resolvedTyping = typing.ERROR_TYPE
+		if node.Expr == nil {
+			resolvedTyping = declaredTyping
 		} else {
-			resolvedTyping = exprTyping
+			exprTyping := node.Expr.GetTyping()
+
+			if !exprTyping.Equals(declaredTyping) {
+				visitor.log(node.GetLocation(),
+					"variable declared as "+declaredTyping.String()+","+
+						"but expression evaluated to "+exprTyping.String())
+
+				resolvedTyping = typing.ERROR_TYPE
+			} else {
+				resolvedTyping = exprTyping
+			}
 		}
 	} else {
 		resolvedTyping = node.Expr.GetTyping()
@@ -71,6 +75,7 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 	}
 
 	binding := scope.CreateBinding(identifier.Tok.Raw, identifier.Tok.Locator, resolvedTyping)
+	identifier.SetTyping(resolvedTyping)
 	identifier.SetBinding(binding)
 
 	if node.Tok.TokenType == token.CONST {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
 )
 
 // AssignmentNode represents a node with assignment statement
@@ -22,8 +23,8 @@ func (node *AssignmentNode) Accept(visitor Visitor) {
 
 // VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
 func (node *AssignmentNode) VisitChildren(visitor Visitor) {
-	node.Identifier.Accept(visitor)
-	node.Expr.Accept(visitor)
+	Accept(node.Identifier, visitor)
+	Accept(node.Expr, visitor)
 }
 
 func (node *AssignmentNode) MarshalJSON() ([]byte, error) {
@@ -31,11 +32,13 @@ func (node *AssignmentNode) MarshalJSON() ([]byte, error) {
 		NodeType   string
 		Token      *token.Token
 		Identifier Node
+		Typing     typing.Typing
 		Expr       Node
 	}{
 		NodeType:   "assignment",
 		Token:      node.BaseNode.Tok,
 		Identifier: node.Identifier,
+		Typing:     node.Typing,
 		Expr:       node.Expr,
 	})
 }

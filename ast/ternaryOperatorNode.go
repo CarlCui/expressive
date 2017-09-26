@@ -5,6 +5,7 @@ import (
 
 	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
 )
 
 // TernaryOperatorNode represents a node with a binary operation (+, -, etc)
@@ -25,9 +26,9 @@ func (node *TernaryOperatorNode) Accept(visitor Visitor) {
 
 // VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
 func (node *TernaryOperatorNode) VisitChildren(visitor Visitor) {
-	node.Expr1.Accept(visitor)
-	node.Expr2.Accept(visitor)
-	node.Expr3.Accept(visitor)
+	Accept(node.Expr1, visitor)
+	Accept(node.Expr2, visitor)
+	Accept(node.Expr3, visitor)
 }
 
 func CreateTernaryOperatorNode(tok *token.Token, operator signature.Operator, expr1 Node, expr2 Node, expr3 Node) Node {
@@ -51,12 +52,14 @@ func (node *TernaryOperatorNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		NodeType string
 		Token    *token.Token
+		Typing   typing.Typing
 		Expr1    Node
 		Expr2    Node
 		Expr3    Node
 	}{
 		NodeType: "ternary operator",
 		Token:    node.BaseNode.Tok,
+		Typing:   node.Typing,
 		Expr1:    node.Expr1,
 		Expr2:    node.Expr2,
 		Expr3:    node.Expr3,

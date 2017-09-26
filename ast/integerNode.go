@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
 )
 
 // IntegerNode represents an integer constant node.
@@ -34,9 +35,11 @@ func (node *IntegerNode) MarshalJSON() ([]byte, error) {
 		NodeType string
 		Token    *token.Token
 		Val      int
+		Typing   typing.Typing
 	}{
 		NodeType: "integer literal",
 		Token:    node.BaseNode.Tok,
 		Val:      node.val,
+		Typing:   node.Typing,
 	})
 }

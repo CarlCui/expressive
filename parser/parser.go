@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/carlcui/expressive/ast"
 	"github.com/carlcui/expressive/scanner"
 	"github.com/carlcui/expressive/signature"
@@ -475,8 +473,6 @@ func (parser *Parser) parseIdentifier() ast.Node {
 	}
 
 	node := ast.IdentifierNode{BaseNode: ast.CreateBaseNode(parser.cur, nil)}
-
-	fmt.Println(node)
 
 	parser.read()
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
 )
 
 // UnaryOperatorNode represents a node with a left-associated unary operator
@@ -23,7 +24,7 @@ func (node *UnaryOperatorNode) Accept(visitor Visitor) {
 
 // VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
 func (node *UnaryOperatorNode) VisitChildren(visitor Visitor) {
-	node.Expr.Accept(visitor)
+	Accept(node.Expr, visitor)
 }
 
 func CreateUnaryOperatorNode(tok *token.Token, operator signature.Operator, expr Node) Node {
@@ -43,10 +44,12 @@ func (node *UnaryOperatorNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		NodeType string
 		Token    *token.Token
+		Typing   typing.Typing
 		Rhs      Node
 	}{
 		NodeType: "unary operator",
 		Token:    node.BaseNode.Tok,
+		Typing:   node.Typing,
 		Rhs:      node.Expr,
 	})
 }

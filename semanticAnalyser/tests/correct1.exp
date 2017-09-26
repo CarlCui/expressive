@@ -1,0 +1,3 @@
+let foo: int;
+let bar = 5;
+let foo: int = 6;

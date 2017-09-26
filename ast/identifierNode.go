@@ -5,6 +5,7 @@ import (
 
 	"github.com/carlcui/expressive/symbolTable"
 	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
 )
 
 // IdentifierNode represents an identifier node.
@@ -64,8 +65,12 @@ func (node *IdentifierNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		NodeType string
 		Token    *token.Token
+		Typing   typing.Typing
+		Binding  *symbolTable.Binding
 	}{
 		NodeType: "identifier",
 		Token:    node.BaseNode.Tok,
+		Typing:   node.Typing,
+		Binding:  node.binding,
 	})
 }

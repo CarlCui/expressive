@@ -21,9 +21,9 @@ func (node *VariableDeclarationNode) Accept(visitor Visitor) {
 
 // VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
 func (node *VariableDeclarationNode) VisitChildren(visitor Visitor) {
-	node.Identifier.Accept(visitor)
-	node.DeclaredType.Accept(visitor)
-	node.Expr.Accept(visitor)
+	Accept(node.Identifier, visitor)
+	Accept(node.DeclaredType, visitor)
+	Accept(node.Expr, visitor)
 }
 
 func (node *VariableDeclarationNode) MarshalJSON() ([]byte, error) {

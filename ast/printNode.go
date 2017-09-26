@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
 )
 
 // PrintNode represents a node with print statement to stdout
@@ -21,7 +22,7 @@ func (node *PrintNode) Accept(visitor Visitor) {
 
 // VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
 func (node *PrintNode) VisitChildren(visitor Visitor) {
-	node.Expr.Accept(visitor)
+	Accept(node.Expr, visitor)
 }
 
 func (node *PrintNode) MarshalJSON() ([]byte, error) {
@@ -29,9 +30,11 @@ func (node *PrintNode) MarshalJSON() ([]byte, error) {
 		NodeType string
 		Token    *token.Token
 		Expr     Node
+		Typing   typing.Typing
 	}{
 		NodeType: "print",
 		Token:    node.BaseNode.Tok,
 		Expr:     node.Expr,
+		Typing:   node.Typing,
 	})
 }
