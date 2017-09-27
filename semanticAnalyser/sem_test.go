@@ -43,7 +43,6 @@ func parseAndAnalyze(dirName string, fileName string, handleResult func(logger l
 }
 
 func TestAnalzingCorrectPrograms(t *testing.T) {
-	t.Skip()
 	dirName := "./testFiles/correct"
 
 	files, err := ioutil.ReadDir(dirName)
@@ -66,7 +65,6 @@ func TestAnalzingCorrectPrograms(t *testing.T) {
 }
 
 func TestAnalzingIncorrectPrograms(t *testing.T) {
-	t.Skip()
 	dirName := "./testFiles/incorrect"
 
 	files, err := ioutil.ReadDir(dirName)
@@ -87,7 +85,7 @@ func TestAnalzingIncorrectPrograms(t *testing.T) {
 }
 
 func TestParticularFile(t *testing.T) {
-	// t.Skip("for local debugging only")
+	t.Skip("for local debugging only")
 
 	dirName := "./testFiles/incorrect"
 	fileName := "operator_7.exp"
