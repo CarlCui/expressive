@@ -60,6 +60,7 @@ func ResultTyping(key interface{}, params ...typing.Typing) typing.Typing {
 func checkValidKey(key interface{}) {
 	switch key.(type) {
 	case Operator:
+		return
 	case string:
 		return
 	default:

@@ -359,14 +359,15 @@ func (parser *Parser) parseExprNot() ast.Node {
 	}
 
 	if parser.cur.TokenType == token.LNOT {
-		var node ast.UnaryOperatorNode
-		node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+		currentToken := parser.cur
 
-		rhs := parser.parseExprNot()
+		parser.read()
 
-		rhs.SetParent(&node)
+		expr := parser.parseExprNot()
 
-		return &node
+		node := ast.CreateUnaryOperatorNode(currentToken, signature.GetOperator(currentToken), expr)
+
+		return node
 	}
 
 	return parser.parseExprFinal()

@@ -17,10 +17,7 @@ func CreateScope(baseScope *Scope) *Scope {
 	symbolTable = make(SymbolTable)
 
 	scope.symbolTable = &symbolTable
-	scope.BaseScope = &scope
-	if baseScope != nil {
-		scope.BaseScope = baseScope
-	}
+	scope.BaseScope = baseScope
 
 	return &scope
 }

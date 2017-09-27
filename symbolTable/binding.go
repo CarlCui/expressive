@@ -11,7 +11,7 @@ type Binding struct {
 }
 
 func CreateBinding(locator locator.Locator, typing typing.Typing) *Binding {
-	return &Binding{false, locator, typing}
+	return &Binding{true, locator, typing}
 }
 
 func (binding *Binding) GetTyping() typing.Typing {

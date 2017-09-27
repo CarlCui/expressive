@@ -1,0 +1,2 @@
+let foo: int;
+let foo: int = 6;

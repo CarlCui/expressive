@@ -28,9 +28,13 @@ func (node *IdentifierNode) IsBeingDeclared() bool {
 		return false
 	}
 
-	_, ok := node.Parent.(*VariableDeclarationNode)
+	declarationNode, ok := node.Parent.(*VariableDeclarationNode)
 
-	return ok
+	if !ok {
+		return false
+	}
+
+	return declarationNode.Identifier == node
 }
 
 func (node *IdentifierNode) FindVariableBinding() *symbolTable.Binding {

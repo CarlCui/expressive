@@ -54,7 +54,7 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 
 			if !exprTyping.Equals(declaredTyping) {
 				visitor.log(node.GetLocation(),
-					"variable declared as "+declaredTyping.String()+","+
+					"variable declared as "+declaredTyping.String()+", "+
 						"but expression evaluated to "+exprTyping.String())
 
 				resolvedTyping = typing.ERROR_TYPE
@@ -70,7 +70,7 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 
 	if scope.VariableDeclared(identifier.Tok.Raw) {
 		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(identifier.GetLocation(), "variable \""+identifier.Tok.Raw+"\" already declared")
+		visitor.log(identifier.GetLocation(), "variable \""+identifier.Tok.Raw+"\" has already been declared")
 		return
 	}
 
@@ -96,6 +96,11 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveAssignmentNode(node *ast.Assig
 
 	binding := identifier.GetBinding()
 
+	if binding == nil {
+		node.SetTyping(typing.ERROR_TYPE)
+		return
+	}
+
 	if !binding.IsVariable {
 		node.SetTyping(typing.ERROR_TYPE)
 		visitor.log(identifier.GetLocation(), "variable cannot be re-assigned")
@@ -108,7 +113,7 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveAssignmentNode(node *ast.Assig
 	if !declaredType.Equals(exprType) {
 		node.SetTyping(typing.ERROR_TYPE)
 		visitor.log(node.Expr.GetLocation(), "variable declared as "+declaredType.String()+", "+
-			"but got "+exprType.String())
+			" but got "+exprType.String())
 		return
 	}
 
@@ -222,7 +227,8 @@ func (visitor *SemanticAnalysisVisitor) VisitIdentifierNode(node *ast.Identifier
 
 		if binding == nil {
 			node.SetTyping(typing.ERROR_TYPE)
-			visitor.log(node.GetLocation(), "variable "+node.Tok.Raw+" used before declared")
+			visitor.log(node.GetLocation(), "variable \""+node.Tok.Raw+"\" used before declared")
+			return
 		}
 
 		node.SetTyping(binding.GetTyping())

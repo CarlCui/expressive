@@ -1,6 +1,7 @@
 package semanticAnalyser
 
 import (
+	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -29,7 +30,20 @@ func newLogger() *logger.StdError {
 	return &logger
 }
 
+func parseAndAnalyze(dirName string, fileName string, handleResult func(logger logger.Logger)) {
+	root := parseFile(dirName, fileName)
+
+	ast.PrintAst(root)
+
+	logger := newLogger()
+
+	Analyze(root, logger)
+
+	handleResult(logger)
+}
+
 func TestAnalzingCorrectPrograms(t *testing.T) {
+	t.Skip()
 	dirName := "./testFiles/correct"
 
 	files, err := ioutil.ReadDir(dirName)
@@ -39,19 +53,20 @@ func TestAnalzingCorrectPrograms(t *testing.T) {
 	}
 
 	for _, file := range files {
-		root := parseFile(dirName, file.Name())
+		fileName := file.Name()
 
-		logger := newLogger()
-
-		Analyze(root, logger)
-
-		if logger.ErrorsCount() > 0 {
-			t.Errorf("File %v: error(s) encountered: %v", file.Name(), logger.ErrorsCount())
-		}
+		parseAndAnalyze(dirName, fileName, func(logger logger.Logger) {
+			if logger.ErrorsCount() > 0 {
+				t.Errorf("File %v: error(s) encountered: %v", fileName, logger.ErrorsCount())
+			} else {
+				fmt.Printf("%v: passed\n", fileName)
+			}
+		})
 	}
 }
 
 func TestAnalzingIncorrectPrograms(t *testing.T) {
+	t.Skip()
 	dirName := "./testFiles/incorrect"
 
 	files, err := ioutil.ReadDir(dirName)
@@ -61,14 +76,25 @@ func TestAnalzingIncorrectPrograms(t *testing.T) {
 	}
 
 	for _, file := range files {
-		root := parseFile(dirName, file.Name())
+		fileName := file.Name()
 
-		logger := newLogger()
-
-		Analyze(root, logger)
-
-		if logger.ErrorsCount() == 0 {
-			t.Errorf("File %v: error not found", file.Name())
-		}
+		parseAndAnalyze(dirName, fileName, func(logger logger.Logger) {
+			if logger.ErrorsCount() == 0 {
+				t.Errorf("File %v: error not found", fileName)
+			}
+		})
 	}
+}
+
+func TestParticularFile(t *testing.T) {
+	// t.Skip("for local debugging only")
+
+	dirName := "./testFiles/incorrect"
+	fileName := "operator_7.exp"
+
+	parseAndAnalyze(dirName, fileName, func(logger logger.Logger) {
+		if logger.ErrorsCount() == 0 {
+			t.Errorf("File %v: error not found", fileName)
+		}
+	})
 }
