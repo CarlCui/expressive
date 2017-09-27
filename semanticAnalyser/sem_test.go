@@ -33,8 +33,6 @@ func newLogger() *logger.StdError {
 func parseAndAnalyze(dirName string, fileName string, handleResult func(logger logger.Logger)) {
 	root := parseFile(dirName, fileName)
 
-	ast.PrintAst(root)
-
 	logger := newLogger()
 
 	Analyze(root, logger)
