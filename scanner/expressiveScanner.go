@@ -96,6 +96,8 @@ func (scanner *ExpressiveScanner) parseIdentifier() *token.Token {
 		tok = &token.Token{TokenType: token.IDENTIFIER, Raw: scanner.cur, Locator: scanner.curLoc}
 	}
 
+	tok.Locator = scanner.curLoc
+
 	return tok
 }
 
@@ -112,6 +114,8 @@ func (scanner *ExpressiveScanner) parseOperator() *token.Token {
 	if tok == nil {
 		tok = token.IllegalToken(scanner.cur, scanner.curLoc)
 	}
+
+	tok.Locator = scanner.curLoc
 
 	return tok
 }

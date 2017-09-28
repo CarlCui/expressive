@@ -1,23 +1,16 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Launch test package",
+            "name": "Launch sem-analyser tests",
             "type": "go",
             "request": "launch",
             "mode": "test",
-            "program": "${workspaceRoot}/parser"
-        },
-        {
-            "name": "Launch test function",
-            "type": "go",
-            "request": "launch",
-            "mode": "test",
-            "program": "${workspaceRoot}/scanner",
-            "args": [
-                "-test.run",
-                "MyTestFunction"
-            ]
+            "program": "${workspaceRoot}/semanticAnalyser",
+            "env": {
+
+            }
         },
         {
             "name": "Launch",

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
 )
 
 // FloatNode represents a float constant node.
@@ -33,9 +34,11 @@ func (node *FloatNode) MarshalJSON() ([]byte, error) {
 		NodeType string
 		Token    *token.Token
 		Val      float32
+		Typing   typing.Typing
 	}{
 		NodeType: "float literal",
 		Token:    node.BaseNode.Tok,
 		Val:      node.val,
+		Typing:   node.Typing,
 	})
 }

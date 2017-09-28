@@ -1,0 +1,10 @@
+let foo: int;
+let foo2: char;
+let foo3: string;
+let foo4: float;
+let foo5: bool;
+
+const foo1: int;
+
+let bar = 5;
+let bar1: int = 6;
