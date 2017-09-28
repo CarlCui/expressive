@@ -96,6 +96,9 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveAssignmentNode(node *ast.Assig
 
 	binding := identifier.GetBinding()
 
+	// If the binding is nil, then error is handled inside VisitIdentifierNode. If we pass a
+	// null instance (not nil) to signature matching, it will log another error, which will
+	// be miss-leading.
 	if binding == nil {
 		node.SetTyping(typing.ERROR_TYPE)
 		return
@@ -222,18 +225,20 @@ func (visitor *SemanticAnalysisVisitor) VisitFloatNode(node *ast.FloatNode) {
 
 // VisitIdentifierNode do something
 func (visitor *SemanticAnalysisVisitor) VisitIdentifierNode(node *ast.IdentifierNode) {
-	if !node.IsBeingDeclared() {
-		binding := node.FindVariableBinding()
-
-		if binding == nil {
-			node.SetTyping(typing.ERROR_TYPE)
-			visitor.log(node.GetLocation(), "variable \""+node.Tok.Raw+"\" used before declared")
-			return
-		}
-
-		node.SetTyping(binding.GetTyping())
-		node.SetBinding(binding)
+	if node.IsBeingDeclared() {
+		return
 	}
+
+	binding := node.FindVariableBinding()
+
+	if binding == nil {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.log(node.GetLocation(), "variable \""+node.Tok.Raw+"\" used before declared")
+		return
+	}
+
+	node.SetTyping(binding.GetTyping())
+	node.SetBinding(binding)
 }
 
 // VisitTypeLiteralNode do something
