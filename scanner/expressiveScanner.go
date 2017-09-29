@@ -83,7 +83,6 @@ func (scanner *ExpressiveScanner) appendConsequentDigits() {
 
 /*
 	identifier := [_a-zA-Z][_0-9a-zA-Z]*
-
 */
 func (scanner *ExpressiveScanner) parseIdentifier() *token.Token {
 	for !scanner.input.IsEOF() && !isWhitespace(scanner.input.Peek()) && (isIdentifierStart(scanner.input.Peek()) || isDigit(scanner.input.Peek())) {
@@ -96,10 +95,41 @@ func (scanner *ExpressiveScanner) parseIdentifier() *token.Token {
 		tok = &token.Token{TokenType: token.IDENTIFIER, Raw: scanner.cur, Locator: scanner.curLoc}
 	}
 
-	tok.Locator = scanner.curLoc
-
 	return tok
 }
+
+/*
+	stringLiteral := "[^"^\n]*"
+*/
+func (scanner *ExpressiveScanner) parseStringLiteral() *token.Token {
+	loc := scanner.curLoc
+
+	scanner.cur += string(scanner.input.NextChar()) // "
+
+	for !scanner.input.IsEOF() && !isReturn(scanner.input.Peek()) && !isDoubleQuote(scanner.input.Peek()) {
+		scanner.cur += string(scanner.input.NextChar())
+	}
+
+	// expecting back qoute
+	if scanner.input.IsEOF() {
+		return token.IllegalToken(scanner.cur, loc)
+	}
+	if isReturn(scanner.input.Peek()) {
+		return token.IllegalToken(scanner.cur, loc)
+	}
+
+	if !isDoubleQuote(scanner.input.Peek()) {
+		return token.IllegalToken(scanner.cur, loc)
+	}
+
+	scanner.cur += string(scanner.input.NextChar()) // "
+
+	return &token.Token{TokenType: token.STRING_LITERAL, Raw: scanner.cur, Locator: loc}
+}
+
+/*
+	charLiteral := '[^'^\n]|(\asciiEscapeControl)'
+*/
 
 /*
 	operators
@@ -137,6 +167,18 @@ func isWhitespace(ch rune) bool {
 
 func isDot(ch rune) bool {
 	return ch == '.'
+}
+
+func isDoubleQuote(ch rune) bool {
+	return ch == '"'
+}
+
+func isSingleQuote(ch rune) bool {
+	return ch == '\''
+}
+
+func isReturn(ch rune) bool {
+	return ch == '\n'
 }
 
 func isLetter(ch rune) bool {
