@@ -1,7 +1,16 @@
 {
     "version": "0.2.0",
     "configurations": [
+        {
+            "name": "Launch scanner tests",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceRoot}/scanner",
+            "env": {
 
+            }
+        },
         {
             "name": "Launch sem-analyser tests",
             "type": "go",

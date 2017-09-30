@@ -39,6 +39,9 @@ func (scanner *ExpressiveScanner) Next() *token.Token {
 		case isIdentifierStart(ch):
 			tok = scanner.parseIdentifier()
 			break
+		case isDoubleQuote(ch):
+			tok = scanner.parseStringLiteral()
+			break
 		case token.HasOperatorPrefix(string(ch)):
 			tok = scanner.parseOperator()
 			break
@@ -95,6 +98,8 @@ func (scanner *ExpressiveScanner) parseIdentifier() *token.Token {
 		tok = &token.Token{TokenType: token.IDENTIFIER, Raw: scanner.cur, Locator: scanner.curLoc}
 	}
 
+	tok.Locator = scanner.curLoc
+
 	return tok
 }
 
@@ -104,10 +109,25 @@ func (scanner *ExpressiveScanner) parseIdentifier() *token.Token {
 func (scanner *ExpressiveScanner) parseStringLiteral() *token.Token {
 	loc := scanner.curLoc
 
-	scanner.cur += string(scanner.input.NextChar()) // "
-
 	for !scanner.input.IsEOF() && !isReturn(scanner.input.Peek()) && !isDoubleQuote(scanner.input.Peek()) {
-		scanner.cur += string(scanner.input.NextChar())
+
+		cur := scanner.input.NextChar()
+		scanner.cur += string(cur)
+
+		if isBackSlash(cur) {
+			// parse escape sequence
+
+			if scanner.input.IsEOF() {
+				return token.IllegalToken(scanner.cur, loc)
+			}
+
+			if !isControlSequenceCharacter(scanner.input.Peek()) {
+				return token.IllegalToken(scanner.cur, loc)
+			}
+
+			scanner.cur += string(scanner.input.NextChar())
+
+		}
 	}
 
 	// expecting back qoute
@@ -175,6 +195,15 @@ func isDoubleQuote(ch rune) bool {
 
 func isSingleQuote(ch rune) bool {
 	return ch == '\''
+}
+
+func isBackSlash(ch rune) bool {
+	return ch == '\\'
+}
+
+// implemented partially
+func isControlSequenceCharacter(ch rune) bool {
+	return ch == 'n' || ch == '0' || ch == 't' || ch == '\'' || ch == '"' || ch == '\\'
 }
 
 func isReturn(ch rune) bool {

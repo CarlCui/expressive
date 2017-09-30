@@ -86,6 +86,33 @@ func TestScanFloat(t *testing.T) {
 	}
 }
 
+func TestScanStringLiteralSuccess(t *testing.T) {
+	var input input.StringInput
+
+	input.Init("\"abc\" \"\" \"  \" \"\\\"\" \"\\'\" \"\\n\" \"\\t\" \"\\0\" \"\\\\\"  ")
+
+	var scanner ExpressiveScanner
+	scanner.Init(&input)
+
+	var expected = []token.Token{
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"abc\""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"  \""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\"\""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\'\""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\n\""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\t\""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\0\""},
+		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\\\""},
+	}
+
+	for _, expectedToken := range expected {
+		tok := scanner.Next()
+
+		compareTokens(*tok, expectedToken, t)
+	}
+}
+
 func compareTokens(actual token.Token, expected token.Token, t *testing.T) {
 	equal := actual.TokenType == expected.TokenType && actual.Raw == expected.Raw
 
