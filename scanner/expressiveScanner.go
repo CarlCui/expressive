@@ -42,6 +42,8 @@ func (scanner *ExpressiveScanner) Next() *token.Token {
 		case isDoubleQuote(ch):
 			tok = scanner.parseStringLiteral()
 			break
+		case isSingleQuote(ch):
+			tok = scanner.parseCharacterLiteral()
 		case token.HasOperatorPrefix(string(ch)):
 			tok = scanner.parseOperator()
 			break
@@ -111,34 +113,15 @@ func (scanner *ExpressiveScanner) parseStringLiteral() *token.Token {
 
 	for !scanner.input.IsEOF() && !isReturn(scanner.input.Peek()) && !isDoubleQuote(scanner.input.Peek()) {
 
-		cur := scanner.input.NextChar()
-		scanner.cur += string(cur)
+		ok := scanner.tryParseEscapeControlSequence()
 
-		if isBackSlash(cur) {
-			// parse escape sequence
-
-			if scanner.input.IsEOF() {
-				return token.IllegalToken(scanner.cur, loc)
-			}
-
-			if !isControlSequenceCharacter(scanner.input.Peek()) {
-				return token.IllegalToken(scanner.cur, loc)
-			}
-
-			scanner.cur += string(scanner.input.NextChar())
-
+		if !ok {
+			return token.IllegalToken(scanner.cur, loc)
 		}
 	}
 
 	// expecting back qoute
-	if scanner.input.IsEOF() {
-		return token.IllegalToken(scanner.cur, loc)
-	}
-	if isReturn(scanner.input.Peek()) {
-		return token.IllegalToken(scanner.cur, loc)
-	}
-
-	if !isDoubleQuote(scanner.input.Peek()) {
+	if scanner.input.IsEOF() || isReturn(scanner.input.Peek()) || !isDoubleQuote(scanner.input.Peek()) {
 		return token.IllegalToken(scanner.cur, loc)
 	}
 
@@ -150,6 +133,27 @@ func (scanner *ExpressiveScanner) parseStringLiteral() *token.Token {
 /*
 	charLiteral := '[^'^\n]|(\asciiEscapeControl)'
 */
+func (scanner *ExpressiveScanner) parseCharacterLiteral() *token.Token {
+	loc := scanner.curLoc
+
+	if scanner.input.IsEOF() || isReturn(scanner.input.Peek()) || isSingleQuote(scanner.input.Peek()) {
+		return token.IllegalToken(scanner.cur, loc)
+	}
+
+	ok := scanner.tryParseEscapeControlSequence()
+
+	if !ok {
+		return token.IllegalToken(scanner.cur, loc)
+	}
+
+	if scanner.input.IsEOF() || !isSingleQuote(scanner.input.Peek()) {
+		return token.IllegalToken(scanner.cur, loc)
+	}
+
+	scanner.cur += string(scanner.input.NextChar())
+
+	return &token.Token{TokenType: token.CHAR_LITERAL, Raw: scanner.cur, Locator: loc}
+}
 
 /*
 	operators
@@ -174,6 +178,21 @@ func (scanner *ExpressiveScanner) skipWhitespaces() {
 	for !scanner.input.IsEOF() && isWhitespace(scanner.input.Peek()) {
 		scanner.input.NextChar()
 	}
+}
+
+func (scanner *ExpressiveScanner) tryParseEscapeControlSequence() bool {
+	cur := scanner.input.NextChar()
+	scanner.cur += string(cur)
+
+	if isBackSlash(cur) {
+		if scanner.input.IsEOF() || !isControlSequenceCharacter(scanner.input.Peek()) {
+			return false
+		}
+
+		scanner.cur += string(scanner.input.NextChar())
+	}
+
+	return true
 }
 
 // char helpers

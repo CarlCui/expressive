@@ -8,109 +8,92 @@ import (
 	"github.com/carlcui/expressive/token"
 )
 
-func TestScanTokens(t *testing.T) {
-	testFileDir := "."
-	testFileName := "tokens.txt"
-
-	var file input.File
-	file.Init(testFileDir, testFileName)
-
-	var scanner ExpressiveScanner
-	scanner.Init(&file)
-
-	var expected = []token.Token{
-		token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "12.1"},
-		token.Token{TokenType: token.IDENTIFIER, Raw: "abc"},
-		token.Token{TokenType: token.LET, Raw: "let"},
-		token.Token{TokenType: token.ADD, Raw: "+"},
-		token.Token{TokenType: token.SUB, Raw: "-"},
-		token.Token{TokenType: token.MUL, Raw: "*"},
-		token.Token{TokenType: token.DIV, Raw: "/"},
-		token.Token{TokenType: token.LAND, Raw: "&&"},
-		token.Token{TokenType: token.LOR, Raw: "||"},
-		token.Token{TokenType: token.LNOT, Raw: "!"},
+func TestScanOperator(t *testing.T) {
+	for operatorRaw, operatorType := range token.GetOperatorsMapping() {
+		testScanningOneToken(operatorRaw, operatorRaw, operatorType, t)
 	}
+}
 
-	for _, expectedToken := range expected {
-		tok := scanner.Next()
-
-		compareTokens(*tok, expectedToken, t)
+func TestScanKeyword(t *testing.T) {
+	for keywordRaw, keywordType := range token.GetKeywordsMapping() {
+		testScanningOneToken(keywordRaw, keywordRaw, keywordType, t)
 	}
-
 }
 
 func TestScanInteger(t *testing.T) {
-	var input input.StringInput
-
-	input.Init("123 456 0")
-
-	var scanner ExpressiveScanner
-	scanner.Init(&input)
-
-	var expected = []token.Token{
-		token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		token.Token{TokenType: token.INT_LITERAL, Raw: "456"},
-		token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		token.Token{TokenType: token.EOF, Raw: ""},
+	actuals := []string{
+		"123",
+		"456",
+		"0",
 	}
 
-	for _, expectedToken := range expected {
-		tok := scanner.Next()
-
-		compareTokens(*tok, expectedToken, t)
+	for _, actual := range actuals {
+		testScanningOneToken(actual, actual, token.INT_LITERAL, t)
 	}
 }
 
 func TestScanFloat(t *testing.T) {
-	var input input.StringInput
-
-	input.Init("123.123 123. 0.3 000.2 0123.5")
-
-	var scanner ExpressiveScanner
-	scanner.Init(&input)
-
-	var expected = []token.Token{
-		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.123"},
-		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123."},
-		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "0.3"},
-		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "000.2"},
-		token.Token{TokenType: token.FLOAT_LITERAL, Raw: "0123.5"},
-		token.Token{TokenType: token.EOF, Raw: ""},
+	actuals := []string{
+		"123.123",
+		"123.",
+		"0.3",
+		"000.2",
+		"0123.5",
 	}
 
-	for _, expectedToken := range expected {
-		tok := scanner.Next()
-
-		compareTokens(*tok, expectedToken, t)
+	for _, actual := range actuals {
+		testScanningOneToken(actual, actual, token.FLOAT_LITERAL, t)
 	}
 }
 
 func TestScanStringLiteralSuccess(t *testing.T) {
+	actuals := []string{
+		"\"abc\"",
+		"\"\"",
+		"\"  \"",
+		"\"\\\"\"",
+		"\"\\'\"",
+		"\"\\n\"",
+		"\"\\t\"",
+		"\"\\0\"",
+		"\"\\\\\"",
+	}
+
+	for _, actual := range actuals {
+		testScanningOneToken(actual, actual, token.STRING_LITERAL, t)
+	}
+}
+
+func TestScanCharacterLiteralSuccess(t *testing.T) {
+	actuals := []string{
+		"'a'",
+		"'1'",
+		"'\\0'",
+		"'\\''",
+		"'\\\"'",
+		"'\\t'",
+		"'\\n'",
+		"'\\\\'",
+	}
+
+	for _, actual := range actuals {
+		testScanningOneToken(actual, actual, token.CHAR_LITERAL, t)
+	}
+}
+
+func testScanningOneToken(actual string, expected string, tokenType token.Type, t *testing.T) {
 	var input input.StringInput
 
-	input.Init("\"abc\" \"\" \"  \" \"\\\"\" \"\\'\" \"\\n\" \"\\t\" \"\\0\" \"\\\\\"  ")
+	input.Init(actual)
 
 	var scanner ExpressiveScanner
 	scanner.Init(&input)
 
-	var expected = []token.Token{
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"abc\""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"  \""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\"\""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\'\""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\n\""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\t\""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\0\""},
-		token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\\\""},
-	}
+	tok := scanner.Next()
 
-	for _, expectedToken := range expected {
-		tok := scanner.Next()
+	expectedToken := token.Token{TokenType: tokenType, Raw: expected}
 
-		compareTokens(*tok, expectedToken, t)
-	}
+	compareTokens(*tok, expectedToken, t)
 }
 
 func compareTokens(actual token.Token, expected token.Token, t *testing.T) {
