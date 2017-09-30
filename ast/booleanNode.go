@@ -41,7 +41,7 @@ func (node *BooleanNode) MarshalJSON() ([]byte, error) {
 		Val      bool
 		Typing   typing.Typing
 	}{
-		NodeType: "integer literal",
+		NodeType: "boolean literal",
 		Token:    node.BaseNode.Tok,
 		Val:      node.val,
 		Typing:   node.Typing,

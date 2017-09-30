@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"testing"
+
 	"github.com/carlcui/expressive/ast"
 	"github.com/carlcui/expressive/scanner"
 	"github.com/carlcui/expressive/token"
@@ -23,4 +25,9 @@ func parseWithMockTokens(toks []*token.Token) ast.Node {
 	parser := initParserWithMockTokens(toks)
 
 	return parser.Parse()
+}
+
+func reportTestError(message string, node ast.Node, t *testing.T) {
+	t.Error(message)
+	t.Error(string(ast.SerializeAst(node)))
 }

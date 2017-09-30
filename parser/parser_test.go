@@ -93,7 +93,24 @@ func TestParseBooleanLiteral(t *testing.T) {
 		node := parser.parseBool()
 
 		if _, ok := node.(*ast.BooleanNode); !ok {
-			t.Errorf("Error parsing boolean literal node: %v", node)
+			reportTestError("Error parsing boolean literal node", node, t)
+		}
+	}
+}
+
+func TestParseBooleanLiteralFailed(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.ADD},
+		&token.Token{TokenType: token.IDENTIFIER},
+	}
+
+	for _, tok := range toks {
+		parser := initParserWithMockTokens([]*token.Token{tok})
+
+		node := parser.parseBool()
+
+		if _, ok := node.(*ast.BooleanNode); ok {
+			reportTestError("Parsing boolean literal should fail", node, t)
 		}
 	}
 }
