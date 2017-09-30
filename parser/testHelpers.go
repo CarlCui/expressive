@@ -22,7 +22,12 @@ func initParserWithMockTokens(toks []*token.Token) *Parser {
 }
 
 func parseWithMockTokens(toks []*token.Token) ast.Node {
-	parser := initParserWithMockTokens(toks)
+	var scanner scanner.MockScanner
+
+	scanner.Init(toks)
+
+	var parser Parser
+	parser.Init(&scanner)
 
 	return parser.Parse()
 }
