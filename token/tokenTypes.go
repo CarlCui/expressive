@@ -136,5 +136,12 @@ func init() {
 	for i := operatorStart + 1; i < operatorEnd; i++ {
 		operators[tokens[i]] = i
 	}
+}
 
+func GetKeywordsMapping() map[string]Type {
+	return keywords
+}
+
+func GetOperatorsMapping() map[string]Type {
+	return operators
 }
