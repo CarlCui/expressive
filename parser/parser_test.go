@@ -80,3 +80,37 @@ func TestParseValidVariableDeclarationStmt_LetStmtWithDeclaredType(t *testing.T)
 		t.Error()
 	}
 }
+
+func TestParseBooleanLiteral(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.TRUE},
+		&token.Token{TokenType: token.FALSE},
+	}
+
+	for _, tok := range toks {
+		parser := initParserWithMockTokens([]*token.Token{tok})
+
+		node := parser.parseBool()
+
+		if _, ok := node.(*ast.BooleanNode); !ok {
+			reportTestError("Error parsing boolean literal node", node, t)
+		}
+	}
+}
+
+func TestParseBooleanLiteralFailed(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.ADD},
+		&token.Token{TokenType: token.IDENTIFIER},
+	}
+
+	for _, tok := range toks {
+		parser := initParserWithMockTokens([]*token.Token{tok})
+
+		node := parser.parseBool()
+
+		if _, ok := node.(*ast.BooleanNode); ok {
+			reportTestError("Parsing boolean literal should fail", node, t)
+		}
+	}
+}
