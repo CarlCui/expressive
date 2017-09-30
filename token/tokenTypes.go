@@ -63,6 +63,9 @@ const (
 	BOOL_KEYWORD
 	STRING_KEYWORD
 
+	TRUE
+	FALSE
+
 	PRINT
 	keywordEnd
 )
@@ -118,6 +121,9 @@ var tokens = [...]string{
 	CHAR_KEYWORD:   "char",
 	BOOL_KEYWORD:   "bool",
 	STRING_KEYWORD: "string",
+
+	TRUE:  "true",
+	FALSE: "false",
 
 	PRINT: "print",
 }
