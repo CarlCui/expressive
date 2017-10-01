@@ -1,0 +1,2 @@
+let foo: bool = false;
+foo = 5;

@@ -241,8 +241,9 @@ func (visitor *SemanticAnalysisVisitor) VisitIdentifierNode(node *ast.Identifier
 	node.SetBinding(binding)
 }
 
+// VisitBooleanNode do something
 func (visitor *SemanticAnalysisVisitor) VisitBooleanNode(node *ast.BooleanNode) {
-
+	node.SetTyping(typing.BOOL)
 }
 
 // VisitTypeLiteralNode do something

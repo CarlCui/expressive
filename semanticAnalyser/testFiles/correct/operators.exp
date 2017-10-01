@@ -8,6 +8,9 @@ let f = 5.5 + 6.0;
 
 let g: bool;
 
+g = true;
+g = false;
+
 g = a > b;
 g = a >= b;
 g = a < b;
