@@ -8,3 +8,6 @@ const foo1: int;
 
 let bar = 5;
 let bar1: int = 6;
+
+let foo6 = true;
+let foo7: bool = false;
