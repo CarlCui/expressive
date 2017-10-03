@@ -62,6 +62,9 @@ func (scanner *ExpressiveScanner) Next() *token.Token {
 }
 
 func (scanner *ExpressiveScanner) tryParseComment(cur rune) *token.Token {
+	if scanner.input.IsEOF() { // cannot be a comment
+		return nil
+	}
 
 	if isSlash(cur) && isSlash(scanner.input.Peek()) { // `//`
 
