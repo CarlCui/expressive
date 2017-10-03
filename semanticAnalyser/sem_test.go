@@ -20,7 +20,7 @@ func parseFile(dirName string, fileName string) ast.Node {
 	s.Init(&fileInput)
 
 	var p parser.Parser
-	p.Init(&s)
+	p.Init(&s, newLogger())
 
 	return p.Parse()
 }
@@ -35,7 +35,7 @@ func parseAndAnalyze(dirName string, fileName string, handleResult func(logger l
 
 	logger := newLogger()
 
-	Analyze(root, logger)
+	Analyze(root, logger) // pass a new logger, assuming parsing is correct
 
 	handleResult(logger)
 }

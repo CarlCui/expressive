@@ -1,5 +1,7 @@
 package token
 
+import "strconv"
+
 // Type is the type of a token
 type Type int
 
@@ -126,6 +128,14 @@ var tokens = [...]string{
 	FALSE: "false",
 
 	PRINT: "print",
+}
+
+func (tokenType Type) String() string {
+	if tokenType >= 0 && int(tokenType) < len(tokens) {
+		return tokens[tokenType]
+	}
+
+	return "token(" + strconv.Itoa(int(tokenType)) + ")"
 }
 
 var keywords map[string]Type

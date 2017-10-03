@@ -1,6 +1,5 @@
 package token
 
-import "strconv"
 import "strings"
 
 import "github.com/carlcui/expressive/locator"
@@ -13,11 +12,15 @@ type Token struct {
 }
 
 func (tok *Token) String() string {
-	if tok.TokenType >= 0 && int(tok.TokenType) < len(tokens) {
-		return tokens[tok.TokenType] + ": " + tok.Raw
+	return tok.TokenType.String() + ": " + tok.Raw
+}
+
+func (tok *Token) GetLocation() string {
+	if tok.Locator == nil {
+		return "unknown location"
 	}
 
-	return "token(" + strconv.Itoa(int(tok.TokenType)) + ")"
+	return tok.Locator.Locate()
 }
 
 // IllegalToken is a factory for generating a default illegal token

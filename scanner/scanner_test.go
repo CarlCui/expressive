@@ -81,10 +81,40 @@ func TestScanCharacterLiteralSuccess(t *testing.T) {
 	}
 }
 
-func testScanningOneToken(actual string, expected string, tokenType token.Type, t *testing.T) {
+func TestScanSingleComment(t *testing.T) {
+	stringInputs := []string{
+		"// abc",
+		"   // deo //",
+		"// ddd*/",
+		"// feeffe \n",
+		"/* abc */",
+		"/* // */",
+		"/* *** */",
+		"/* /n /n // */",
+		"/* /n */ /n",
+	}
+
+	expected := []string{
+		"// abc",
+		"// deo //",
+		"// ddd*/",
+		"// feeffe ",
+		"/* abc */",
+		"/* // */",
+		"/* *** */",
+		"/* /n /n // */",
+		"/* /n */",
+	}
+
+	for i, input := range stringInputs {
+		testScanningOneToken(input, expected[i], token.COMMENT, t)
+	}
+}
+
+func testScanningOneToken(stringInput string, expected string, tokenType token.Type, t *testing.T) {
 	var input input.StringInput
 
-	input.Init(actual)
+	input.Init(stringInput)
 
 	var scanner ExpressiveScanner
 	scanner.Init(&input)
@@ -94,6 +124,21 @@ func testScanningOneToken(actual string, expected string, tokenType token.Type, 
 	expectedToken := token.Token{TokenType: tokenType, Raw: expected}
 
 	compareTokens(*tok, expectedToken, t)
+}
+
+func testScanningTokens(stringInput string, expectedTokens []token.Token, t *testing.T) {
+	var input input.StringInput
+
+	input.Init(stringInput)
+
+	var scanner ExpressiveScanner
+	scanner.Init(&input)
+
+	for _, expected := range expectedTokens {
+		tok := scanner.Next()
+
+		compareTokens(*tok, expected, t)
+	}
 }
 
 func compareTokens(actual token.Token, expected token.Token, t *testing.T) {

@@ -15,10 +15,11 @@ func (scanner *MockScanner) Init(toks []*token.Token) {
 
 func (scanner *MockScanner) Next() *token.Token {
 	if scanner.pos >= len(scanner.toks) {
-		return token.EOFToken(locator.CreateIndexLocation(scanner.pos))
+		return token.IllegalToken("", locator.CreateIndexLocation(scanner.pos))
 	}
 
 	cur := scanner.toks[scanner.pos]
+	cur.Locator = &locator.IndexLocation{scanner.pos}
 
 	scanner.pos++
 
