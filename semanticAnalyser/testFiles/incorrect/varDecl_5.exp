@@ -1,2 +1,3 @@
+// declared as bool, but assigned int
 let foo: bool = false;
 foo = 5;

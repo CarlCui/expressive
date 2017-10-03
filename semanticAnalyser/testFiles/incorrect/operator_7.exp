@@ -1,1 +1,2 @@
+// not can only be applied to bool
 let g = !5;

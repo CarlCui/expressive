@@ -1,1 +1,2 @@
+// inferred and declared types are not the same
 let foo: char = 5;
