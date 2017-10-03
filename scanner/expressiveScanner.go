@@ -32,6 +32,12 @@ func (scanner *ExpressiveScanner) Next() *token.Token {
 
 		scanner.cur = string(ch)
 
+		commentTok := scanner.tryParseComment(ch)
+
+		if commentTok != nil {
+			return commentTok
+		}
+
 		switch {
 		case isDigit(ch):
 			tok = scanner.parseNumber()
@@ -53,6 +59,45 @@ func (scanner *ExpressiveScanner) Next() *token.Token {
 	}
 
 	return tok
+}
+
+func (scanner *ExpressiveScanner) tryParseComment(cur rune) *token.Token {
+	if scanner.input.IsEOF() { // cannot be a comment
+		return nil
+	}
+
+	if isSlash(cur) && isSlash(scanner.input.Peek()) { // `//`
+
+		scanner.cur += string(scanner.input.NextChar())
+
+		for !scanner.input.IsEOF() {
+			if isReturn(scanner.input.Peek()) {
+				return &token.Token{TokenType: token.COMMENT, Raw: scanner.cur, Locator: scanner.curLoc}
+			}
+
+			ch := scanner.input.NextChar()
+
+			scanner.cur += string(ch)
+		}
+
+		return &token.Token{TokenType: token.COMMENT, Raw: scanner.cur, Locator: scanner.curLoc}
+
+	} else if isSlash(cur) && isAsterisk(scanner.input.Peek()) { // `/*`
+
+		for !scanner.input.IsEOF() {
+			ch := scanner.input.NextChar()
+
+			scanner.cur += string(ch)
+
+			// */
+			if isAsterisk(ch) && isSlash(scanner.input.Peek()) {
+				scanner.cur += string(scanner.input.NextChar())
+				return &token.Token{TokenType: token.COMMENT, Raw: scanner.cur, Locator: scanner.curLoc}
+			}
+		}
+	}
+
+	return nil
 }
 
 /*
@@ -218,6 +263,14 @@ func isSingleQuote(ch rune) bool {
 
 func isBackSlash(ch rune) bool {
 	return ch == '\\'
+}
+
+func isSlash(ch rune) bool {
+	return ch == '/'
+}
+
+func isAsterisk(ch rune) bool {
+	return ch == '*'
 }
 
 // implemented partially

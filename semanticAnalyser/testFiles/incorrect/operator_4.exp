@@ -1,1 +1,2 @@
+// mod cannot take float as second parameter
 let a = 6.5 % 6.5;

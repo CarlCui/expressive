@@ -1,3 +1,4 @@
+// assign int to float
 const foo = 5;
 
 let bar: float = foo;

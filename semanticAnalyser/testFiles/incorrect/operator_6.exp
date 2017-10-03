@@ -1,1 +1,2 @@
+// types from second and third exprs should be consistent
 let a = 5 > 6 ? 5 : 5.5;

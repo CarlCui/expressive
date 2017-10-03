@@ -1,2 +1,3 @@
+// const cannot be re-assigned
 const foo = 5;
 foo = 6;

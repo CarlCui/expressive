@@ -12,9 +12,10 @@ func TestParseValidVariableDelarationStmt_LetStmt(t *testing.T) {
 		&token.Token{TokenType: token.LET, Raw: "let"},
 		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
 		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
 	}
 
-	root := parseWithMockTokens(toks)
+	root := parseWithMockTokens(toks, shouldHaveNoError(t))
 
 	stmtNode := root.(*ast.ProgramNode).Chilren[0]
 
@@ -46,9 +47,10 @@ func TestParseValidVariableDeclarationStmt_LetStmtWithDeclaredType(t *testing.T)
 		&token.Token{TokenType: token.COLON},
 		&token.Token{TokenType: token.INT_KEYWORD},
 		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
 	}
 
-	root := parseWithMockTokens(toks)
+	root := parseWithMockTokens(toks, shouldHaveNoError(t))
 
 	stmtNode := root.(*ast.ProgramNode).Chilren[0]
 
@@ -113,4 +115,73 @@ func TestParseBooleanLiteralFailed(t *testing.T) {
 			reportTestError("Parsing boolean literal should fail", node, t)
 		}
 	}
+}
+
+func TestSkipCommentTokenWhenParsing_InFront(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.COMMENT},
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.INT_KEYWORD},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestSkipCommentTokenWhenParsing_InBetween(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
+		&token.Token{TokenType: token.COMMENT},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.INT_KEYWORD},
+		&token.Token{TokenType: token.COMMENT},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestSkipCommentTokenWhenParsing_After(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.INT_KEYWORD},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.COMMENT},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestSkipCommentTokenWhenParsing_AfterEOF(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.INT_KEYWORD},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+		&token.Token{TokenType: token.COMMENT},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestNoEOFShouldFail(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "bar"},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.INT_KEYWORD},
+		&token.Token{TokenType: token.SEMI},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
 }

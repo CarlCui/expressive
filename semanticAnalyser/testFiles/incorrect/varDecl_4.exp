@@ -1,2 +1,3 @@
+// re-declaration
 let foo: int;
 let foo: int = 6;

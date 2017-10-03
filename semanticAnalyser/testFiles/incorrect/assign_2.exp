@@ -1,2 +1,3 @@
+// declared as int, but assigned with float
 let foo: int;
 foo = 5.5;

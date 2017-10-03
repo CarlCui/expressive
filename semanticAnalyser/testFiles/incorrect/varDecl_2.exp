@@ -1,1 +1,2 @@
+// inferred type and declared type are not the same
 let foo: int = 6.7;
