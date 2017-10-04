@@ -6,3 +6,9 @@ let foo1 = 5;
 foo1 = 7;
 
 foo1 = foo;
+
+let str1 = "abc";
+str1 = "def";
+
+let char1 = 'a';
+char1 = 'b';

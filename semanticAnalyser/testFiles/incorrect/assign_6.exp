@@ -1,0 +1,4 @@
+// assign string to float
+let foo = "abc";
+
+let bar: float = foo;

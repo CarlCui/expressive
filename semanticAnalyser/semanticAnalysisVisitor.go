@@ -223,6 +223,16 @@ func (visitor *SemanticAnalysisVisitor) VisitFloatNode(node *ast.FloatNode) {
 	node.SetTyping(typing.FLOAT)
 }
 
+// VisitCharacterNode do something
+func (visitor *SemanticAnalysisVisitor) VisitCharacterNode(node *ast.CharacterNode) {
+	node.SetTyping(typing.CHAR)
+}
+
+// VisitStringNode do something
+func (visitor *SemanticAnalysisVisitor) VisitStringNode(node *ast.StringNode) {
+	node.SetTyping(typing.STRING)
+}
+
 // VisitIdentifierNode do something
 func (visitor *SemanticAnalysisVisitor) VisitIdentifierNode(node *ast.IdentifierNode) {
 	if node.IsBeingDeclared() {
