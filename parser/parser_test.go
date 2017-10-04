@@ -83,6 +83,56 @@ func TestParseValidVariableDeclarationStmt_LetStmtWithDeclaredType(t *testing.T)
 	}
 }
 
+func TestParseIntegerLiteral(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
+	}
+
+	expectedVals := []int{
+		123,
+		0,
+		// -1, // not supported yet
+	}
+
+	for index, tok := range toks {
+		parser := initParserWithMockTokens([]*token.Token{tok})
+
+		node := parser.parserInt()
+
+		intNode, ok := node.(*ast.IntegerNode)
+
+		if !ok || intNode.Val != expectedVals[index] {
+			reportTestError("Error parsing integer literal node", node, t)
+		}
+	}
+}
+
+func TestParseFloatLiteral(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.123"},
+		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.0"},
+	}
+
+	expectedVals := []float32{
+		123.123,
+		123,
+		// -1, // not supported yet
+	}
+
+	for index, tok := range toks {
+		parser := initParserWithMockTokens([]*token.Token{tok})
+
+		node := parser.parseFloat()
+
+		floatNode, ok := node.(*ast.FloatNode)
+
+		if !ok || floatNode.Val != expectedVals[index] {
+			reportTestError("Error parsing float literal node", node, t)
+		}
+	}
+}
+
 func TestParseBooleanLiteral(t *testing.T) {
 	toks := []*token.Token{
 		&token.Token{TokenType: token.TRUE},

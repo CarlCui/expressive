@@ -2,6 +2,7 @@ package ast
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
@@ -27,7 +28,13 @@ func (node *IntegerNode) VisitChildren(visitor Visitor) {
 func (node *IntegerNode) Init(tok *token.Token) {
 	node.BaseNode = CreateBaseNode(tok, nil)
 
-	// TODO: parse val
+	val, err := strconv.Atoi(tok.Raw)
+
+	if err != nil {
+		panic(tok.GetLocation() + ": error parsing int")
+	}
+
+	node.Val = val
 }
 
 func (node *IntegerNode) MarshalJSON() ([]byte, error) {
