@@ -2,6 +2,7 @@ package ast
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
@@ -26,7 +27,13 @@ func (node *FloatNode) VisitChildren(visitor Visitor) {
 func (node *FloatNode) Init(tok *token.Token) {
 	node.BaseNode = CreateBaseNode(tok, nil)
 
-	// TODO: parse val
+	val, err := strconv.ParseFloat(tok.Raw, 32)
+
+	if err != nil {
+		panic(tok.GetLocation() + ": error parsing float")
+	}
+
+	node.Val = float32(val)
 }
 
 func (node *FloatNode) MarshalJSON() ([]byte, error) {
