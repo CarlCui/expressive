@@ -11,3 +11,9 @@ let bar1: int = 6;
 
 let foo6 = true;
 let foo7: bool = false;
+
+let string1 = "abc";
+let string2: string = "def\n";
+
+let char1 = 'a';
+let char2: char = '\n';

@@ -1,0 +1,3 @@
+// string comparison with greater
+let str1 = "abc";
+let g = str1 > "aaa";

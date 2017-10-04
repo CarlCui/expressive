@@ -24,3 +24,11 @@ let h = g ? a : b;
 h = a > b ? a : b;
 
 g = !g;
+
+let str1 = "avc";
+let str2 = "def";
+
+g = str1 == str2;
+g = str1 != str2;
+g = str1 === str2;
+g = str1 !== str2;
