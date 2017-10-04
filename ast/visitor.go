@@ -32,6 +32,8 @@ type Visitor interface {
 	VisitIntegerNode(node *IntegerNode)
 	VisitFloatNode(node *FloatNode)
 	VisitBooleanNode(node *BooleanNode)
+	VisitCharacterNode(node *CharacterNode)
+	VisitStringNode(node *StringNode)
 	VisitIdentifierNode(node *IdentifierNode)
 
 	VisitTypeLiteralNode(node *TypeLiteralNode)

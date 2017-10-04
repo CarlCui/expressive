@@ -10,7 +10,7 @@ import (
 // IntegerNode represents an integer constant node.
 type IntegerNode struct {
 	*BaseNode
-	val int
+	Val int
 }
 
 // Accept is part of visitor pattern.
@@ -39,7 +39,7 @@ func (node *IntegerNode) MarshalJSON() ([]byte, error) {
 	}{
 		NodeType: "integer literal",
 		Token:    node.BaseNode.Tok,
-		Val:      node.val,
+		Val:      node.Val,
 		Typing:   node.Typing,
 	})
 }

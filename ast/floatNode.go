@@ -10,7 +10,7 @@ import (
 // FloatNode represents a float constant node.
 type FloatNode struct {
 	*BaseNode
-	val float32
+	Val float32
 }
 
 // Accept is part of visitor pattern.
@@ -38,7 +38,7 @@ func (node *FloatNode) MarshalJSON() ([]byte, error) {
 	}{
 		NodeType: "float literal",
 		Token:    node.BaseNode.Tok,
-		Val:      node.val,
+		Val:      node.Val,
 		Typing:   node.Typing,
 	})
 }

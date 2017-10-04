@@ -10,7 +10,7 @@ import (
 // BooleanNode represents an integer constant node.
 type BooleanNode struct {
 	*BaseNode
-	val bool
+	Val bool
 }
 
 // Accept is part of visitor pattern.
@@ -28,9 +28,9 @@ func (node *BooleanNode) Init(tok *token.Token) {
 	node.BaseNode = CreateBaseNode(tok, nil)
 
 	if tok.TokenType == token.TRUE {
-		node.val = true
+		node.Val = true
 	} else {
-		node.val = false
+		node.Val = false
 	}
 }
 
@@ -43,7 +43,7 @@ func (node *BooleanNode) MarshalJSON() ([]byte, error) {
 	}{
 		NodeType: "boolean literal",
 		Token:    node.BaseNode.Tok,
-		Val:      node.val,
+		Val:      node.Val,
 		Typing:   node.Typing,
 	})
 }

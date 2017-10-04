@@ -117,6 +117,80 @@ func TestParseBooleanLiteralFailed(t *testing.T) {
 	}
 }
 
+func TestParseCharacterLiteral(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'a'"},
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'1'"},
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\0'"},
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\''"},
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\\"'"},
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\t'"},
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\n'"},
+		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\\\'"},
+	}
+
+	expectedVals := []rune{
+		'a',
+		'1',
+		'\x00',
+		'\'',
+		'"',
+		'\t',
+		'\n',
+		'\\',
+	}
+
+	for index, tok := range toks {
+		parser := initParserWithMockTokens([]*token.Token{tok})
+
+		node := parser.parseCharacter()
+
+		charNode, ok := node.(*ast.CharacterNode)
+
+		if !ok || charNode.Val != expectedVals[index] {
+			reportTestError("Error parsing character literal node", node, t)
+		}
+	}
+}
+
+func TestParseStringLiteral(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"abc\""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"  \""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\"\""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\'\""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\n\""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\t\""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\0\""},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\\\""},
+	}
+
+	expectedVals := []string{
+		"abc",
+		"",
+		"  ",
+		"\\\"",
+		"\\'",
+		"\\n",
+		"\\t",
+		"\\0",
+		"\\\\",
+	}
+
+	for index, tok := range toks {
+		parser := initParserWithMockTokens([]*token.Token{tok})
+
+		node := parser.parseString()
+
+		stringNode, ok := node.(*ast.StringNode)
+
+		if !ok || stringNode.Val != expectedVals[index] {
+			reportTestError("Error parsing string literal node", node, t)
+		}
+	}
+}
+
 func TestSkipCommentTokenWhenParsing_InFront(t *testing.T) {
 	toks := []*token.Token{
 		&token.Token{TokenType: token.COMMENT},

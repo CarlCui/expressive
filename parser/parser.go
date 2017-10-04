@@ -444,6 +444,10 @@ func (parser *Parser) parseLiteral() ast.Node {
 		return parser.parseIdentifier()
 	} else if parser.isBooleanLiteralStart(cur) {
 		return parser.parseBool()
+	} else if parser.isStringLiteralStart(cur) {
+		return parser.parseString()
+	} else if parser.isCharacterLiteralStart(cur) {
+		return parser.parseCharacter()
 	}
 
 	return parser.syntaxErrorNode("literal")
@@ -468,6 +472,32 @@ func (parser *Parser) parseFloat() ast.Node {
 	}
 
 	var node ast.FloatNode
+	node.Init(parser.cur)
+
+	parser.read()
+
+	return &node
+}
+
+func (parser *Parser) parseString() ast.Node {
+	if parser.cur.TokenType != token.STRING_LITERAL {
+		return parser.syntaxErrorNode("string")
+	}
+
+	var node ast.StringNode
+	node.Init(parser.cur)
+
+	parser.read()
+
+	return &node
+}
+
+func (parser *Parser) parseCharacter() ast.Node {
+	if parser.cur.TokenType != token.CHAR_LITERAL {
+		return parser.syntaxErrorNode("character")
+	}
+
+	var node ast.CharacterNode
 	node.Init(parser.cur)
 
 	parser.read()
@@ -514,6 +544,8 @@ func (parser *Parser) syntaxErrorNode(expected string) ast.Node {
 func (parser *Parser) isLiteralStart(tok *token.Token) bool {
 	return parser.isIntegerLiteralStart(tok) ||
 		parser.isFLoatLiteralStart(tok) ||
+		parser.isStringLiteralStart(tok) ||
+		parser.isCharacterLiteralStart(tok) ||
 		parser.isIdentifierStart(tok) ||
 		parser.isBooleanLiteralStart(tok)
 }
@@ -524,6 +556,14 @@ func (parser *Parser) isIntegerLiteralStart(tok *token.Token) bool {
 
 func (parser *Parser) isFLoatLiteralStart(tok *token.Token) bool {
 	return parser.cur.TokenType == token.FLOAT_LITERAL
+}
+
+func (parser *Parser) isStringLiteralStart(tok *token.Token) bool {
+	return parser.cur.TokenType == token.STRING_LITERAL
+}
+
+func (parser *Parser) isCharacterLiteralStart(tok *token.Token) bool {
+	return parser.cur.TokenType == token.CHAR_LITERAL
 }
 
 func (parser *Parser) isIdentifierStart(tok *token.Token) bool {
