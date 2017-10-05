@@ -25,7 +25,6 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v ./...
-      - run: go test -v ./...
 
       - run:
           name: Run unit tests
