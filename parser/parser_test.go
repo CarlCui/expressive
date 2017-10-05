@@ -87,12 +87,15 @@ func TestParseIntegerLiteral(t *testing.T) {
 	toks := []*token.Token{
 		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
 		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "-1"},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "-0"},
 	}
 
 	expectedVals := []int{
 		123,
 		0,
-		// -1, // not supported yet
+		-1,
+		0,
 	}
 
 	for index, tok := range toks {
@@ -112,12 +115,19 @@ func TestParseFloatLiteral(t *testing.T) {
 	toks := []*token.Token{
 		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.123"},
 		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.0"},
+		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-1.0"},
+		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-123.5"},
+		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-0.6"},
+		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-0.0"},
 	}
 
 	expectedVals := []float32{
 		123.123,
 		123,
-		// -1, // not supported yet
+		-1,
+		-123.5,
+		-0.6,
+		0,
 	}
 
 	for index, tok := range toks {

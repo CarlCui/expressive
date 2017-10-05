@@ -25,6 +25,8 @@ func TestScanInteger(t *testing.T) {
 		"123",
 		"456",
 		"0",
+		"-5",
+		"-0",
 	}
 
 	for _, actual := range actuals {
@@ -39,6 +41,8 @@ func TestScanFloat(t *testing.T) {
 		"0.3",
 		"000.2",
 		"0123.5",
+		"-5.5",
+		"-0.123",
 	}
 
 	for _, actual := range actuals {
