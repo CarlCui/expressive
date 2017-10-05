@@ -39,8 +39,8 @@ func (scanner *ExpressiveScanner) Next() *token.Token {
 		}
 
 		switch {
-		case isDigit(ch):
-			tok = scanner.parseNumber()
+		case isDigit(ch) || isMinus(ch):
+			tok = scanner.parseNumber(ch)
 			break
 		case isIdentifierStart(ch):
 			tok = scanner.parseIdentifier()
@@ -103,11 +103,18 @@ func (scanner *ExpressiveScanner) tryParseComment(cur rune) *token.Token {
 /*
 	a number is either:
 
-	1. an integer: [0-9]+
-	2. a float: [0-9]+.[0-9]+
+	1. an integer: -?[0-9]+
+	2. a float: -?[0-9]+.[0-9]+
 
 */
-func (scanner *ExpressiveScanner) parseNumber() *token.Token {
+func (scanner *ExpressiveScanner) parseNumber(first rune) *token.Token {
+
+	if isMinus(first) {
+		if scanner.input.IsEOF() || !isDigit(scanner.input.Peek()) { // cannot be a negative number
+			return scanner.parseOperator()
+		}
+	}
+
 	// parse int
 	scanner.appendConsequentDigits()
 
@@ -251,6 +258,10 @@ func isWhitespace(ch rune) bool {
 
 func isDot(ch rune) bool {
 	return ch == '.'
+}
+
+func isMinus(ch rune) bool {
+	return ch == '-'
 }
 
 func isDoubleQuote(ch rune) bool {
