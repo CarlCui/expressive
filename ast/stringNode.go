@@ -37,16 +37,24 @@ func (node *StringNode) Init(tok *token.Token) {
 
 	node.Val += "\\00" // append terminating character
 
-	node.Val = strings.Replace(node.Val, "\\n", "\\0A", -1)
-
 }
 
-func (node *StringNode) StringLength() int {
-	totalLength := len(node.Val)
+func (node *StringNode) EscapeVal() string {
+	escapedString := node.Val
+
+	escapedString = strings.Replace(escapedString, "\\n", "\\0A", -1)
+
+	return escapedString
+}
+
+func (node *StringNode) EscapedStringLength() int {
+	escapedString := node.EscapeVal()
+
+	totalLength := len(escapedString)
 
 	matchEscapedCharacters := regexp.MustCompile("\\\\..")
 
-	escapedCharacters := matchEscapedCharacters.FindAllString(node.Val, -1)
+	escapedCharacters := matchEscapedCharacters.FindAllString(escapedString, -1)
 
 	return totalLength - len(escapedCharacters)*2
 }

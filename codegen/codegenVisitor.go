@@ -309,8 +309,8 @@ func (visitor *CodegenVisitor) VisitCharacterNode(node *ast.CharacterNode) {
 func (visitor *CodegenVisitor) VisitStringNode(node *ast.StringNode) {
 	fragment := visitor.newAddressCode(node)
 
-	stringValue := node.Val
-	stringLength := node.StringLength()
+	stringValue := node.EscapeVal()
+	stringLength := node.EscapedStringLength()
 
 	stringGlobalIdentifier := visitor.constants.AddOperation("private constant [%v x i8] c\"%v\", align 1", stringLength, stringValue)
 
