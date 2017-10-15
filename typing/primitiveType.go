@@ -2,6 +2,7 @@ package typing
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -29,6 +30,28 @@ var literals = [...]string{
 	NO_TYPE:    "",
 }
 
+var irTypes = [...]string{
+	INT:        "i32",
+	FLOAT:      "float",
+	CHAR:       "i8*",
+	STRING:     "i8*",
+	BOOL:       "i1",
+	VOID:       "void",
+	ERROR_TYPE: "",
+	NO_TYPE:    "",
+}
+
+var sizes = [...]int{
+	INT:        4,
+	FLOAT:      4,
+	CHAR:       4,
+	STRING:     4,
+	BOOL:       1,
+	VOID:       0,
+	ERROR_TYPE: 0,
+	NO_TYPE:    0,
+}
+
 func (primitiveType PrimitiveType) Equals(typing Typing) bool {
 	primitiveType2, ok := typing.(PrimitiveType)
 
@@ -37,6 +60,22 @@ func (primitiveType PrimitiveType) Equals(typing Typing) bool {
 	}
 
 	return primitiveType2 == primitiveType
+}
+
+func (primitiveType PrimitiveType) Size() int {
+	if primitiveType >= 0 && int(primitiveType) < len(literals) {
+		return sizes[primitiveType]
+	}
+
+	panic(fmt.Sprintf("Illegal primitive type: %v \n", primitiveType))
+}
+
+func (primitiveType PrimitiveType) IrType() string {
+	if primitiveType >= 0 && int(primitiveType) < len(literals) {
+		return irTypes[primitiveType]
+	}
+
+	panic(fmt.Sprintf("Illegal primitive type: %v \n", primitiveType))
 }
 
 func (primitiveType PrimitiveType) String() string {

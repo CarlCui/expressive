@@ -2,6 +2,8 @@ package ast
 
 import (
 	"encoding/json"
+	"regexp"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/carlcui/expressive/token"
@@ -32,6 +34,28 @@ func (node *StringNode) Init(tok *token.Token) {
 	_, lastSize := utf8.DecodeLastRuneInString(tok.Raw)
 
 	node.Val = tok.Raw[start : len(tok.Raw)-lastSize]
+}
+
+func (node *StringNode) EscapeVal() string {
+	escapedString := node.Val
+
+	escapedString += "\\00" // append terminating character
+
+	escapedString = strings.Replace(escapedString, "\\n", "\\0A", -1)
+
+	return escapedString
+}
+
+func (node *StringNode) EscapedStringLength() int {
+	escapedString := node.EscapeVal()
+
+	totalLength := len(escapedString)
+
+	matchEscapedCharacters := regexp.MustCompile("\\\\..")
+
+	escapedCharacters := matchEscapedCharacters.FindAllString(escapedString, -1)
+
+	return totalLength - len(escapedCharacters)*2
 }
 
 func (node *StringNode) MarshalJSON() ([]byte, error) {
