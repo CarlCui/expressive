@@ -4,4 +4,6 @@ package typing
 type Typing interface {
 	Equals(typing Typing) bool
 	String() string
+	Size() int
+	IrType() string
 }
