@@ -34,13 +34,12 @@ func (node *StringNode) Init(tok *token.Token) {
 	_, lastSize := utf8.DecodeLastRuneInString(tok.Raw)
 
 	node.Val = tok.Raw[start : len(tok.Raw)-lastSize]
-
-	node.Val += "\\00" // append terminating character
-
 }
 
 func (node *StringNode) EscapeVal() string {
 	escapedString := node.Val
+
+	escapedString += "\\00" // append terminating character
 
 	escapedString = strings.Replace(escapedString, "\\n", "\\0A", -1)
 
