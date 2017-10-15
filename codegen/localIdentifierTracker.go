@@ -10,18 +10,18 @@ type LocalIdentifierTracker struct {
 	index int
 }
 
-func (localVariableIndex *LocalIdentifierTracker) Reset() {
-	localVariableIndex.index = 0
+func (localIdentifierTracker *LocalIdentifierTracker) Reset() {
+	localIdentifierTracker.index = 0
 }
 
-func (localVariableIndex *LocalIdentifierTracker) LocalVariable() string {
-	return AsLocalVariable("l" + strconv.Itoa(localVariableIndex.index))
+func (localIdentifierTracker *LocalIdentifierTracker) CurrentIdentifier() string {
+	return AsLocalVariable("l" + strconv.Itoa(localIdentifierTracker.index))
 }
 
-func (localVariableIndex *LocalIdentifierTracker) NewLocalVariable() string {
-	localVariableIndex.index++
+func (localIdentifierTracker *LocalIdentifierTracker) NewIdentifier() string {
+	localIdentifierTracker.index++
 
-	return localVariableIndex.LocalVariable()
+	return localIdentifierTracker.CurrentIdentifier()
 }
 
 func AsLocalVariable(identifier string) string {

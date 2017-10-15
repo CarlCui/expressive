@@ -12,5 +12,11 @@ func Generate(node ast.Node, logger logger.Logger) string {
 
 	rootFragment := visitor.removeVoidCode(node)
 
+	globalConstants := visitor.constants
+	externals := visitor.externals
+
+	rootFragment.AppendBefore(externals)
+	rootFragment.AppendBefore(globalConstants)
+
 	return rootFragment.String()
 }

@@ -32,6 +32,16 @@
             }
         },
         {
+            "name": "Launch codegen tests",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceRoot}/codegen",
+            "env": {
+
+            }
+        },
+        {
             "name": "Launch",
             "type": "go",
             "request": "launch",

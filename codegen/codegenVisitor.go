@@ -15,15 +15,25 @@ type CodegenVisitor struct {
 	constants              *Fragment // global constants
 	codeMap                map[ast.Node]*Fragment
 	localIdentifierTracker *LocalIdentifierTracker
+	externals              *Fragment
+}
+
+func (visitor *CodegenVisitor) externalFragment() *Fragment {
+	fragment := NewFragment(VOID, nil)
+
+	fragment.AddInstruction("declare i32 @printf(i8* noalias nocapture, ...) nounwind")
+
+	return fragment
 }
 
 // Init with a logger
 func (visitor *CodegenVisitor) Init(logger logger.Logger) {
 	visitor.logger = logger
 	visitor.labeller = &Labeller{0}
-	visitor.constants = NewFragment(VOID, nil)
+	visitor.constants = NewFragment(VOID, &GlobalIdentifierTracker{0})
 	visitor.codeMap = make(map[ast.Node]*Fragment)
 	visitor.localIdentifierTracker = &LocalIdentifierTracker{0}
+	visitor.externals = visitor.externalFragment()
 }
 
 func (visitor *CodegenVisitor) newVoidCode(node ast.Node) *Fragment {
@@ -131,6 +141,7 @@ func (visitor *CodegenVisitor) VisitLeaveProgramNode(node *ast.ProgramNode) {
 		fragment.Append(visitor.removeVoidCode(child))
 	}
 
+	fragment.AddInstruction("ret i32 0")
 	fragment.AddInstruction("}")
 }
 
@@ -200,7 +211,15 @@ func (visitor *CodegenVisitor) VisitEnterPrintNode(node *ast.PrintNode) {
 
 // VisitLeavePrintNode do something
 func (visitor *CodegenVisitor) VisitLeavePrintNode(node *ast.PrintNode) {
+	fragment := visitor.newVoidCode(node)
 
+	exprFrag := visitor.removeAddressCode(node.Expr)
+
+	localIdentifier := exprFrag.GetResult()
+
+	fragment.Append(exprFrag)
+
+	fragment.AddInstruction("call i32 (i8*, ...) @printf(i8* %v)", localIdentifier)
 }
 
 // exprs
@@ -288,7 +307,14 @@ func (visitor *CodegenVisitor) VisitCharacterNode(node *ast.CharacterNode) {
 
 // VisitStringNode do something
 func (visitor *CodegenVisitor) VisitStringNode(node *ast.StringNode) {
+	fragment := visitor.newAddressCode(node)
 
+	stringValue := node.Val
+	stringLength := node.StringLength()
+
+	stringGlobalIdentifier := visitor.constants.AddOperation("private constant [%v x i8] c\"%v\", align 1", stringLength, stringValue)
+
+	fragment.AddOperation("getelementptr inbounds [%v x i8], [%v x i8]* %v, i32 0, i32 0", stringLength, stringLength, stringGlobalIdentifier)
 }
 
 // VisitIdentifierNode do something

@@ -14,18 +14,18 @@ const (
 
 // Fragment represents a fragment of instructions in asm
 type Fragment struct {
-	Lines                  []IrLiner
-	ResultType             ResultType
-	localIdentifierTracker *LocalIdentifierTracker
-	result                 string
+	Lines             []IrLiner
+	ResultType        ResultType
+	identifierTracker IdentifierTracker
+	result            string
 }
 
 // NewFragment is the initializer of Fragment
-func NewFragment(resultType ResultType, localIdentifierTracker *LocalIdentifierTracker) *Fragment {
+func NewFragment(resultType ResultType, identifierTracker IdentifierTracker) *Fragment {
 	var fragment Fragment
 
 	fragment.Lines = make([]IrLiner, 0)
-	fragment.localIdentifierTracker = localIdentifierTracker
+	fragment.identifierTracker = identifierTracker
 	fragment.ResultType = resultType
 	fragment.result = ""
 
@@ -59,7 +59,7 @@ func (fragment *Fragment) AddInstruction(format string, arguments ...interface{}
 func (fragment *Fragment) AddOperation(format string, arguments ...interface{}) string {
 	operation := fmt.Sprintf(format, arguments...)
 
-	localIdentifier := fragment.localIdentifierTracker.NewLocalVariable()
+	localIdentifier := fragment.identifierTracker.NewIdentifier()
 
 	instruction := &Instruction{Result: localIdentifier, Operation: operation}
 
