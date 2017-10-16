@@ -41,9 +41,9 @@ func getAnalyzedAst(dirName string, fileName string) ast.Node {
 }
 
 func TestCodegen(t *testing.T) {
-	ast := getAnalyzedAst("tests", "test1.exp")
+	root := getAnalyzedAst("tests", "test1.exp")
 
-	result := Generate(ast, newLogger())
+	result := Generate(root, newLogger())
 
 	fmt.Println(result)
 }

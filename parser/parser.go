@@ -145,6 +145,8 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 
 	node.Expr = expr
 
+	parser.expect(token.SEMI)
+
 	return &node
 }
 
@@ -166,6 +168,8 @@ func (parser *Parser) parsePrintStmt() ast.Node {
 	expr.SetParent(&node)
 
 	node.Expr = expr
+
+	parser.expect(token.SEMI)
 
 	return &node
 }
