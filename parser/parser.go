@@ -162,12 +162,25 @@ func (parser *Parser) parsePrintStmt() ast.Node {
 	var node ast.PrintNode
 	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
 
+	args := make([]ast.Node, 0)
+
 	parser.expect(token.PRINT)
 
-	expr := parser.parseExpr()
-	expr.SetParent(&node)
+	stringExpr := parser.parseExpr()
+	stringExpr.SetParent(&node)
 
-	node.Expr = expr
+	node.StringExpr = stringExpr
+
+	for parser.cur.TokenType == token.COMMA {
+		parser.read()
+
+		arg := parser.parseExpr()
+		arg.SetParent(&node)
+
+		args = append(args, arg)
+	}
+
+	node.Args = args
 
 	parser.expect(token.SEMI)
 

@@ -319,3 +319,56 @@ func TestNoEOFShouldFail(t *testing.T) {
 
 	parseWithMockTokens(toks, shouldHaveError(t))
 }
+
+func TestParsingPrintStmt(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.PRINT},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingPrintStmtWithOneArg(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.PRINT},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		&token.Token{TokenType: token.COMMA},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingPrintStmtWithMultipleArgs(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.PRINT},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		&token.Token{TokenType: token.COMMA},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
+		&token.Token{TokenType: token.COMMA},
+		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.5"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingPrintStmtWithMultipleArgs_Fail(t *testing.T) {
+	toks := []*token.Token{
+		&token.Token{TokenType: token.PRINT},
+		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		&token.Token{TokenType: token.COMMA},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
+		&token.Token{TokenType: token.COMMA},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}

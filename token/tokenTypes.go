@@ -52,6 +52,7 @@ const (
 
 	SEMI // SEMI: semi-colon (;)
 	COLON
+	COMMA
 	operatorEnd
 
 	keywordStart
@@ -114,6 +115,7 @@ var tokens = [...]string{
 
 	SEMI:  ";",
 	COLON: ":",
+	COMMA: ",",
 
 	LET:   "let",
 	CONST: "const",

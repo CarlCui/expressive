@@ -130,10 +130,10 @@ func (visitor *SemanticAnalysisVisitor) VisitEnterPrintNode(node *ast.PrintNode)
 
 // VisitLeavePrintNode do something
 func (visitor *SemanticAnalysisVisitor) VisitLeavePrintNode(node *ast.PrintNode) {
-	exprTyping := node.Expr.GetTyping()
-	if !exprTyping.Equals(typing.STRING) {
+	stringExprTyping := node.StringExpr.GetTyping()
+	if !stringExprTyping.Equals(typing.STRING) {
 		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(node.GetLocation(), "requires string type, but got "+exprTyping.String())
+		visitor.log(node.GetLocation(), "requires string type, but got "+stringExprTyping.String())
 		return
 	}
 
