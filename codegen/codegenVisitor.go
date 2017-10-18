@@ -104,7 +104,7 @@ func (visitor *CodegenVisitor) removeAddressCode(node ast.Node) *Fragment {
 func (visitor *CodegenVisitor) removeValueCode(node ast.Node) *Fragment {
 	fragment := visitor.getAndRemoveCode(node)
 
-	if fragment.ResultType != VALUE {
+	if fragment.ResultType != VALUE && fragment.ResultType != ADDRESS {
 		panic(fmt.Sprintf("Code fragment does not produce value result: %v", node))
 	}
 
@@ -213,13 +213,34 @@ func (visitor *CodegenVisitor) VisitEnterPrintNode(node *ast.PrintNode) {
 func (visitor *CodegenVisitor) VisitLeavePrintNode(node *ast.PrintNode) {
 	fragment := visitor.newVoidCode(node)
 
-	exprFrag := visitor.removeAddressCode(node.Expr)
+	stringExprFrag := visitor.removeAddressCode(node.StringExpr)
 
-	localIdentifier := exprFrag.GetResult()
+	instructionArgs := make([]interface{}, 0)
 
-	fragment.Append(exprFrag)
+	localIdentifier := stringExprFrag.GetResult()
 
-	fragment.AddInstruction("call i32 (i8*, ...) @printf(i8* %v)", localIdentifier)
+	instructionArgs = append(instructionArgs, localIdentifier)
+
+	fragment.Append(stringExprFrag)
+
+	callInstruction := "call i32 (i8*, ...) @printf(i8* %v"
+
+	for _, arg := range node.Args {
+		argFrag := visitor.removeValueCode(arg)
+		localIdentifier = argFrag.GetResult()
+
+		irType := arg.GetTyping().IrType()
+
+		fragment.Append(argFrag)
+
+		instructionArgs = append(instructionArgs, irType, localIdentifier)
+
+		callInstruction += ", %v %v"
+	}
+
+	callInstruction += ")"
+
+	fragment.AddInstruction(callInstruction, instructionArgs...)
 }
 
 // exprs
@@ -322,11 +343,6 @@ func (visitor *CodegenVisitor) VisitIdentifierNode(node *ast.IdentifierNode) {
 	fragment := visitor.newAddressCode(node)
 
 	identifier := node.Tok.Raw
-	typing := node.GetTyping()
-	irType := typing.IrType()
-	alignment := typing.Size()
-
-	fragment.AddInstruction("%%v = alloca %v, align %v", identifier, irType, alignment)
 
 	fragment.result = AsLocalVariable(identifier)
 }
