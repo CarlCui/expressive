@@ -26,7 +26,7 @@ _variableDeclarationStmt_ := (`let`|`const`) _identifier_ _typeAnnotation_? (`=`
 
 _assignmentStmt_ := _identifier_ `=` _expr_ `;`
 
-_printStmt_ := `print` `(` _expr_ `)` `;`
+_printStmt_ := `print` _expr_ (`,` _expr_)* `;`
 
 ### Expressions
 

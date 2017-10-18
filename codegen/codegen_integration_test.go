@@ -46,4 +46,6 @@ func TestCodegen(t *testing.T) {
 	result := Generate(root, newLogger())
 
 	fmt.Println(result)
+
+	// t.Error()
 }

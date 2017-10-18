@@ -6,3 +6,6 @@ print str1;
 
 let str2 = "def";
 print str2;
+
+// multiple arguments
+print "123", 5, 5.5, true;
