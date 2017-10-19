@@ -32,6 +32,17 @@ jobs:
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             go test -v ./... | tee ${TEST_RESULTS}/go-test.out
 
+      - run:
+          name: Build expressive
+          command: |
+            bash build.sh
+
+      - run:
+          name: e2e tests
+          command: |
+            expressive -d ./tests -f test1.exp --outDir ./dist
+            llvm-prebuilt/lli dist/test1.s
+
       - store_artifacts:
           path: /tmp/test-results
           destination: raw-test-output
