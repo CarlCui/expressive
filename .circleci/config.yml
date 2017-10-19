@@ -40,8 +40,7 @@ jobs:
       - run:
           name: e2e tests
           command: |
-            expressive -d ./tests -f test1.exp --outDir ./dist
-            llvm-prebuilt/lli dist/test1.s
+            bash test_e2e.sh
 
       - store_artifacts:
           path: /tmp/test-results
