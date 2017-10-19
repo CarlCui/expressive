@@ -7,7 +7,6 @@ jobs:
     docker:
       # specify the version
       - image: circleci/golang:1.8
-      - image: nwtgck/pre-built-llvm-clang:3.8.1
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -42,7 +41,7 @@ jobs:
           name: e2e tests
           command: |
             expressive -d ./tests -f test1.exp --outDir ./dist
-            lli-3.6.1 dist/test1.s
+            llvm-prebuilt/lli dist/test1.s
 
       - store_artifacts:
           path: /tmp/test-results
