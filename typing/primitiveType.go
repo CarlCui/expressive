@@ -32,7 +32,7 @@ var literals = [...]string{
 
 var irTypes = [...]string{
 	INT:        "i32",
-	FLOAT:      "float",
+	FLOAT:      "double",
 	CHAR:       "i8*",
 	STRING:     "i8*",
 	BOOL:       "i1",
@@ -43,7 +43,7 @@ var irTypes = [...]string{
 
 var sizes = [...]int{
 	INT:        4,
-	FLOAT:      4,
+	FLOAT:      8,
 	CHAR:       4,
 	STRING:     4,
 	BOOL:       1,
