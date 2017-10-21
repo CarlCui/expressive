@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -24,5 +25,5 @@ func (labeller *Labeller) NewSet(tags ...string) string {
 
 // Label creates a new label under the current set
 func (labeller *Labeller) Label(tags ...string) string {
-	return strings.Join(tags, ".")
+	return strings.Join(tags, ".") + strconv.Itoa(labeller.index)
 }

@@ -38,7 +38,8 @@ func (gen *OperatorCodegen) GenerateCode() {
 		gen.generateLogicalAnd()
 	case signature.LOGIC_OR:
 		gen.generateLogicalOr()
-
+	case signature.LOGIC_NOT:
+		gen.generateLogicalNot()
 	default:
 		panic(fmt.Sprintf("Not implemented for operator %v", gen.operator))
 	}
@@ -151,18 +152,30 @@ func (gen *OperatorCodegen) generateLogicalAnd() {
 	entry := gen.labeller.NewSet("LAND", "entry")
 	condTrue := gen.labeller.Label("LAND", "cond", "true")
 	condFalse := gen.labeller.Label("LAND", "cond", "false")
+	condFalseEval := gen.labeller.Label("LAND", "cond", "false", "eval")
 	condEnd := gen.labeller.Label("LAND", "cond", "end")
 
 	gen.fragment.Append(frag1)
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(entry))
+	gen.fragment.AddLabel(entry)
+
 	frag1IsTrue := gen.fragment.AddOperation("icmp eq i1 %v, 0", localIdentifier1)
-	gen.fragment.AddInstruction("br i1 %v, label %%v, label %%v", frag1IsTrue, condTrue, condFalse)
+	gen.fragment.AddInstruction("br i1 %v, label %v, label %v", frag1IsTrue, AsLocalVariable(condTrue), AsLocalVariable(condFalse))
 
 	gen.fragment.AddLabel(condFalse)
 	gen.fragment.Append(frag2)
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condFalseEval))
+	gen.fragment.AddLabel(condFalseEval)
+
 	result := gen.fragment.AddOperation("and i1 %v, %v", localIdentifier1, localIdentifier2)
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condTrue))
 
 	gen.fragment.AddLabel(condTrue)
-	gen.fragment.AddOperation("phi i1 [false, %%v], [%v, %%v]", entry, result, condFalse)
+	gen.fragment.AddOperation("phi i1 [false, %v], [%v, %v]", AsLocalVariable(entry), result, AsLocalVariable(condFalseEval))
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
 	gen.fragment.AddLabel(condEnd)
 }
 
@@ -186,19 +199,51 @@ func (gen *OperatorCodegen) generateLogicalOr() {
 	entry := gen.labeller.NewSet("LOR", "entry")
 	condTrue := gen.labeller.Label("LOR", "cond", "true")
 	condFalse := gen.labeller.Label("LOR", "cond", "false")
+	condFalseEval := gen.labeller.Label("LOR", "cond", "false", "eval")
 	condEnd := gen.labeller.Label("LOR", "cond", "end")
 
 	gen.fragment.Append(frag1)
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(entry))
+	gen.fragment.AddLabel(entry)
+
 	frag1IsTrue := gen.fragment.AddOperation("icmp eq i1 %v, 1", localIdentifier1)
-	gen.fragment.AddInstruction("br i1 %v, label %%v, label %%v", frag1IsTrue, condTrue, condFalse)
+	gen.fragment.AddInstruction("br i1 %v, label %v, label %v", frag1IsTrue, AsLocalVariable(condTrue), AsLocalVariable(condFalse))
 
 	gen.fragment.AddLabel(condFalse)
 	gen.fragment.Append(frag2)
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condFalseEval))
+	gen.fragment.AddLabel(condFalseEval)
+
 	result := gen.fragment.AddOperation("or i1 %v, %v", localIdentifier1, localIdentifier2)
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condTrue))
 
 	gen.fragment.AddLabel(condTrue)
-	gen.fragment.AddOperation("phi i1 [true, %%v], [%v, %%v]", entry, result, condFalse)
+	gen.fragment.AddOperation("phi i1 [true, %v], [%v, %v]", AsLocalVariable(entry), result, AsLocalVariable(condFalseEval))
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
 	gen.fragment.AddLabel(condEnd)
+}
+
+func (gen *OperatorCodegen) generateLogicalNot() {
+
+	switch gen.typing {
+	case typing.BOOL:
+
+	default:
+		gen.panicOnMismatchCodegen()
+	}
+
+	gen.checkOperandsLength(1)
+
+	frag := gen.operands[0]
+
+	fragResult := frag.GetResult()
+
+	gen.fragment.Append(frag)
+
+	gen.fragment.AddOperation("xor i1 %v, 1", fragResult)
 }
 
 func (gen *OperatorCodegen) generateIfElse() {
@@ -207,7 +252,9 @@ func (gen *OperatorCodegen) generateIfElse() {
 
 	entry := gen.labeller.NewSet("ifelse", "entry")
 	condTrue := gen.labeller.Label("ifelse", "cond", "true")
+	condTrueEval := gen.labeller.Label("ifelse", "cond", "true", "eval")
 	condFalse := gen.labeller.Label("ifelse", "cond", "false")
+	condFalseEval := gen.labeller.Label("ifelse", "cond", "false", "eval")
 	condEnd := gen.labeller.Label("ifelse", "cond", "end")
 
 	frag1 := gen.operands[0]
@@ -218,21 +265,32 @@ func (gen *OperatorCodegen) generateIfElse() {
 	localIdentifier2 := frag2.GetResult()
 	localIdentifier3 := frag3.GetResult()
 
-	gen.fragment.AddLabel(entry)
 	gen.fragment.Append(frag1)
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(entry))
+	gen.fragment.AddLabel(entry)
+
 	comp := gen.fragment.AddOperation("icmp eq i1 %v, 1", localIdentifier1)
-	gen.fragment.AddInstruction("br i1 %v, label %%v, label %%v", comp, condTrue, condFalse)
+	gen.fragment.AddInstruction("br i1 %v, label %v, label %v", comp, AsLocalVariable(condTrue), AsLocalVariable(condFalse))
 
 	gen.fragment.AddLabel(condTrue)
 	gen.fragment.Append(frag2)
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condTrueEval))
+	gen.fragment.AddLabel(condTrueEval)
+
 	gen.fragment.AddInstruction("br label %%v", condEnd)
 
 	gen.fragment.AddLabel(condFalse)
 	gen.fragment.Append(frag3)
+
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condFalseEval))
+	gen.fragment.AddLabel(condFalseEval)
+
 	gen.fragment.AddInstruction("br label %v", condEnd)
 
 	gen.fragment.AddLabel(condEnd)
-	gen.fragment.AddOperation("phi %v [%v, %%v], [%v, %%v]", gen.typing.IrType(), localIdentifier2, condTrue, localIdentifier3, condFalse)
+	gen.fragment.AddOperation("phi %v [%v, %v], [%v, %v]", gen.typing.IrType(), localIdentifier2, AsLocalVariable(condTrueEval), localIdentifier3, AsLocalVariable(condFalseEval))
 }
 
 func (gen *OperatorCodegen) checkOperandsLength(needed int) {
