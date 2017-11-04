@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/carlcui/expressive/typing"
+
 	"github.com/carlcui/expressive/ast"
 	"github.com/carlcui/expressive/logger"
 )
@@ -157,9 +159,9 @@ func (visitor *CodegenVisitor) VisitLeaveVariableDeclarationNode(node *ast.Varia
 	fragment := visitor.newVoidCode(node)
 
 	identifierNode := node.Identifier.(*ast.IdentifierNode)
-	typing := identifierNode.GetTyping()
-	irType := typing.IrType()
-	alignment := typing.Size()
+	identifierTyping := identifierNode.GetTyping()
+	irType := identifierTyping.IrType()
+	alignment := identifierTyping.Size()
 
 	variable := AsLocalVariable(identifierNode.Tok.Raw)
 
@@ -168,7 +170,12 @@ func (visitor *CodegenVisitor) VisitLeaveVariableDeclarationNode(node *ast.Varia
 
 	if node.Expr == nil {
 		// load default value
-		fragment.AddInstruction("store %v %v, %v* %v, align %v", irType, 0, irType, variable, alignment)
+		defaultValue := "0"
+		if identifierTyping == typing.FLOAT {
+			defaultValue = "0.0"
+		}
+
+		fragment.AddInstruction("store %v %v, %v* %v, align %v", irType, defaultValue, irType, variable, alignment)
 	} else {
 		exprFragment := visitor.removeValueCode(node.Expr)
 
@@ -318,7 +325,11 @@ func (visitor *CodegenVisitor) VisitIntegerNode(node *ast.IntegerNode) {
 func (visitor *CodegenVisitor) VisitFloatNode(node *ast.FloatNode) {
 	fragment := visitor.newValueCode(node)
 
-	fragment.result = strconv.FormatFloat(float64(node.Val), 'f', 6, 32)
+	if node.Val == 0 {
+		fragment.result = "0.0"
+	} else {
+		fragment.result = strconv.FormatFloat(float64(node.Val), 'f', 6, 32)
+	}
 }
 
 // VisitCharacterNode do something
