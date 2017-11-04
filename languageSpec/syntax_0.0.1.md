@@ -1,5 +1,33 @@
 # syntax for version 0.0.1
 
+## Checklist
+
+* arithmetic operation
+    - [x] integer +,-,*,/,%
+    - [x] float (64 bit) +,-,*,/
+* logic operation (short-circuit cannot be tested)
+    - [x] and
+    - [x] or
+    - [x] not
+* comparison operation
+    - [x] integer >,<,>=,<=,==,!=,===,!==
+    - [x] float >,<,>=,<=,==,!=,===,!==
+    - [x] bool ==,!=,===,!==
+    - [ ] char ==,!=,===,!==
+    - [ ] string ==,!=,===,!==
+* variable declaration
+    - [x] variable explicit type
+    - [x] variable explicit type with expression
+    - [x] variable implicit type with expression
+    - [x] const explicit type
+    - [x] const explicit type with expression
+    - [x] const implicit type with expression
+* variable assignment
+    - [x] assign with same type
+* ternary if else
+    - [x] basic case
+
+
 ## Features
 
 In v0.0.1, express will have the following features:

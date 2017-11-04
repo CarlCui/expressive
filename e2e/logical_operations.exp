@@ -16,3 +16,4 @@ print "%d\n", !false; // 1
 print "\n";
 print "%d\n", !(true && false); // 1
 print "%d\n", (true && !false) || false; // 1
+print "%d\n", (true && !false) || (false || true); // 1

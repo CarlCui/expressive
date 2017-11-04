@@ -52,7 +52,6 @@ func (fragment *Fragment) AddInstruction(format string, arguments ...interface{}
 	instruction := &Instruction{Result: "", Operation: operation}
 
 	fragment.Lines = append(fragment.Lines, instruction)
-	fragment.result = instruction.Result
 }
 
 // AddOperation adds an operation, and return the result
