@@ -87,6 +87,18 @@ func (gen *OperatorCodegen) generateComparison() {
 		} else {
 			opcode += "ne"
 		}
+	case signature.DEEP_EQUAL:
+		if gen.typing == typing.FLOAT {
+			opcode += "ueq"
+		} else {
+			opcode += "eq"
+		}
+	case signature.DEEP_NOT_EQUAL:
+		if gen.typing == typing.FLOAT {
+			opcode += "une"
+		} else {
+			opcode += "ne"
+		}
 	default:
 		gen.panicOnMismatchCodegen()
 	}
