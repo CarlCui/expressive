@@ -1,0 +1,27 @@
+let a = true;
+let b = false;
+
+print "%d\n", a == b;
+print "%d\n", a != b;
+print "%d\n", a === b;
+print "%d\n", a !== b;
+
+print "\n";
+
+a = true;
+b = true;
+
+print "%d\n", a == b;
+print "%d\n", a != b;
+print "%d\n", a === b;
+print "%d\n", a !== b;
+
+print "\n";
+
+a = false;
+b = false;
+
+print "%d\n", a == b;
+print "%d\n", a != b;
+print "%d\n", a === b;
+print "%d\n", a !== b;
