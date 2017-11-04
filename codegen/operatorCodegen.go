@@ -40,9 +40,58 @@ func (gen *OperatorCodegen) GenerateCode() {
 		gen.generateLogicalOr()
 	case signature.LOGIC_NOT:
 		gen.generateLogicalNot()
+	case signature.IF_ELSE:
+		gen.generateIfElse()
+	case signature.GREATER, signature.GREATER_OR_EQUAL,
+		signature.LESS, signature.LESS_OR_EQUAL,
+		signature.SHALLOW_EQUAL, signature.SHALLOW_NOT_EQUAL,
+		signature.DEEP_EQUAL, signature.DEEP_NOT_EQUAL:
+		gen.generateComparison()
 	default:
 		panic(fmt.Sprintf("Not implemented for operator %v", gen.operator))
 	}
+}
+
+func (gen *OperatorCodegen) generateComparison() {
+	var opcode string
+	switch gen.typing {
+	case typing.INT:
+		opcode = "icmp "
+	case typing.BOOL:
+		opcode = "icmp "
+	case typing.FLOAT:
+		opcode = "fcmp "
+	// TODO: implement string and char
+	default:
+		gen.panicOnMismatchCodegen()
+	}
+
+	switch gen.operator {
+	case signature.GREATER:
+		opcode += "ugt"
+	case signature.GREATER_OR_EQUAL:
+		opcode += "uge"
+	case signature.LESS:
+		opcode += "ult"
+	case signature.LESS_OR_EQUAL:
+		opcode += "ule"
+	case signature.SHALLOW_EQUAL:
+		if gen.typing == typing.FLOAT {
+			opcode += "ueq"
+		} else {
+			opcode += "eq"
+		}
+	case signature.SHALLOW_NOT_EQUAL:
+		if gen.typing == typing.FLOAT {
+			opcode += "une"
+		} else {
+			opcode += "ne"
+		}
+	default:
+		gen.panicOnMismatchCodegen()
+	}
+
+	gen.generateBinary(opcode)
 }
 
 func (gen *OperatorCodegen) generateBinary(opcode string) {
@@ -279,7 +328,7 @@ func (gen *OperatorCodegen) generateIfElse() {
 	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condTrueEval))
 	gen.fragment.AddLabel(condTrueEval)
 
-	gen.fragment.AddInstruction("br label %%v", condEnd)
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
 
 	gen.fragment.AddLabel(condFalse)
 	gen.fragment.Append(frag3)
@@ -287,7 +336,7 @@ func (gen *OperatorCodegen) generateIfElse() {
 	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condFalseEval))
 	gen.fragment.AddLabel(condFalseEval)
 
-	gen.fragment.AddInstruction("br label %v", condEnd)
+	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
 
 	gen.fragment.AddLabel(condEnd)
 	gen.fragment.AddOperation("phi %v [%v, %v], [%v, %v]", gen.typing.IrType(), localIdentifier2, AsLocalVariable(condTrueEval), localIdentifier3, AsLocalVariable(condFalseEval))

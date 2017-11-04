@@ -279,7 +279,7 @@ func (visitor *CodegenVisitor) VisitLeaveBinaryOperatorNode(node *ast.BinaryOper
 	fragment2 := visitor.removeValueCode(node.Rhs)
 
 	operator := node.Operator
-	typing := node.GetTyping()
+	typing := node.Lhs.GetTyping()
 
 	operatorCodegen := NewOperatorCodegen(fragment, operator, typing, visitor.labeller, fragment1, fragment2)
 

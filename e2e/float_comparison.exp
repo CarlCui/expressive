@@ -1,0 +1,33 @@
+let a = 5.5;
+let b = 6.6;
+
+print "%d\n", a > b;
+print "%d\n", a < b;
+print "%d\n", a >= b;
+print "%d\n", a <= b;
+print "%d\n", a == b;
+print "%d\n", a != b;
+
+print "\n";
+
+a = 6.6;
+b = 5.5;
+
+print "%d\n", a > b;
+print "%d\n", a < b;
+print "%d\n", a >= b;
+print "%d\n", a <= b;
+print "%d\n", a == b;
+print "%d\n", a != b;
+
+print "\n";
+
+a = 5.0;
+b = 5.0;
+
+print "%d\n", a > b;
+print "%d\n", a < b;
+print "%d\n", a >= b;
+print "%d\n", a <= b;
+print "%d\n", a == b;
+print "%d\n", a != b;
