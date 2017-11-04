@@ -1,0 +1,7 @@
+let a: int;
+let b = 5;
+let c: int = 5;
+
+const d: float;
+const e = 5.5;
+const f: float = 5.6;
