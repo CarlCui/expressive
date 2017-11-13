@@ -13,8 +13,8 @@
     - [x] integer >,<,>=,<=,==,!=,===,!==
     - [x] float >,<,>=,<=,==,!=,===,!==
     - [x] bool ==,!=,===,!==
-    - [ ] char ==,!=,===,!==
-    - [ ] string ==,!=,===,!==
+    - [ ] char ==,!=,===,!== (Will not implement)
+    - [ ] string ==,!=,===,!== (Will not implement)
 * variable declaration
     - [x] variable explicit type
     - [x] variable explicit type with expression
