@@ -28,7 +28,7 @@ func (scanner *ExpressiveScanner) Next() *token.Token {
 	tok := token.EOFToken(scanner.curLoc)
 
 	if !scanner.input.IsEOF() {
-		ch := scanner.input.NextChar()
+		ch := scanner.input.NextRune()
 
 		scanner.cur = string(ch)
 
@@ -68,14 +68,14 @@ func (scanner *ExpressiveScanner) tryParseComment(cur rune) *token.Token {
 
 	if isSlash(cur) && isSlash(scanner.input.Peek()) { // `//`
 
-		scanner.cur += string(scanner.input.NextChar())
+		scanner.cur += string(scanner.input.NextRune())
 
 		for !scanner.input.IsEOF() {
 			if isReturn(scanner.input.Peek()) {
 				return &token.Token{TokenType: token.COMMENT, Raw: scanner.cur, Locator: scanner.curLoc}
 			}
 
-			ch := scanner.input.NextChar()
+			ch := scanner.input.NextRune()
 
 			scanner.cur += string(ch)
 		}
@@ -85,13 +85,13 @@ func (scanner *ExpressiveScanner) tryParseComment(cur rune) *token.Token {
 	} else if isSlash(cur) && isAsterisk(scanner.input.Peek()) { // `/*`
 
 		for !scanner.input.IsEOF() {
-			ch := scanner.input.NextChar()
+			ch := scanner.input.NextRune()
 
 			scanner.cur += string(ch)
 
 			// */
 			if isAsterisk(ch) && isSlash(scanner.input.Peek()) {
-				scanner.cur += string(scanner.input.NextChar())
+				scanner.cur += string(scanner.input.NextRune())
 				return &token.Token{TokenType: token.COMMENT, Raw: scanner.cur, Locator: scanner.curLoc}
 			}
 		}
@@ -120,7 +120,7 @@ func (scanner *ExpressiveScanner) parseNumber(first rune) *token.Token {
 
 	// parse float
 	if !scanner.input.IsEOF() && isDot(scanner.input.Peek()) {
-		scanner.cur += string(scanner.input.NextChar())
+		scanner.cur += string(scanner.input.NextRune())
 
 		scanner.appendConsequentDigits()
 
@@ -132,7 +132,7 @@ func (scanner *ExpressiveScanner) parseNumber(first rune) *token.Token {
 
 func (scanner *ExpressiveScanner) appendConsequentDigits() {
 	for !scanner.input.IsEOF() && isDigit(scanner.input.Peek()) {
-		ch := scanner.input.NextChar()
+		ch := scanner.input.NextRune()
 
 		scanner.cur += string(ch)
 	}
@@ -143,7 +143,7 @@ func (scanner *ExpressiveScanner) appendConsequentDigits() {
 */
 func (scanner *ExpressiveScanner) parseIdentifier() *token.Token {
 	for !scanner.input.IsEOF() && !isWhitespace(scanner.input.Peek()) && (isIdentifierStart(scanner.input.Peek()) || isDigit(scanner.input.Peek())) {
-		scanner.cur += string(scanner.input.NextChar())
+		scanner.cur += string(scanner.input.NextRune())
 	}
 
 	tok := token.MatchKeyword(scanner.cur)
@@ -177,7 +177,7 @@ func (scanner *ExpressiveScanner) parseStringLiteral() *token.Token {
 		return token.IllegalToken(scanner.cur, loc)
 	}
 
-	scanner.cur += string(scanner.input.NextChar()) // "
+	scanner.cur += string(scanner.input.NextRune()) // "
 
 	return &token.Token{TokenType: token.STRING_LITERAL, Raw: scanner.cur, Locator: loc}
 }
@@ -202,7 +202,7 @@ func (scanner *ExpressiveScanner) parseCharacterLiteral() *token.Token {
 		return token.IllegalToken(scanner.cur, loc)
 	}
 
-	scanner.cur += string(scanner.input.NextChar())
+	scanner.cur += string(scanner.input.NextRune())
 
 	return &token.Token{TokenType: token.CHAR_LITERAL, Raw: scanner.cur, Locator: loc}
 }
@@ -212,7 +212,7 @@ func (scanner *ExpressiveScanner) parseCharacterLiteral() *token.Token {
 */
 func (scanner *ExpressiveScanner) parseOperator() *token.Token {
 	for !scanner.input.IsEOF() && token.HasOperatorPrefix(scanner.cur+string(scanner.input.Peek())) {
-		scanner.cur += string(scanner.input.NextChar())
+		scanner.cur += string(scanner.input.NextRune())
 	}
 
 	tok := token.MatchOperator(scanner.cur)
@@ -228,12 +228,12 @@ func (scanner *ExpressiveScanner) parseOperator() *token.Token {
 
 func (scanner *ExpressiveScanner) skipWhitespaces() {
 	for !scanner.input.IsEOF() && isWhitespace(scanner.input.Peek()) {
-		scanner.input.NextChar()
+		scanner.input.NextRune()
 	}
 }
 
 func (scanner *ExpressiveScanner) tryParseEscapeControlSequence() bool {
-	cur := scanner.input.NextChar()
+	cur := scanner.input.NextRune()
 	scanner.cur += string(cur)
 
 	if isBackSlash(cur) {
@@ -241,7 +241,7 @@ func (scanner *ExpressiveScanner) tryParseEscapeControlSequence() bool {
 			return false
 		}
 
-		scanner.cur += string(scanner.input.NextChar())
+		scanner.cur += string(scanner.input.NextRune())
 	}
 
 	return true

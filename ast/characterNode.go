@@ -24,6 +24,11 @@ func (node *CharacterNode) VisitChildren(visitor Visitor) {
 
 }
 
+// Size returns the size of the rune in number of bytes
+func (node *CharacterNode) Size() int {
+	return utf8.RuneLen(node.Val)
+}
+
 // Init initializes an integer node with a token
 func (node *CharacterNode) Init(tok *token.Token) {
 	node.BaseNode = CreateBaseNode(tok, nil)

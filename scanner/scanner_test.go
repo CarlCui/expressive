@@ -72,6 +72,8 @@ func TestScanCharacterLiteralSuccess(t *testing.T) {
 	actuals := []string{
 		"'a'",
 		"'1'",
+		"'🙃'",
+		"'你'",
 		"'\\0'",
 		"'\\''",
 		"'\\\"'",

@@ -43,8 +43,8 @@ func (file *File) Init(dirname, filename string) {
 	file.dirname = dirname
 }
 
-// NextChar returns the next rune. The user needs to check IsEOF before calling this function.
-func (file *File) NextChar() rune {
+// NextRune returns the next rune. The user needs to check IsEOF before calling this function.
+func (file *File) NextRune() rune {
 	if file.IsEOF() {
 		panic("EOF in " + file.dirname + "/" + file.filename)
 	}

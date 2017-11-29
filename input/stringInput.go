@@ -18,7 +18,7 @@ func (input *StringInput) Init(src string) {
 	input.src = []byte(src)
 }
 
-func (input *StringInput) NextChar() rune {
+func (input *StringInput) NextRune() rune {
 	if input.IsEOF() {
 		panic("eof at " + strconv.Itoa(input.curPos))
 	}
