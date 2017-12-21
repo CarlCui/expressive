@@ -24,6 +24,14 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveProgramNode(node *ast.ProgramN
 
 }
 
+func (visitor *SemanticAnalysisVisitor) VisitEnterBlockNode(node *ast.BlockNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveBlockNode(node *ast.BlockNode) {
+
+}
+
 // stmts
 
 // VisitEnterVariableDeclarationNode do something
@@ -138,6 +146,14 @@ func (visitor *SemanticAnalysisVisitor) VisitLeavePrintNode(node *ast.PrintNode)
 	}
 
 	node.SetTyping(typing.VOID)
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitEnterIfStmtNode(node *ast.IfStmtNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
+
 }
 
 // exprs
