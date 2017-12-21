@@ -52,10 +52,40 @@ func (parser *Parser) parseProgram() ast.Node {
 	return &node
 }
 
+func (parser *Parser) isBlockStart(tok *token.Token) bool {
+	return parser.isStmtStart(tok)
+}
+
+func (parser *Parser) parseBlock() ast.Node {
+	if !parser.isBlockStart(parser.cur) {
+		return parser.syntaxErrorNode("block")
+	}
+
+	var node ast.BlockNode
+	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+
+	stmts := make([]ast.Node, 0)
+
+	for parser.isStmtStart(parser.cur) {
+		stmt := parser.parseStmt()
+
+		stmt.SetParent(&node)
+
+		stmts = append(stmts, stmt)
+	}
+
+	node.Stmts = stmts
+
+	return &node
+}
+
 // Stmts
 
 func (parser *Parser) isStmtStart(tok *token.Token) bool {
-	return parser.isVariableDeclarationStmtStart(tok) || parser.isAssignmentStmtStart(tok) || parser.isPrintStmtStart(tok)
+	return parser.isVariableDeclarationStmtStart(tok) ||
+		parser.isAssignmentStmtStart(tok) ||
+		parser.isPrintStmtStart(tok) ||
+		parser.isIfStmtStart(tok)
 }
 
 func (parser *Parser) parseStmt() ast.Node {
@@ -69,6 +99,8 @@ func (parser *Parser) parseStmt() ast.Node {
 		return parser.parseAssignmentStmt()
 	} else if parser.isPrintStmtStart(parser.cur) {
 		return parser.parsePrintStmt()
+	} else if parser.isIfStmtStart(parser.cur) {
+		return parser.parseIfStmt()
 	}
 
 	panic("parseStmt: unreachable")
@@ -148,6 +180,72 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 	parser.expect(token.SEMI)
 
 	return &node
+}
+
+func (parser *Parser) isIfStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.IF
+}
+
+func (parser *Parser) parseIfStmt() ast.Node {
+	if !parser.isIfStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("if statement")
+	}
+
+	node := ast.CreateIfStmtNode(parser.cur)
+
+	parser.read()
+
+	var parseBlockWithBraces = func() ast.Node {
+		parser.expect(token.LEFT_CURLY_BRACE)
+
+		block := parser.parseBlock()
+
+		parser.expect(token.RIGHT_CURLY_BRACE)
+
+		return block
+	}
+
+	parser.expect(token.LEFT_PAREN)
+
+	expr := parser.parseExpr()
+
+	parser.expect(token.RIGHT_PAREN)
+
+	block := parseBlockWithBraces()
+
+	node.AddCondition(expr, block)
+
+	for parser.cur.TokenType == token.ELSE {
+		parser.read()
+
+		lastElse := false
+
+		if parser.cur.TokenType != token.IF {
+			lastElse = true
+
+			block := parseBlockWithBraces()
+
+			node.ElseBlock = block
+			block.SetParent(node)
+		} else if parser.cur.TokenType == token.IF {
+			parser.read()
+			parser.expect(token.LEFT_PAREN)
+			expr := parser.parseExpr()
+			parser.expect(token.RIGHT_PAREN)
+
+			block := parseBlockWithBraces()
+
+			node.AddCondition(expr, block)
+		} else {
+			parser.expect(token.IF, token.LEFT_CURLY_BRACE)
+		}
+
+		if lastElse {
+			break
+		}
+	}
+
+	return node
 }
 
 func (parser *Parser) isPrintStmtStart(tok *token.Token) bool {

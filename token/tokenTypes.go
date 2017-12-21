@@ -48,6 +48,9 @@ const (
 	LEFT_PAREN
 	RIGHT_PAREN
 
+	LEFT_CURLY_BRACE
+	RIGHT_CURLY_BRACE
+
 	QUESTION_MARK
 
 	SEMI // SEMI: semi-colon (;)
@@ -59,6 +62,9 @@ const (
 	// keywords
 	LET
 	CONST
+
+	IF
+	ELSE
 
 	INT_KEYWORD
 	FLOAT_KEYWORD
@@ -111,6 +117,9 @@ var tokens = [...]string{
 	LEFT_PAREN:  "(",
 	RIGHT_PAREN: ")",
 
+	LEFT_CURLY_BRACE:  "{",
+	RIGHT_CURLY_BRACE: "}",
+
 	QUESTION_MARK: "?",
 
 	SEMI:  ";",
@@ -119,6 +128,9 @@ var tokens = [...]string{
 
 	LET:   "let",
 	CONST: "const",
+
+	IF:   "if",
+	ELSE: "else",
 
 	INT_KEYWORD:    "int",
 	FLOAT_KEYWORD:  "float",

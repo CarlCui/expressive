@@ -5,6 +5,9 @@ type Visitor interface {
 	VisitEnterProgramNode(node *ProgramNode)
 	VisitLeaveProgramNode(node *ProgramNode)
 
+	VisitEnterBlockNode(node *BlockNode)
+	VisitLeaveBlockNode(node *BlockNode)
+
 	// stmts
 
 	VisitEnterVariableDeclarationNode(node *VariableDeclarationNode)
@@ -12,6 +15,9 @@ type Visitor interface {
 
 	VisitEnterAssignmentNode(node *AssignmentNode)
 	VisitLeaveAssignmentNode(node *AssignmentNode)
+
+	VisitEnterIfStmtNode(node *IfStmtNode)
+	VisitLeaveIfStmtNode(node *IfStmtNode)
 
 	VisitEnterPrintNode(node *PrintNode)
 	VisitLeavePrintNode(node *PrintNode)
