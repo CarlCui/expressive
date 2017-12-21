@@ -147,6 +147,14 @@ func (visitor *CodegenVisitor) VisitLeaveProgramNode(node *ast.ProgramNode) {
 	fragment.AddInstruction("}")
 }
 
+func (visitor *CodegenVisitor) VisitEnterBlockNode(node *ast.BlockNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveBlockNode(node *ast.BlockNode) {
+
+}
+
 // stmts
 
 // VisitEnterVariableDeclarationNode do something
@@ -248,6 +256,14 @@ func (visitor *CodegenVisitor) VisitLeavePrintNode(node *ast.PrintNode) {
 	callInstruction += ")"
 
 	fragment.AddInstruction(callInstruction, instructionArgs...)
+}
+
+func (visitor *CodegenVisitor) VisitEnterIfStmtNode(node *ast.IfStmtNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
+
 }
 
 // exprs
