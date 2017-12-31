@@ -152,7 +152,11 @@ func (visitor *CodegenVisitor) VisitEnterBlockNode(node *ast.BlockNode) {
 }
 
 func (visitor *CodegenVisitor) VisitLeaveBlockNode(node *ast.BlockNode) {
+	fragment := visitor.newVoidCode(node)
 
+	for _, child := range node.Stmts {
+		fragment.Append(visitor.removeVoidCode(child))
+	}
 }
 
 // stmts
@@ -263,7 +267,59 @@ func (visitor *CodegenVisitor) VisitEnterIfStmtNode(node *ast.IfStmtNode) {
 }
 
 func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
+	fragment := visitor.newVoidCode(node)
 
+	ifEndLabel := visitor.labeller.NewSet("if", "end")
+	ifElseLabel := visitor.labeller.Label("if", "else")
+
+	numberOfConditions := len(node.ConditionExprs)
+
+	ifConditionLabels := make([]string, numberOfConditions)
+
+	for i := range ifConditionLabels {
+		ifConditionLabels[i] = visitor.labeller.Label("if", "condition", strconv.Itoa(i))
+	}
+
+	for i, conditionExpr := range node.ConditionExprs {
+		conditionLabel := ifConditionLabels[i]
+		blockLabel := visitor.labeller.Label("if", "block", strconv.Itoa(i))
+
+		exprFragment := visitor.removeValueCode(conditionExpr)
+
+		fragment.AddInstruction("br label %v", AsLocalVariable(conditionLabel))
+		fragment.AddLabel(conditionLabel)
+
+		fragment.Append(exprFragment)
+
+		exprResult := exprFragment.GetResult()
+
+		conditionResult := fragment.AddOperation("icmp eq i1 %v, 1", exprResult)
+
+		finalLabel := ifEndLabel
+
+		if i+1 != numberOfConditions {
+			finalLabel = ifConditionLabels[i+1]
+		} else {
+			if node.ElseBlock != nil {
+				finalLabel = ifElseLabel
+			}
+		}
+
+		fragment.AddInstruction("br i1 %v, label %v, label %v", conditionResult, AsLocalVariable(blockLabel), AsLocalVariable(finalLabel))
+
+		fragment.AddLabel(blockLabel)
+		fragment.Append(visitor.removeVoidCode(node.ConditionBlocks[i]))
+		fragment.AddInstruction("br label %v", AsLocalVariable(ifEndLabel))
+	}
+
+	if node.ElseBlock != nil {
+		fragment.AddInstruction("br label %v", AsLocalVariable(ifElseLabel))
+		fragment.AddLabel(ifElseLabel)
+		fragment.Append(visitor.removeVoidCode(node.ElseBlock))
+	}
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(ifEndLabel))
+	fragment.AddLabel(ifEndLabel)
 }
 
 // exprs

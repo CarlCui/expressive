@@ -1,0 +1,66 @@
+let a = 5;
+
+if (a > 4) {
+    print "test1-true\n";
+} else {
+    print "test1-false";
+}
+
+if (a > 5) {
+    print "test2-false";
+} else {
+    print "test2-true\n";
+}
+
+if (a > 1) {
+    print "test3-true\n";
+}
+if (a < 1) {
+    print "test4-false";
+}
+
+if (a < 3) {
+    print "test5-false";
+} else if (a > 4) {
+    print "test5-true\n";
+}
+
+if (a < 3) {
+    print "test6-false";
+} else if (a > 4) {
+    print "test6-true\n";
+} else {
+    print "test6-false";
+}
+
+if (a < 3) {
+    print "test7-false";
+} else if (a <2) {
+    print "test7-false";
+} else {
+    print "test7-true\n";
+}
+
+if (a < 3) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else if (a <2) {
+    print "test8-false";
+} else {
+    print "test8-true\n";
+}
