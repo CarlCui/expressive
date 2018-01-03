@@ -299,10 +299,8 @@ func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
 
 		if i+1 != numberOfConditions {
 			finalLabel = ifConditionLabels[i+1]
-		} else {
-			if node.ElseBlock != nil {
-				finalLabel = ifElseLabel
-			}
+		} else if node.ElseBlock != nil {
+			finalLabel = ifElseLabel
 		}
 
 		fragment.AddInstruction("br i1 %v, label %v, label %v", conditionResult, AsLocalVariable(blockLabel), AsLocalVariable(finalLabel))
