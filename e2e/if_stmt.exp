@@ -65,7 +65,15 @@ if (a < 3) {
     print "test8-true\n";
 }
 
+print "%d\n", a;
+
+if (a > 2) {
+    print "%d\n", a;
+}
+
 if (a > 2) {
     let a = 7;
     print "%d\n", a;
 }
+
+print "%d\n", a;

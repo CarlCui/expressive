@@ -37,7 +37,7 @@ func (node *IdentifierNode) IsBeingDeclared() bool {
 	return declarationNode.Identifier == node
 }
 
-func (node *IdentifierNode) FindVariableBinding() *symbolTable.Binding {
+func (node *IdentifierNode) FindDeclarationScope() *symbolTable.Scope {
 	identifier := node.Tok.Raw
 
 	scope := node.GetLocalScope()
@@ -52,12 +52,20 @@ func (node *IdentifierNode) FindVariableBinding() *symbolTable.Binding {
 		return nil
 	}
 
+	return scope
+}
+
+func (node *IdentifierNode) FindVariableBinding() *symbolTable.Binding {
+	identifier := node.Tok.Raw
+
+	scope := node.FindDeclarationScope()
+
 	return scope.FindBinding(identifier)
 }
 
 // LocalIdentifier returns the localized identifier name in corresponding scope (appends scope identifier)
 func (node *IdentifierNode) LocalIdentifier() string {
-	scope := node.GetLocalScope()
+	scope := node.FindDeclarationScope()
 
 	if scope == nil {
 		panic("cannot get local scope for identifier node")
