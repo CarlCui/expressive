@@ -175,7 +175,7 @@ func (visitor *CodegenVisitor) VisitLeaveVariableDeclarationNode(node *ast.Varia
 	irType := identifierTyping.IrType()
 	alignment := identifierTyping.Size()
 
-	variable := AsLocalVariable(identifierNode.Tok.Raw)
+	variable := AsLocalVariable(identifierNode.LocalIdentifier())
 
 	// allocate space
 	fragment.AddInstruction("%v = alloca %v, align %v", variable, irType, alignment)
@@ -212,7 +212,7 @@ func (visitor *CodegenVisitor) VisitLeaveAssignmentNode(node *ast.AssignmentNode
 	irType := typing.IrType()
 	alignment := typing.Size()
 
-	variable := AsLocalVariable(identifierNode.Tok.Raw)
+	variable := AsLocalVariable(identifierNode.LocalIdentifier())
 
 	exprFragment := visitor.removeValueCode(node.Expr)
 
@@ -425,7 +425,7 @@ func (visitor *CodegenVisitor) VisitStringNode(node *ast.StringNode) {
 func (visitor *CodegenVisitor) VisitIdentifierNode(node *ast.IdentifierNode) {
 	fragment := visitor.newAddressCode(node)
 
-	identifier := node.Tok.Raw
+	identifier := node.LocalIdentifier()
 
 	fragment.result = AsLocalVariable(identifier)
 }

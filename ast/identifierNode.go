@@ -55,6 +55,17 @@ func (node *IdentifierNode) FindVariableBinding() *symbolTable.Binding {
 	return scope.FindBinding(identifier)
 }
 
+// LocalIdentifier returns the localized identifier name in corresponding scope (appends scope identifier)
+func (node *IdentifierNode) LocalIdentifier() string {
+	scope := node.GetLocalScope()
+
+	if scope == nil {
+		panic("cannot get local scope for identifier node")
+	}
+
+	return node.BaseNode.Tok.Raw + scope.GetScopeIdentifier()
+}
+
 // Accept is part of visitor pattern.
 func (node *IdentifierNode) Accept(visitor Visitor) {
 	visitor.VisitIdentifierNode(node)

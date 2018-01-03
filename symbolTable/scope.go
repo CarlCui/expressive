@@ -2,9 +2,13 @@ package symbolTable
 
 import "github.com/carlcui/expressive/typing"
 import "github.com/carlcui/expressive/locator"
+import "strconv"
+
+var nextScopeIndex = 0
 
 // Scope is where variables live and can be referenced
 type Scope struct {
+	scopeIndex  int
 	BaseScope   *Scope
 	symbolTable *SymbolTable
 }
@@ -18,6 +22,9 @@ func CreateScope(baseScope *Scope) *Scope {
 
 	scope.symbolTable = &symbolTable
 	scope.BaseScope = baseScope
+	scope.scopeIndex = nextScopeIndex
+
+	nextScopeIndex++
 
 	return &scope
 }
@@ -41,4 +48,8 @@ func (scope *Scope) FindBinding(identifier string) *Binding {
 
 func (scope *Scope) VariableDeclared(identifier string) bool {
 	return scope.FindBinding(identifier) != nil
+}
+
+func (scope *Scope) GetScopeIdentifier() string {
+	return "___scope___" + strconv.Itoa(scope.scopeIndex)
 }
