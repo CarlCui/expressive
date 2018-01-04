@@ -24,6 +24,16 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveProgramNode(node *ast.ProgramN
 
 }
 
+func (visitor *SemanticAnalysisVisitor) VisitEnterBlockNode(node *ast.BlockNode) {
+	localScope := node.GetLocalScope()
+	newScope := symbolTable.CreateScope(localScope)
+	node.SetScope(newScope)
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveBlockNode(node *ast.BlockNode) {
+
+}
+
 // stmts
 
 // VisitEnterVariableDeclarationNode do something
@@ -138,6 +148,21 @@ func (visitor *SemanticAnalysisVisitor) VisitLeavePrintNode(node *ast.PrintNode)
 	}
 
 	node.SetTyping(typing.VOID)
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitEnterIfStmtNode(node *ast.IfStmtNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
+	for _, conditionExpr := range node.ConditionExprs {
+		conditionExprTyping := conditionExpr.GetTyping()
+		if !conditionExprTyping.Equals(typing.BOOL) {
+			node.SetTyping(typing.ERROR_TYPE)
+			visitor.log(conditionExpr.GetLocation(), "requires boolean type, but got "+conditionExprTyping.String())
+			return
+		}
+	}
 }
 
 // exprs
