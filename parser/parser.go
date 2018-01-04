@@ -79,6 +79,14 @@ func (parser *Parser) parseBlock() ast.Node {
 	return &node
 }
 
+func (parser *Parser) parseBlockWithBraces() ast.Node {
+	parser.expect(token.LEFT_CURLY_BRACE)
+	node := parser.parseBlock()
+	parser.expect(token.RIGHT_CURLY_BRACE)
+
+	return node
+}
+
 // Stmts
 
 func (parser *Parser) isStmtStart(tok *token.Token) bool {
@@ -195,23 +203,11 @@ func (parser *Parser) parseIfStmt() ast.Node {
 
 	parser.read()
 
-	var parseBlockWithBraces = func() ast.Node {
-		parser.expect(token.LEFT_CURLY_BRACE)
-
-		block := parser.parseBlock()
-
-		parser.expect(token.RIGHT_CURLY_BRACE)
-
-		return block
-	}
-
 	parser.expect(token.LEFT_PAREN)
-
 	expr := parser.parseExpr()
-
 	parser.expect(token.RIGHT_PAREN)
 
-	block := parseBlockWithBraces()
+	block := parser.parseBlockWithBraces()
 
 	node.AddCondition(expr, block)
 
@@ -223,17 +219,19 @@ func (parser *Parser) parseIfStmt() ast.Node {
 		if parser.cur.TokenType != token.IF {
 			lastElse = true
 
-			block := parseBlockWithBraces()
+			block := parser.parseBlockWithBraces()
 
 			node.ElseBlock = block
 			block.SetParent(node)
+
 		} else if parser.cur.TokenType == token.IF {
 			parser.read()
+
 			parser.expect(token.LEFT_PAREN)
 			expr := parser.parseExpr()
 			parser.expect(token.RIGHT_PAREN)
 
-			block := parseBlockWithBraces()
+			block := parser.parseBlockWithBraces()
 
 			node.AddCondition(expr, block)
 		} else {
