@@ -60,6 +60,10 @@ func (node *IdentifierNode) FindVariableBinding() *symbolTable.Binding {
 
 	scope := node.FindDeclarationScope()
 
+	if scope == nil {
+		return nil
+	}
+
 	return scope.FindBinding(identifier)
 }
 
