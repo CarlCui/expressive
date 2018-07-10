@@ -66,6 +66,9 @@ const (
 	IF
 	ELSE
 
+	FOR
+	IN
+
 	INT_KEYWORD
 	FLOAT_KEYWORD
 	CHAR_KEYWORD
@@ -131,6 +134,9 @@ var tokens = [...]string{
 
 	IF:   "if",
 	ELSE: "else",
+
+	FOR: "for",
+	IN:  "in",
 
 	INT_KEYWORD:    "int",
 	FLOAT_KEYWORD:  "float",

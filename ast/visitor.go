@@ -19,6 +19,9 @@ type Visitor interface {
 	VisitEnterIfStmtNode(node *IfStmtNode)
 	VisitLeaveIfStmtNode(node *IfStmtNode)
 
+	VisitEnterForStmtNode(node *ForStmtNode)
+	VisitLeaveForStmtNode(node *ForStmtNode)
+
 	VisitEnterPrintNode(node *PrintNode)
 	VisitLeavePrintNode(node *PrintNode)
 

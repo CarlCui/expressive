@@ -246,6 +246,24 @@ func (parser *Parser) parseIfStmt() ast.Node {
 	return node
 }
 
+func (parser *Parser) isForStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.FOR
+}
+
+func (parser *Parser) parseForStmt() ast.Node {
+	if !parser.isForStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("for statement")
+	}
+
+	node := ast.CreateForStmtNode(parser.cur)
+
+	parser.read()
+
+	parser.expect(token.LEFT_PAREN)
+
+	return nil
+}
+
 func (parser *Parser) isPrintStmtStart(tok *token.Token) bool {
 	return tok.TokenType == token.PRINT
 }
