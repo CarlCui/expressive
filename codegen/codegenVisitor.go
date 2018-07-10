@@ -320,6 +320,14 @@ func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
 	fragment.AddLabel(ifEndLabel)
 }
 
+func (visitor *CodegenVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
+
+}
+
 // exprs
 
 // VisitEnterTernaryOperatorNode do something

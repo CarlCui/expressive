@@ -165,6 +165,14 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNod
 	}
 }
 
+func (visitor *SemanticAnalysisVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
+
+}
+
 // exprs
 
 // VisitEnterTernaryOperatorNode do something
