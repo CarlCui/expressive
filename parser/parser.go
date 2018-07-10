@@ -101,17 +101,26 @@ func (parser *Parser) parseStmt() ast.Node {
 		return parser.syntaxErrorNode("statement")
 	}
 
+	var node ast.Node
+
 	if parser.isVariableDeclarationStmtStart(parser.cur) {
-		return parser.parseVariableDeclarationStmt()
+		node = parser.parseVariableDeclarationStmt()
+		parser.expect(token.SEMI)
 	} else if parser.isAssignmentStmtStart(parser.cur) {
-		return parser.parseAssignmentStmt()
+		node = parser.parseAssignmentStmt()
+		parser.expect(token.SEMI)
 	} else if parser.isPrintStmtStart(parser.cur) {
-		return parser.parsePrintStmt()
+		node = parser.parsePrintStmt()
+		parser.expect(token.SEMI)
 	} else if parser.isIfStmtStart(parser.cur) {
-		return parser.parseIfStmt()
+		node = parser.parseIfStmt()
 	}
 
-	panic("parseStmt: unreachable")
+	if node == nil {
+		panic("parseStmt: not a stmt")
+	}
+
+	return node
 }
 
 func (parser *Parser) isVariableDeclarationStmtStart(tok *token.Token) bool {
@@ -156,8 +165,6 @@ func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
 		node.Expr = expr
 	}
 
-	parser.expect(token.SEMI)
-
 	return &node
 }
 
@@ -184,8 +191,6 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 	expr.SetParent(&node)
 
 	node.Expr = expr
-
-	parser.expect(token.SEMI)
 
 	return &node
 }
@@ -295,8 +300,6 @@ func (parser *Parser) parsePrintStmt() ast.Node {
 	}
 
 	node.Args = args
-
-	parser.expect(token.SEMI)
 
 	return &node
 }
