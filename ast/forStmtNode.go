@@ -19,15 +19,21 @@ type ForStmtNode struct {
 // Accept is part of visitor pattern.
 func (node *ForStmtNode) Accept(visitor Visitor) {
 	visitor.VisitEnterForStmtNode(node)
-	node.VisitChildren(visitor)
+	node.VisitForExpr(visitor)
+	visitor.VisitEnterForStmtNodeBeforeBlockNode(node)
+	node.VisitForBlock(visitor)
 	visitor.VisitLeaveForStmtNode(node)
 }
 
-// VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
-func (node *ForStmtNode) VisitChildren(visitor Visitor) {
+// VisitForExpr traverses nodes in the for conditional expression.
+func (node *ForStmtNode) VisitForExpr(visitor Visitor) {
 	Accept(node.InitializationStmt, visitor)
 	Accept(node.ConditionExpr, visitor)
 	Accept(node.IterationStmt, visitor)
+}
+
+// VisitForBlock traverses the for block.
+func (node *ForStmtNode) VisitForBlock(visitor Visitor) {
 	Accept(node.Block, visitor)
 }
 
