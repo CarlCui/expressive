@@ -187,11 +187,13 @@ func (visitor *SemanticAnalysisVisitor) VisitEnterForStmtNode(node *ast.ForStmtN
 }
 
 func (visitor *SemanticAnalysisVisitor) VisitEnterForStmtNodeBeforeBlockNode(node *ast.ForStmtNode) {
-	conditionExprTyping := node.ConditionExpr.GetTyping()
-	if !conditionExprTyping.Equals(typing.BOOL) {
-		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(node.ConditionExpr.GetLocation(), "requires boolean type, but got "+conditionExprTyping.String())
-		return
+	if node.ConditionExpr != nil {
+		conditionExprTyping := node.ConditionExpr.GetTyping()
+		if !conditionExprTyping.Equals(typing.BOOL) {
+			node.SetTyping(typing.ERROR_TYPE)
+			visitor.log(node.ConditionExpr.GetLocation(), "requires boolean type, but got "+conditionExprTyping.String())
+			return
+		}
 	}
 }
 

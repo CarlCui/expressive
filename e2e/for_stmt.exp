@@ -1,0 +1,5 @@
+let i : int;
+
+for (i = 0; i < 5; i = i + 1) {
+    print "%d\n", i;
+}

@@ -1,0 +1,4 @@
+// use undeclared variable
+for (i = 1; ;) {
+
+}

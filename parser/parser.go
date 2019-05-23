@@ -297,26 +297,26 @@ func (parser *Parser) parseForStmt() ast.Node {
 	parser.expect(token.LEFT_PAREN)
 
 	if parser.isAssignmentStmtStart(parser.cur) {
-		node.InitializationStmt = parser.parseAssignmentStmt()
+		node.SetInitializationStmtNode(parser.parseAssignmentStmt())
 	} else if parser.isVariableDeclarationStmtStart(parser.cur) {
-		node.InitializationStmt = parser.parseVariableDeclarationStmt()
+		node.SetInitializationStmtNode(parser.parseVariableDeclarationStmt())
 	}
 	parser.expect(token.SEMI)
 
 	if parser.isExprStart(parser.cur) {
-		node.ConditionExpr = parser.parseExpr()
+		node.SetConditionExprNode(parser.parseExpr())
 	}
 	parser.expect(token.SEMI)
 
 	if parser.isStmtWithSemiStart(parser.cur) {
-		node.IterationStmt = parser.parseStmtWithSemi()
+		node.SetIterationStmtNode(parser.parseStmtWithSemi())
 	}
 	parser.expect(token.RIGHT_PAREN)
 
 	// body
 	body := parser.parseBlockWithBraces()
 
-	node.Block = body
+	node.SetBlockNode(body)
 
 	return node
 }

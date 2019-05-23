@@ -324,8 +324,55 @@ func (visitor *CodegenVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
 
 }
 
-func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
+func (visitor *CodegenVisitor) VisitEnterForStmtNodeBeforeBlockNode(node *ast.ForStmtNode) {
 
+}
+
+func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
+	fragment := visitor.newVoidCode(node)
+
+	forStartLabel := visitor.labeller.NewSet("for", "start")
+	forEndLabel := visitor.labeller.Label("for", "end")
+
+	initializationLabel := visitor.labeller.Label("for", "initialization")
+	conditionExprLabel := visitor.labeller.Label("for", "condition")
+	iterationStmtLabel := visitor.labeller.Label("for", "iteration")
+	blockLabel := visitor.labeller.Label("for", "block")
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(forStartLabel))
+	fragment.AddLabel(forStartLabel)
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(initializationLabel))
+	fragment.AddLabel(initializationLabel)
+	if node.InitializationStmt != nil {
+		fragment.Append(visitor.removeVoidCode(node.InitializationStmt))
+	}
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(conditionExprLabel))
+	fragment.AddLabel(conditionExprLabel)
+
+	if node.ConditionExpr != nil {
+		conditionExprFragment := visitor.removeValueCode(node.ConditionExpr)
+
+		fragment.Append(conditionExprFragment)
+
+		conditionResult := fragment.AddOperation("icmp eq i1 %v, 1", conditionExprFragment.GetResult())
+
+		fragment.AddInstruction("br i1 %v, label %v, label %v", conditionResult, AsLocalVariable(blockLabel), AsLocalVariable(forEndLabel))
+	}
+
+	fragment.AddLabel(blockLabel)
+	fragment.Append(visitor.removeVoidCode(node.Block))
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(iterationStmtLabel))
+	fragment.AddLabel(iterationStmtLabel)
+	if node.IterationStmt != nil {
+		fragment.Append(visitor.removeVoidCode(node.IterationStmt))
+	}
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(conditionExprLabel))
+
+	fragment.AddLabel(forEndLabel)
 }
 
 // exprs

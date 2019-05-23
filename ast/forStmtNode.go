@@ -37,6 +37,26 @@ func (node *ForStmtNode) VisitForBlock(visitor Visitor) {
 	Accept(node.Block, visitor)
 }
 
+func (node *ForStmtNode) SetInitializationStmtNode(stmt Node) {
+	node.InitializationStmt = stmt
+	stmt.SetParent(node)
+}
+
+func (node *ForStmtNode) SetConditionExprNode(expr Node) {
+	node.ConditionExpr = expr
+	expr.SetParent(node)
+}
+
+func (node *ForStmtNode) SetIterationStmtNode(stmt Node) {
+	node.IterationStmt = stmt
+	stmt.SetParent(node)
+}
+
+func (node *ForStmtNode) SetBlockNode(block Node) {
+	node.Block = block
+	block.SetParent(node)
+}
+
 func (node *ForStmtNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		NodeType           string

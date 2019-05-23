@@ -580,6 +580,7 @@ func TestParsingIfStmtWithElseIfElseFail(t *testing.T) {
 }
 
 func TestParsingForStmtWithAllEmpty(t *testing.T) {
+	// for (;;) {}
 	toks := []*token.Token{
 		&token.Token{TokenType: token.FOR},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -595,6 +596,7 @@ func TestParsingForStmtWithAllEmpty(t *testing.T) {
 }
 
 func TestParsingForStmtWithAssignmentInit(t *testing.T) {
+	// for (i = 0; i < 10; i = i + 1) {}
 	toks := []*token.Token{
 		&token.Token{TokenType: token.FOR},
 		&token.Token{TokenType: token.LEFT_PAREN},
