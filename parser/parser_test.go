@@ -309,6 +309,7 @@ func TestSkipCommentTokenWhenParsing_AfterEOF(t *testing.T) {
 }
 
 func TestNoEOFShouldFail(t *testing.T) {
+	// let bar: int; (no EOF)
 	toks := []*token.Token{
 		&token.Token{TokenType: token.LET},
 		&token.Token{TokenType: token.IDENTIFIER, Raw: "bar"},
@@ -321,6 +322,7 @@ func TestNoEOFShouldFail(t *testing.T) {
 }
 
 func TestParsingPrintStmt(t *testing.T) {
+	// print "123";
 	toks := []*token.Token{
 		&token.Token{TokenType: token.PRINT},
 		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
@@ -332,6 +334,7 @@ func TestParsingPrintStmt(t *testing.T) {
 }
 
 func TestParsingPrintStmtWithOneArg(t *testing.T) {
+	// print "123", 123;
 	toks := []*token.Token{
 		&token.Token{TokenType: token.PRINT},
 		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
@@ -345,6 +348,7 @@ func TestParsingPrintStmtWithOneArg(t *testing.T) {
 }
 
 func TestParsingPrintStmtWithMultipleArgs(t *testing.T) {
+	// print "123", 123, 123.5;
 	toks := []*token.Token{
 		&token.Token{TokenType: token.PRINT},
 		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
@@ -360,6 +364,7 @@ func TestParsingPrintStmtWithMultipleArgs(t *testing.T) {
 }
 
 func TestParsingPrintStmtWithMultipleArgs_Fail(t *testing.T) {
+	// print "123", 123,;
 	toks := []*token.Token{
 		&token.Token{TokenType: token.PRINT},
 		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
@@ -374,6 +379,11 @@ func TestParsingPrintStmtWithMultipleArgs_Fail(t *testing.T) {
 }
 
 func TestParsingIfStmtWithNoElse(t *testing.T) {
+	/*
+		if (true) {
+			print "123", 123;
+		}
+	*/
 	toks := []*token.Token{
 		&token.Token{TokenType: token.IF},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -393,6 +403,13 @@ func TestParsingIfStmtWithNoElse(t *testing.T) {
 }
 
 func TestParsingIfStmtWithElse(t *testing.T) {
+	/*
+		if (true) {
+			print "123", 123;
+		} else {
+			print "123", 123;
+		}
+	*/
 	toks := []*token.Token{
 		&token.Token{TokenType: token.IF},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -420,6 +437,13 @@ func TestParsingIfStmtWithElse(t *testing.T) {
 }
 
 func TestParsingIfStmtWithIfElse(t *testing.T) {
+	/*
+		if (true) {
+			print "123", 123;
+		} else if (false) {
+			print "123", 123;
+		}
+	*/
 	toks := []*token.Token{
 		&token.Token{TokenType: token.IF},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -451,6 +475,15 @@ func TestParsingIfStmtWithIfElse(t *testing.T) {
 }
 
 func TestParsingIfStmtWithIfElseElse(t *testing.T) {
+	/*
+		if (true) {
+			print "123", 123;
+		} else if (false) {
+			print "123", 123;
+		} else {
+			print "123", 123;
+		}
+	*/
 	toks := []*token.Token{
 		&token.Token{TokenType: token.IF},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -490,6 +523,17 @@ func TestParsingIfStmtWithIfElseElse(t *testing.T) {
 }
 
 func TestParsingIfStmtWithIfElseIfElseElse(t *testing.T) {
+	/*
+		if (true) {
+			print "123", 123;
+		} else if (false) {
+			print "123", 123;
+		} else if (false) {
+			print "123", 123;
+		} else {
+			print "123", 123;
+		}
+	*/
 	toks := []*token.Token{
 		&token.Token{TokenType: token.IF},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -541,6 +585,15 @@ func TestParsingIfStmtWithIfElseIfElseElse(t *testing.T) {
 }
 
 func TestParsingIfStmtWithElseIfElseFail(t *testing.T) {
+	/*
+		if (true) {
+			print "123", 123;
+		} else {
+			print "123", 123;
+		} else if (false) {
+			print "123", 123;
+		}
+	*/
 	toks := []*token.Token{
 		&token.Token{TokenType: token.IF},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -623,6 +676,7 @@ func TestParsingForStmtWithAssignmentInit(t *testing.T) {
 }
 
 func TestParsingForStmtWithDeclarationInit(t *testing.T) {
+	// for (let i: int = 0; i < 10; i = i + 1) {}
 	toks := []*token.Token{
 		&token.Token{TokenType: token.FOR},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -652,6 +706,7 @@ func TestParsingForStmtWithDeclarationInit(t *testing.T) {
 }
 
 func TestParsingForStmtWithInitEmpty(t *testing.T) {
+	// for (; i < 10; ) {}
 	toks := []*token.Token{
 		&token.Token{TokenType: token.FOR},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -670,6 +725,7 @@ func TestParsingForStmtWithInitEmpty(t *testing.T) {
 }
 
 func TestParsingForStmtWithConditionEmpty(t *testing.T) {
+	// for (let i: int = 0;;i = i + 1) {}
 	toks := []*token.Token{
 		&token.Token{TokenType: token.FOR},
 		&token.Token{TokenType: token.LEFT_PAREN},
@@ -696,6 +752,7 @@ func TestParsingForStmtWithConditionEmpty(t *testing.T) {
 }
 
 func TestParsingForStmtWithIterationEmpty(t *testing.T) {
+	// for (let i: int = 0; i < 10;) {}
 	toks := []*token.Token{
 		&token.Token{TokenType: token.FOR},
 		&token.Token{TokenType: token.LEFT_PAREN},
