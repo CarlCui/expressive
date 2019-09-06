@@ -3,3 +3,13 @@ let i : int;
 for (i = 0; i < 5; i = i + 1) {
     print "%d\n", i;
 }
+
+for (let i = 5; i >= 0; i = i - 1) {
+    print "%d\n", i;
+}
+
+for (let j = 0; j < 10; j = j + 1) {
+    if (j > 5) {
+        print "%d\n", j;
+    }
+}
