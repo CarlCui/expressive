@@ -54,13 +54,19 @@ func (gen *OperatorCodegen) GenerateCode() {
 
 func (gen *OperatorCodegen) generateComparison() {
 	var opcode string
+
+	var conditionCodePrefix string // signed, unsigned, ordered or unordered depending on the typing
+
 	switch gen.typing {
 	case typing.INT:
 		opcode = "icmp "
+		conditionCodePrefix = "s" // signed
 	case typing.BOOL:
 		opcode = "icmp "
+		conditionCodePrefix = "u" // does not matter if signed or unsigned
 	case typing.FLOAT:
 		opcode = "fcmp "
+		conditionCodePrefix = "o" // ordered, since neither can be QNAN
 	// TODO: implement string and char
 	default:
 		gen.panicOnMismatchCodegen()
@@ -68,34 +74,34 @@ func (gen *OperatorCodegen) generateComparison() {
 
 	switch gen.operator {
 	case signature.GREATER:
-		opcode += "ugt"
+		opcode += conditionCodePrefix + "gt"
 	case signature.GREATER_OR_EQUAL:
-		opcode += "uge"
+		opcode += conditionCodePrefix + "ge"
 	case signature.LESS:
-		opcode += "ult"
+		opcode += conditionCodePrefix + "lt"
 	case signature.LESS_OR_EQUAL:
-		opcode += "ule"
+		opcode += conditionCodePrefix + "le"
 	case signature.SHALLOW_EQUAL:
 		if gen.typing == typing.FLOAT {
-			opcode += "ueq"
+			opcode += conditionCodePrefix + "eq"
 		} else {
 			opcode += "eq"
 		}
 	case signature.SHALLOW_NOT_EQUAL:
 		if gen.typing == typing.FLOAT {
-			opcode += "une"
+			opcode += conditionCodePrefix + "ne"
 		} else {
 			opcode += "ne"
 		}
 	case signature.DEEP_EQUAL:
 		if gen.typing == typing.FLOAT {
-			opcode += "ueq"
+			opcode += conditionCodePrefix + "eq"
 		} else {
 			opcode += "eq"
 		}
 	case signature.DEEP_NOT_EQUAL:
 		if gen.typing == typing.FLOAT {
-			opcode += "une"
+			opcode += conditionCodePrefix + "ne"
 		} else {
 			opcode += "ne"
 		}

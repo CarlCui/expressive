@@ -42,12 +42,37 @@ func (scope *Scope) CreateBinding(identifier string, locator locator.Locator, ty
 	return binding
 }
 
+// CreateBindingCannotBeShadowed creates a binding associated with an identifier that cannot be shadowed in descendent scopes
+func (scope *Scope) CreateBindingCannotBeShadowed(identifier string, locator locator.Locator, typing typing.Typing) *Binding {
+	binding := CreateBindingCannotBeShadowed(locator, typing)
+
+	scope.symbolTable.Install(identifier, binding)
+
+	return binding
+}
+
 func (scope *Scope) FindBinding(identifier string) *Binding {
 	return scope.symbolTable.Lookup(identifier)
 }
 
 func (scope *Scope) VariableDeclared(identifier string) bool {
 	return scope.FindBinding(identifier) != nil
+}
+
+func (scope *Scope) VariableCanBeShadowed(identifier string) bool {
+	localScope := scope
+
+	for localScope != nil {
+		binding := localScope.FindBinding(identifier)
+
+		if binding != nil && binding.CanBeShadowed == false {
+			return false
+		}
+
+		localScope = localScope.BaseScope
+	}
+
+	return true
 }
 
 func (scope *Scope) GetScopeIdentifier() string {

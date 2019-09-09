@@ -84,7 +84,26 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 		return
 	}
 
-	binding := scope.CreateBinding(identifier.Tok.Raw, identifier.Tok.Locator, resolvedTyping)
+	if !scope.VariableCanBeShadowed(identifier.Tok.Raw) {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.log(identifier.GetLocation(), "variable \""+identifier.Tok.Raw+"\" cannot be shadowed, thus already been declared")
+		return
+	}
+
+	isDeclaringCanBeShadowed := func() bool {
+		_, ok := node.Parent.(*ast.ForStmtNode)
+
+		return ok
+	}
+
+	var binding *symbolTable.Binding
+
+	if !isDeclaringCanBeShadowed() {
+		binding = scope.CreateBinding(identifier.Tok.Raw, identifier.Tok.Locator, resolvedTyping)
+	} else {
+		binding = scope.CreateBindingCannotBeShadowed(identifier.Tok.Raw, identifier.Tok.Locator, resolvedTyping)
+	}
+
 	identifier.SetTyping(resolvedTyping)
 	identifier.SetBinding(binding)
 
@@ -163,6 +182,27 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNod
 			return
 		}
 	}
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
+	localScope := node.GetLocalScope()
+	newScope := symbolTable.CreateScope(localScope)
+	node.SetScope(newScope)
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitEnterForStmtNodeBeforeBlockNode(node *ast.ForStmtNode) {
+	if node.ConditionExpr != nil {
+		conditionExprTyping := node.ConditionExpr.GetTyping()
+		if !conditionExprTyping.Equals(typing.BOOL) {
+			node.SetTyping(typing.ERROR_TYPE)
+			visitor.log(node.ConditionExpr.GetLocation(), "requires boolean type, but got "+conditionExprTyping.String())
+			return
+		}
+	}
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
+	node.SetTyping(typing.VOID)
 }
 
 // exprs

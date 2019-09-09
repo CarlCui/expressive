@@ -61,7 +61,7 @@ _forStmt_ := `for` `(` _forExpr_ | _forInExpr_ `)` _blockStmt_
 
 _forExpr_ := _forInitialization_? `;` _forConditionExpr_? `;` _forIterationStmt_?
 
-_forInitialization_ := _assignmentStmt_
+_forInitialization_ := _assignmentStmt_ | _declarationStmt_
 
 _forConditionExpr_ := _expr_
 
@@ -72,7 +72,16 @@ _forInExpr_ := _identifier_ (`,` _identifier_)? `in` _expr_
 ### normal for
 
 ```
+let i: int;
 for (i = 0; i < 5; i ++) {
+
+}
+```
+
+or
+
+```
+for (let i = 0; i < 5; i ++) {
 
 }
 ```

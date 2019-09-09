@@ -52,14 +52,7 @@ func (parser *Parser) parseProgram() ast.Node {
 	return &node
 }
 
-func (parser *Parser) isBlockStart(tok *token.Token) bool {
-	return parser.isStmtStart(tok)
-}
-
 func (parser *Parser) parseBlock() ast.Node {
-	if !parser.isBlockStart(parser.cur) {
-		return parser.syntaxErrorNode("block")
-	}
 
 	var node ast.BlockNode
 	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
@@ -90,10 +83,7 @@ func (parser *Parser) parseBlockWithBraces() ast.Node {
 // Stmts
 
 func (parser *Parser) isStmtStart(tok *token.Token) bool {
-	return parser.isVariableDeclarationStmtStart(tok) ||
-		parser.isAssignmentStmtStart(tok) ||
-		parser.isPrintStmtStart(tok) ||
-		parser.isIfStmtStart(tok)
+	return parser.isStmtWithSemiStart(tok) || parser.isStmtWithoutSemiStart(tok)
 }
 
 func (parser *Parser) parseStmt() ast.Node {
@@ -101,17 +91,65 @@ func (parser *Parser) parseStmt() ast.Node {
 		return parser.syntaxErrorNode("statement")
 	}
 
-	if parser.isVariableDeclarationStmtStart(parser.cur) {
-		return parser.parseVariableDeclarationStmt()
-	} else if parser.isAssignmentStmtStart(parser.cur) {
-		return parser.parseAssignmentStmt()
-	} else if parser.isPrintStmtStart(parser.cur) {
-		return parser.parsePrintStmt()
-	} else if parser.isIfStmtStart(parser.cur) {
-		return parser.parseIfStmt()
+	var node ast.Node
+
+	if parser.isStmtWithSemiStart(parser.cur) {
+		node = parser.parseStmtWithSemi()
+		parser.expect(token.SEMI)
+	} else if parser.isStmtWithoutSemiStart(parser.cur) {
+		node = parser.parseStmtWithoutSemi()
 	}
 
-	panic("parseStmt: unreachable")
+	if node == nil {
+		panic("parseStmt: not a stmt")
+	}
+
+	return node
+}
+
+func (parser *Parser) isStmtWithSemiStart(tok *token.Token) bool {
+	return parser.isVariableDeclarationStmtStart(tok) ||
+		parser.isAssignmentStmtStart(tok) ||
+		parser.isPrintStmtStart(tok)
+}
+
+func (parser *Parser) parseStmtWithSemi() ast.Node {
+	if !parser.isStmtWithSemiStart(parser.cur) {
+		return parser.syntaxErrorNode("statement with semi")
+	}
+
+	var node ast.Node
+
+	if parser.isVariableDeclarationStmtStart(parser.cur) {
+		node = parser.parseVariableDeclarationStmt()
+	} else if parser.isAssignmentStmtStart(parser.cur) {
+		node = parser.parseAssignmentStmt()
+	} else if parser.isPrintStmtStart(parser.cur) {
+		node = parser.parsePrintStmt()
+	}
+
+	return node
+}
+
+func (parser *Parser) isStmtWithoutSemiStart(tok *token.Token) bool {
+	return parser.isIfStmtStart(tok) ||
+		parser.isForStmtStart(tok)
+}
+
+func (parser *Parser) parseStmtWithoutSemi() ast.Node {
+	if !parser.isStmtWithoutSemiStart(parser.cur) {
+		return parser.syntaxErrorNode("statement without semi")
+	}
+
+	var node ast.Node
+
+	if parser.isIfStmtStart(parser.cur) {
+		node = parser.parseIfStmt()
+	} else if parser.isForStmtStart(parser.cur) {
+		node = parser.parseForStmt()
+	}
+
+	return node
 }
 
 func (parser *Parser) isVariableDeclarationStmtStart(tok *token.Token) bool {
@@ -156,8 +194,6 @@ func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
 		node.Expr = expr
 	}
 
-	parser.expect(token.SEMI)
-
 	return &node
 }
 
@@ -184,8 +220,6 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 	expr.SetParent(&node)
 
 	node.Expr = expr
-
-	parser.expect(token.SEMI)
 
 	return &node
 }
@@ -246,6 +280,47 @@ func (parser *Parser) parseIfStmt() ast.Node {
 	return node
 }
 
+func (parser *Parser) isForStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.FOR
+}
+
+func (parser *Parser) parseForStmt() ast.Node {
+	if !parser.isForStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("for statement")
+	}
+
+	node := ast.CreateForStmtNode(parser.cur)
+
+	parser.read()
+
+	// condition
+	parser.expect(token.LEFT_PAREN)
+
+	if parser.isAssignmentStmtStart(parser.cur) {
+		node.SetInitializationStmtNode(parser.parseAssignmentStmt())
+	} else if parser.isVariableDeclarationStmtStart(parser.cur) {
+		node.SetInitializationStmtNode(parser.parseVariableDeclarationStmt())
+	}
+	parser.expect(token.SEMI)
+
+	if parser.isExprStart(parser.cur) {
+		node.SetConditionExprNode(parser.parseExpr())
+	}
+	parser.expect(token.SEMI)
+
+	if parser.isStmtWithSemiStart(parser.cur) {
+		node.SetIterationStmtNode(parser.parseStmtWithSemi())
+	}
+	parser.expect(token.RIGHT_PAREN)
+
+	// body
+	body := parser.parseBlockWithBraces()
+
+	node.SetBlockNode(body)
+
+	return node
+}
+
 func (parser *Parser) isPrintStmtStart(tok *token.Token) bool {
 	return tok.TokenType == token.PRINT
 }
@@ -277,8 +352,6 @@ func (parser *Parser) parsePrintStmt() ast.Node {
 	}
 
 	node.Args = args
-
-	parser.expect(token.SEMI)
 
 	return &node
 }
