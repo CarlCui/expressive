@@ -90,11 +90,15 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveVariableDeclarationNode(node *
 		return
 	}
 
-	_, ok := node.Parent.(*ast.ForStmtNode)
+	isDeclaringCanBeShadowed := func() bool {
+		_, ok := node.Parent.(*ast.ForStmtNode)
+
+		return ok
+	}
 
 	var binding *symbolTable.Binding
 
-	if !ok {
+	if !isDeclaringCanBeShadowed() {
 		binding = scope.CreateBinding(identifier.Tok.Raw, identifier.Tok.Locator, resolvedTyping)
 	} else {
 		binding = scope.CreateBindingCannotBeShadowed(identifier.Tok.Raw, identifier.Tok.Locator, resolvedTyping)
