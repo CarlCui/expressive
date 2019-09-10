@@ -66,6 +66,7 @@ const (
 	IF
 	ELSE
 
+	WHILE
 	FOR
 	IN
 
@@ -132,8 +133,9 @@ var tokens = [...]string{
 	LET:   "let",
 	CONST: "const",
 
-	IF:   "if",
-	ELSE: "else",
+	WHILE: "while",
+	IF:    "if",
+	ELSE:  "else",
 
 	FOR: "for",
 	IN:  "in",

@@ -320,6 +320,39 @@ func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
 	fragment.AddLabel(ifEndLabel)
 }
 
+func (visitor *CodegenVisitor) VisitEnterWhileStmtNode(node *ast.WhileStmtNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) {
+	fragment := visitor.newVoidCode(node)
+
+	whileStartLabel := visitor.labeller.NewSet("while", "start")
+	whileEndLabel := visitor.labeller.Label("while", "end")
+	whileConditionExprLabel := visitor.labeller.Label("while", "condition")
+	whileBlockLabel := visitor.labeller.Label("while", "block")
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(whileStartLabel))
+	fragment.AddLabel(whileStartLabel)
+	fragment.AddInstruction("br label %v", AsLocalVariable(whileConditionExprLabel))
+	fragment.AddLabel(whileConditionExprLabel)
+
+	conditionExprFragment := visitor.removeValueCode(node.ConditionExpr)
+
+	fragment.Append(conditionExprFragment)
+
+	conditionResult := fragment.AddOperation("icmp eq i1 %v, 1", conditionExprFragment.GetResult())
+
+	fragment.AddInstruction("br i1 %v, label %v, label %v", conditionResult, AsLocalVariable(whileBlockLabel), AsLocalVariable(whileEndLabel))
+
+	fragment.AddLabel(whileBlockLabel)
+	fragment.Append(visitor.removeVoidCode(node.Block))
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(whileConditionExprLabel))
+
+	fragment.AddLabel(whileEndLabel)
+}
+
 func (visitor *CodegenVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
 
 }

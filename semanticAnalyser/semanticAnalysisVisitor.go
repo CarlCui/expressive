@@ -1,12 +1,15 @@
 package semanticAnalyser
 
-import "github.com/carlcui/expressive/ast"
-import "github.com/carlcui/expressive/symbolTable"
-import "github.com/carlcui/expressive/typing"
-import "github.com/carlcui/expressive/token"
-import "github.com/carlcui/expressive/logger"
-import "github.com/carlcui/expressive/signature"
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/carlcui/expressive/ast"
+	"github.com/carlcui/expressive/logger"
+	"github.com/carlcui/expressive/signature"
+	"github.com/carlcui/expressive/symbolTable"
+	"github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/typing"
+)
 
 // SemanticAnalysisVisitor is the general semantic analyser using visitor pattern
 type SemanticAnalysisVisitor struct {
@@ -181,6 +184,19 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNod
 			visitor.log(conditionExpr.GetLocation(), "requires boolean type, but got "+conditionExprTyping.String())
 			return
 		}
+	}
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitEnterWhileStmtNode(node *ast.WhileStmtNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) {
+	conditionExprTyping := node.ConditionExpr.GetTyping()
+	if !conditionExprTyping.Equals(typing.BOOL) {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.log(node.ConditionExpr.GetLocation(), "requires boolean type, but got "+conditionExprTyping.String())
+		return
 	}
 }
 

@@ -775,3 +775,54 @@ func TestParsingForStmtWithIterationEmpty(t *testing.T) {
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
 }
+
+func TestParsingWhileStmt(t *testing.T) {
+	// while (i < 3) {}
+	toks := []*token.Token{
+		&token.Token{TokenType: token.WHILE},
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
+		&token.Token{TokenType: token.LESS},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "3"},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
+		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingWhileStmtWithInvalidConditionExpr(t *testing.T) {
+	// while (let i: int = 0) {}
+	toks := []*token.Token{
+		&token.Token{TokenType: token.WHILE},
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.INT_KEYWORD},
+		&token.Token{TokenType: token.ASSIGN},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
+		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}
+
+func TestParsingWhileStmtWithEmptyConditionExpr(t *testing.T) {
+	// while () {}
+	toks := []*token.Token{
+		&token.Token{TokenType: token.WHILE},
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
+		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}
