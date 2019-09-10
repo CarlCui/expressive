@@ -18,6 +18,7 @@ type WhileStmtNode struct {
 func (node *WhileStmtNode) Accept(visitor Visitor) {
 	visitor.VisitEnterWhileStmtNode(node)
 	Accept(node.ConditionExpr, visitor)
+	Accept(node.Block, visitor)
 	visitor.VisitLeaveWhileStmtNode(node)
 }
 
