@@ -192,7 +192,12 @@ func (visitor *SemanticAnalysisVisitor) VisitEnterWhileStmtNode(node *ast.WhileS
 }
 
 func (visitor *SemanticAnalysisVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) {
-
+	conditionExprTyping := node.ConditionExpr.GetTyping()
+	if !conditionExprTyping.Equals(typing.BOOL) {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.log(node.ConditionExpr.GetLocation(), "requires boolean type, but got "+conditionExprTyping.String())
+		return
+	}
 }
 
 func (visitor *SemanticAnalysisVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
