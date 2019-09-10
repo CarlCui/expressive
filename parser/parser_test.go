@@ -812,3 +812,17 @@ func TestParsingWhileStmtWithInvalidConditionExpr(t *testing.T) {
 
 	parseWithMockTokens(toks, shouldHaveError(t))
 }
+
+func TestParsingWhileStmtWithEmptyConditionExpr(t *testing.T) {
+	// while () {}
+	toks := []*token.Token{
+		&token.Token{TokenType: token.WHILE},
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
+		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}
