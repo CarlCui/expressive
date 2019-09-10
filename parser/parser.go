@@ -110,7 +110,8 @@ func (parser *Parser) parseStmt() ast.Node {
 func (parser *Parser) isStmtWithSemiStart(tok *token.Token) bool {
 	return parser.isVariableDeclarationStmtStart(tok) ||
 		parser.isAssignmentStmtStart(tok) ||
-		parser.isPrintStmtStart(tok)
+		parser.isPrintStmtStart(tok) ||
+		parser.isBreakStmtStart(tok)
 }
 
 func (parser *Parser) parseStmtWithSemi() ast.Node {
@@ -126,6 +127,8 @@ func (parser *Parser) parseStmtWithSemi() ast.Node {
 		node = parser.parseAssignmentStmt()
 	} else if parser.isPrintStmtStart(parser.cur) {
 		node = parser.parsePrintStmt()
+	} else if parser.isBreakStmtStart(parser.cur) {
+		node = parser.parseBreakStmt()
 	}
 
 	return node
@@ -346,6 +349,22 @@ func (parser *Parser) parseForStmt() ast.Node {
 	body := parser.parseBlockWithBraces()
 
 	node.SetBlockNode(body)
+
+	return node
+}
+
+func (parser *Parser) isBreakStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.BREAK
+}
+
+func (parser *Parser) parseBreakStmt() ast.Node {
+	if !parser.isBreakStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("break statement")
+	}
+
+	node := ast.CreateBreakNode(parser.cur)
+
+	parser.read()
 
 	return node
 }

@@ -826,3 +826,26 @@ func TestParsingWhileStmtWithEmptyConditionExpr(t *testing.T) {
 
 	parseWithMockTokens(toks, shouldHaveError(t))
 }
+
+func TestBreakNode(t *testing.T) {
+	// while () {}
+	toks := []*token.Token{
+		&token.Token{TokenType: token.BREAK},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestBreakNodeInvalid(t *testing.T) {
+	// while () {}
+	toks := []*token.Token{
+		&token.Token{TokenType: token.BREAK},
+		&token.Token{TokenType: token.LET},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}

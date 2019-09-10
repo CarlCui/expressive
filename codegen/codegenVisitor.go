@@ -321,14 +321,14 @@ func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
 }
 
 func (visitor *CodegenVisitor) VisitEnterWhileStmtNode(node *ast.WhileStmtNode) {
-
+	node.EndLabel = visitor.labeller.NewSet("while", "end")
 }
 
 func (visitor *CodegenVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) {
 	fragment := visitor.newVoidCode(node)
 
 	whileStartLabel := visitor.labeller.NewSet("while", "start")
-	whileEndLabel := visitor.labeller.Label("while", "end")
+	whileEndLabel := node.EndLabel
 	whileConditionExprLabel := visitor.labeller.Label("while", "condition")
 	whileBlockLabel := visitor.labeller.Label("while", "block")
 
@@ -354,7 +354,7 @@ func (visitor *CodegenVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) 
 }
 
 func (visitor *CodegenVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
-
+	node.EndLabel = visitor.labeller.NewSet("for", "end")
 }
 
 func (visitor *CodegenVisitor) VisitEnterForStmtNodeBeforeBlockNode(node *ast.ForStmtNode) {
@@ -365,7 +365,7 @@ func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
 	fragment := visitor.newVoidCode(node)
 
 	forStartLabel := visitor.labeller.NewSet("for", "start")
-	forEndLabel := visitor.labeller.Label("for", "end")
+	forEndLabel := node.EndLabel
 
 	initializationLabel := visitor.labeller.Label("for", "initialization")
 	conditionExprLabel := visitor.labeller.Label("for", "condition")
@@ -406,6 +406,14 @@ func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
 	fragment.AddInstruction("br label %v", AsLocalVariable(conditionExprLabel))
 
 	fragment.AddLabel(forEndLabel)
+}
+
+func (visitor *CodegenVisitor) VisitBreakNode(node *ast.BreakNode) {
+	fragment := visitor.newVoidCode(node)
+
+	breakLabel := node.FindBreakLabel()
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(breakLabel))
 }
 
 // exprs

@@ -1,0 +1,14 @@
+let i: int;
+let j: int;
+
+for (i = 0; i < 5; i = i + 1) {
+    for (j = 0; j < 5; j = j + 1) {
+        print "%d %d\n", i, j;
+
+        if (i > 2) {
+            break;
+        }
+    }
+}
+
+print "%d %d\n", i, j;
