@@ -133,7 +133,8 @@ func (parser *Parser) parseStmtWithSemi() ast.Node {
 
 func (parser *Parser) isStmtWithoutSemiStart(tok *token.Token) bool {
 	return parser.isIfStmtStart(tok) ||
-		parser.isForStmtStart(tok)
+		parser.isForStmtStart(tok) ||
+		parser.isWhileStmtStart(tok)
 }
 
 func (parser *Parser) parseStmtWithoutSemi() ast.Node {
@@ -147,6 +148,8 @@ func (parser *Parser) parseStmtWithoutSemi() ast.Node {
 		node = parser.parseIfStmt()
 	} else if parser.isForStmtStart(parser.cur) {
 		node = parser.parseForStmt()
+	} else if parser.isWhileStmtStart(parser.cur) {
+		node = parser.parseWhileStmt()
 	}
 
 	return node
@@ -276,6 +279,32 @@ func (parser *Parser) parseIfStmt() ast.Node {
 			break
 		}
 	}
+
+	return node
+}
+
+func (parser *Parser) isWhileStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.WHILE
+}
+
+func (parser *Parser) parseWhileStmt() ast.Node {
+	if !parser.isWhileStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("while statement")
+	}
+
+	node := ast.CreateWhileStmtNode(parser.cur)
+
+	parser.read()
+
+	parser.expect(token.LEFT_PAREN)
+
+	node.SetConditionExprNode(parser.parseExpr())
+
+	parser.expect(token.RIGHT_PAREN)
+
+	body := parser.parseBlockWithBraces()
+
+	node.SetBlockNode(body)
 
 	return node
 }

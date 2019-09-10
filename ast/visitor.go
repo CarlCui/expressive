@@ -19,6 +19,9 @@ type Visitor interface {
 	VisitEnterIfStmtNode(node *IfStmtNode)
 	VisitLeaveIfStmtNode(node *IfStmtNode)
 
+	VisitEnterWhileStmtNode(node *WhileStmtNode)
+	VisitLeaveWhileStmtNode(node *WhileStmtNode)
+
 	VisitEnterForStmtNode(node *ForStmtNode)
 	VisitEnterForStmtNodeBeforeBlockNode(node *ForStmtNode)
 	VisitLeaveForStmtNode(node *ForStmtNode)

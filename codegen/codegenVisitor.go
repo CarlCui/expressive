@@ -320,6 +320,14 @@ func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
 	fragment.AddLabel(ifEndLabel)
 }
 
+func (visitor *CodegenVisitor) VisitEnterWhileStmtNode(node *ast.WhileStmtNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) {
+
+}
+
 func (visitor *CodegenVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
 
 }
