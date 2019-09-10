@@ -69,6 +69,7 @@ const (
 	WHILE
 	FOR
 	IN
+	BREAK
 
 	INT_KEYWORD
 	FLOAT_KEYWORD
@@ -133,12 +134,13 @@ var tokens = [...]string{
 	LET:   "let",
 	CONST: "const",
 
-	WHILE: "while",
-	IF:    "if",
-	ELSE:  "else",
+	IF:   "if",
+	ELSE: "else",
 
-	FOR: "for",
-	IN:  "in",
+	WHILE: "while",
+	FOR:   "for",
+	IN:    "in",
+	BREAK: "break",
 
 	INT_KEYWORD:    "int",
 	FLOAT_KEYWORD:  "float",

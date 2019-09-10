@@ -14,6 +14,7 @@ type ForStmtNode struct {
 	ConditionExpr      Node
 	IterationStmt      Node
 	Block              Node
+	EndLabel           string
 }
 
 // Accept is part of visitor pattern.

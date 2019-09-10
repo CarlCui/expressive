@@ -26,6 +26,8 @@ type Visitor interface {
 	VisitEnterForStmtNodeBeforeBlockNode(node *ForStmtNode)
 	VisitLeaveForStmtNode(node *ForStmtNode)
 
+	VisitBreakNode(node *BreakNode)
+
 	VisitEnterPrintNode(node *PrintNode)
 	VisitLeavePrintNode(node *PrintNode)
 

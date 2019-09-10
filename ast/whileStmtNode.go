@@ -12,6 +12,7 @@ type WhileStmtNode struct {
 	*BaseNode
 	ConditionExpr Node
 	Block         Node
+	EndLabel      string
 }
 
 // Accept is part of visitor pattern.

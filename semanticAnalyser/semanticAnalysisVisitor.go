@@ -221,6 +221,16 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveForStmtNode(node *ast.ForStmtN
 	node.SetTyping(typing.VOID)
 }
 
+func (visitor *SemanticAnalysisVisitor) VisitBreakNode(node *ast.BreakNode) {
+	if node.FindNearestValidStatementNode() != nil {
+		node.SetTyping(typing.VOID)
+		return
+	}
+
+	node.SetTyping(typing.ERROR_TYPE)
+	visitor.log(node.GetLocation(), "has to be inside of for, while or switch statement block")
+}
+
 // exprs
 
 // VisitEnterTernaryOperatorNode do something

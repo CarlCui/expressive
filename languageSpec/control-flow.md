@@ -99,3 +99,30 @@ for (ele, i in someList) {
 
 }
 ```
+
+## break
+
+_breakStmt_ := `break` `;`
+
+A break statement must be inside of a for, while or switch block. Upon called, it will branch out to the end of the most inner for, while or switch block.
+
+e.g.
+
+```
+for (let i = 0; i < 4; i ++) { // first loop
+    for (let j = 0; j < 5; j ++) { // second loop
+        break; // this break will reach (1), not (2)
+
+        // some other code
+
+
+        // (1)
+    }
+
+
+    // some other code
+
+    //(2)
+}
+```
+
