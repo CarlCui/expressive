@@ -24,9 +24,9 @@ func (node *BreakNode) FindNearestValidStatementNode() Node {
 	for ascendentNode != nil {
 		_, isForStmt := ascendentNode.(*ForStmtNode)
 		_, isWhileStmt := ascendentNode.(*WhileStmtNode)
-		// add switch
+		_, isSwitchStmt := ascendentNode.(*SwitchStmtNode)
 
-		if isForStmt || isWhileStmt {
+		if isForStmt || isWhileStmt || isSwitchStmt {
 			node.SetTyping(typing.VOID)
 			return ascendentNode
 		}
@@ -48,6 +48,8 @@ func (node *BreakNode) FindBreakLabel() string {
 	case *ForStmtNode:
 		return stmtNode.EndLabel
 	case *WhileStmtNode:
+		return stmtNode.EndLabel
+	case *SwitchStmtNode:
 		return stmtNode.EndLabel
 	default:
 		panic(node.GetLocation() + "expecting finding valid statement node (for, while or switch)")

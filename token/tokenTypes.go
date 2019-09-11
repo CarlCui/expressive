@@ -71,6 +71,10 @@ const (
 	IN
 	BREAK
 
+	SWITCH
+	CASE
+	DEFAULT
+
 	INT_KEYWORD
 	FLOAT_KEYWORD
 	CHAR_KEYWORD
@@ -141,6 +145,10 @@ var tokens = [...]string{
 	FOR:   "for",
 	IN:    "in",
 	BREAK: "break",
+
+	SWITCH:  "switch",
+	CASE:    "case",
+	DEFAULT: "default",
 
 	INT_KEYWORD:    "int",
 	FLOAT_KEYWORD:  "float",

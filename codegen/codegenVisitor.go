@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/typing"
 
 	"github.com/carlcui/expressive/ast"
@@ -406,6 +407,113 @@ func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
 	fragment.AddInstruction("br label %v", AsLocalVariable(conditionExprLabel))
 
 	fragment.AddLabel(forEndLabel)
+}
+
+func (visitor *CodegenVisitor) VisitEnterSwitchStmtNode(node *ast.SwitchStmtNode) {
+	node.EndLabel = visitor.labeller.NewSet("switch", "end")
+}
+
+func (visitor *CodegenVisitor) VisitLeaveSwitchStmtNode(node *ast.SwitchStmtNode) {
+	testTyping := node.TestExpr.GetTyping()
+	cases := len(node.CaseExprs)
+
+	fragment := visitor.newVoidCode(node)
+
+	startLabel := visitor.labeller.NewSet("switch", "start")
+	endLabel := node.EndLabel
+
+	caseExprLabels := make([]string, cases)
+	caseBlockLabels := make([]string, cases)
+	defaultBlockLabel := visitor.labeller.Label("switch", "defaultBlock")
+
+	for i := 0; i < cases; i++ {
+		caseExprLabels[i] = visitor.labeller.Label("switch", "caseExpr", strconv.Itoa(i))
+		caseBlockLabels[i] = visitor.labeller.Label("switch", "caseBlock", strconv.Itoa(i))
+	}
+
+	fragment.AddInstruction("br label %v", AsLocalVariable(startLabel))
+	fragment.AddLabel(startLabel)
+
+	testExprFragment := visitor.removeValueCode(node.TestExpr)
+	testExprResult := testExprFragment.GetResult()
+
+	fragment.Append(testExprFragment)
+
+	// cases
+	for i := 0; i < cases; i++ {
+		caseExprLabel := caseExprLabels[i]
+		caseBlockLabel := caseBlockLabels[i]
+
+		fragment.AddInstruction("br label %v", AsLocalVariable(caseExprLabel))
+		fragment.AddLabel(caseExprLabel)
+
+		caseExprFragment := visitor.removeValueCode(node.CaseExprs[i])
+		caseExprResult := caseExprFragment.GetResult()
+
+		fragment.Append(caseExprFragment)
+
+		operatorCodegen := NewOperatorCodegen(nil, signature.SHALLOW_EQUAL, testTyping, nil, nil)
+
+		equalOperator := operatorCodegen.GenerateComparisonOpcode()
+
+		comparisonResult := fragment.AddOperation("%v %v %v, %v", equalOperator, testTyping.IrType(), testExprResult, caseExprResult)
+		truthResult := fragment.AddOperation("icmp eq i1 %v, 1", comparisonResult)
+
+		// If the current case passes, it should jump to the next non-empty block
+		// If the switch statement does not have a non-empty block, then it should jump to the endLabel
+
+		var jumpLabelWhenTruthy string
+
+		nextNonEmptyBlockIndex := node.FindTheNextNonEmptyBlockIndexAt(i)
+
+		if nextNonEmptyBlockIndex < cases {
+			jumpLabelWhenTruthy = caseBlockLabels[nextNonEmptyBlockIndex]
+		} else if !node.IsEmptyDefaultBlock() {
+			jumpLabelWhenTruthy = defaultBlockLabel
+		} else {
+			jumpLabelWhenTruthy = endLabel
+		}
+
+		var jumpLabelWhenFalsy string
+
+		if i+1 < cases {
+			jumpLabelWhenFalsy = caseExprLabels[i+1]
+		} else if !node.IsEmptyDefaultBlock() {
+			jumpLabelWhenFalsy = defaultBlockLabel
+		} else {
+			jumpLabelWhenFalsy = endLabel
+		}
+
+		fragment.AddInstruction("br i1 %v, label %v, label %v", truthResult, AsLocalVariable(jumpLabelWhenTruthy), AsLocalVariable(jumpLabelWhenFalsy))
+
+		if !node.IsEmptyCaseBlockAt(i) {
+			fragment.AddLabel(caseBlockLabel)
+			fragment.Append(visitor.removeVoidCode(node.CaseBlocks[i]))
+
+			var jumpLabelAfterCaseBlock string
+
+			nextNonEmptyBlockIndex := node.FindTheNextNonEmptyBlockIndexAt(i + 1)
+
+			if nextNonEmptyBlockIndex < cases {
+				jumpLabelAfterCaseBlock = caseBlockLabels[nextNonEmptyBlockIndex]
+			} else if !node.IsEmptyDefaultBlock() {
+				jumpLabelAfterCaseBlock = defaultBlockLabel
+			} else {
+				jumpLabelAfterCaseBlock = endLabel
+			}
+
+			fragment.AddInstruction("br label %v", AsLocalVariable(jumpLabelAfterCaseBlock))
+		}
+	}
+
+	// default
+	if !node.IsEmptyDefaultBlock() {
+		fragment.AddLabel(defaultBlockLabel)
+		fragment.Append(visitor.removeVoidCode(node.DefaultBlock))
+		fragment.AddInstruction("br label %v", AsLocalVariable(endLabel))
+	}
+
+	fragment.AddLabel(endLabel)
 }
 
 func (visitor *CodegenVisitor) VisitBreakNode(node *ast.BreakNode) {

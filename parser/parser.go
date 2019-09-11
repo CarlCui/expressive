@@ -137,7 +137,8 @@ func (parser *Parser) parseStmtWithSemi() ast.Node {
 func (parser *Parser) isStmtWithoutSemiStart(tok *token.Token) bool {
 	return parser.isIfStmtStart(tok) ||
 		parser.isForStmtStart(tok) ||
-		parser.isWhileStmtStart(tok)
+		parser.isWhileStmtStart(tok) ||
+		parser.isSwitchStmtStart(tok)
 }
 
 func (parser *Parser) parseStmtWithoutSemi() ast.Node {
@@ -153,6 +154,8 @@ func (parser *Parser) parseStmtWithoutSemi() ast.Node {
 		node = parser.parseForStmt()
 	} else if parser.isWhileStmtStart(parser.cur) {
 		node = parser.parseWhileStmt()
+	} else if parser.isSwitchStmtStart(parser.cur) {
+		node = parser.parseSwitchStmt()
 	}
 
 	return node
@@ -365,6 +368,53 @@ func (parser *Parser) parseBreakStmt() ast.Node {
 	node := ast.CreateBreakNode(parser.cur)
 
 	parser.read()
+
+	return node
+}
+
+func (parser *Parser) isSwitchStmtStart(tok *token.Token) bool {
+	return tok.TokenType == token.SWITCH
+}
+
+func (parser *Parser) parseSwitchStmt() ast.Node {
+	if !parser.isSwitchStmtStart(parser.cur) {
+		return parser.syntaxErrorNode("switch statement")
+	}
+
+	node := ast.CreateSwitchStmtNode(parser.cur)
+
+	parser.read()
+
+	parser.expect(token.LEFT_PAREN)
+
+	node.SetTestExpr(parser.parseExpr())
+
+	parser.expect(token.RIGHT_PAREN)
+
+	parser.expect(token.LEFT_CURLY_BRACE)
+
+	if parser.cur.TokenType != token.CASE {
+		return parser.syntaxErrorNode("at least one case")
+	}
+
+	for parser.cur.TokenType == token.CASE {
+		parser.read()
+
+		node.AppendCaseExpr(parser.parseExpr())
+
+		parser.expect(token.COLON)
+
+		node.AppendCaseBlock(parser.parseBlock())
+	}
+
+	if parser.cur.TokenType == token.DEFAULT {
+		parser.read()
+		parser.expect(token.COLON)
+
+		node.SetDefaultBlock(parser.parseBlock())
+	}
+
+	parser.expect(token.RIGHT_CURLY_BRACE)
 
 	return node
 }

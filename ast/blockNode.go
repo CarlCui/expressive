@@ -28,6 +28,10 @@ func (node *BlockNode) VisitChildren(visitor Visitor) {
 	}
 }
 
+func (node *BlockNode) IsEmptyBlock() bool {
+	return len(node.Stmts) == 0
+}
+
 func (node *BlockNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		NodeType string

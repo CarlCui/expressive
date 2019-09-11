@@ -1,0 +1,27 @@
+let a = 5;
+
+let b: int;
+
+// switch with fallthrough and reaching default
+
+switch (a) {
+case 1:
+    b = 1;
+case 5:
+    b = 5;
+    print "%d\n", b;
+case 6:
+    b = 6;
+    print "%d\n", b;
+case 7:
+    b = 7;
+    print "%d\n", b;
+case 8:
+    b = 8;
+    print "%d\n", b;
+default:
+    b = 9;
+    print "%d\n", b;
+}
+
+print "%d\n", b;
