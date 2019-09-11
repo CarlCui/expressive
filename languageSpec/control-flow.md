@@ -20,8 +20,6 @@ _switchStmt_ := `switch` `(` _expr_ `)` `{` _switchCase_* _defaultCase_? `}`
 
 _switchCase_ := `case` _expr_ `:` _stmt_* _breakStmt_?
 
-_breakStmt_ := `break` `;`
-
 _defaultCase_ := `default` `:` _stmt_*
 
 
