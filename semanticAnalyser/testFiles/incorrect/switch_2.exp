@@ -1,0 +1,6 @@
+let a = 5;
+
+switch(a) {
+    case a > 0:
+
+}
