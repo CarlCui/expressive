@@ -393,6 +393,10 @@ func (parser *Parser) parseSwitchStmt() ast.Node {
 
 	parser.expect(token.LEFT_CURLY_BRACE)
 
+	if parser.cur.TokenType != token.CASE {
+		return parser.syntaxErrorNode("at least one case")
+	}
+
 	for parser.cur.TokenType == token.CASE {
 		parser.read()
 

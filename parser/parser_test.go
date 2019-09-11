@@ -954,3 +954,77 @@ func TestSwitchStmt1(t *testing.T) {
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
 }
+
+func TestSwitchStmtWithoutDefault(t *testing.T) {
+	/*
+		switch (a) {
+		case 0:
+			b = 5;
+			break;
+		}
+	*/
+	toks := []*token.Token{
+		&token.Token{TokenType: token.SWITCH},
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
+		&token.Token{TokenType: token.CASE},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
+		&token.Token{TokenType: token.ASSIGN},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.BREAK},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestSwitchStmtWithEmptyCase(t *testing.T) {
+	/*
+		switch (a) {
+		default:
+			b = 9;
+		}
+	*/
+	toks := []*token.Token{
+		&token.Token{TokenType: token.SWITCH},
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
+		&token.Token{TokenType: token.DEFAULT},
+		&token.Token{TokenType: token.COLON},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
+		&token.Token{TokenType: token.ASSIGN},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "9"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}
+
+func TestSwitchStmtWithEmpty(t *testing.T) {
+	/*
+		switch (a) {
+		}
+	*/
+	toks := []*token.Token{
+		&token.Token{TokenType: token.SWITCH},
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
+		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}
