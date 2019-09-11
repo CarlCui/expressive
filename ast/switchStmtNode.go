@@ -21,6 +21,15 @@ type SwitchStmtNode struct {
 func (node *SwitchStmtNode) Accept(visitor Visitor) {
 	visitor.VisitEnterSwitchStmtNode(node)
 
+	Accept(node.TestExpr, visitor)
+	for i, caseExpr := range node.CaseExprs {
+		caseBlock := node.CaseBlocks[i]
+
+		Accept(caseExpr, visitor)
+		Accept(caseBlock, visitor)
+	}
+	Accept(node.DefaultBlock, visitor)
+
 	visitor.VisitLeaveSwitchStmtNode(node)
 }
 

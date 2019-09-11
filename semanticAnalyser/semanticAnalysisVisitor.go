@@ -221,6 +221,25 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveForStmtNode(node *ast.ForStmtN
 	node.SetTyping(typing.VOID)
 }
 
+func (visitor *SemanticAnalysisVisitor) VisitEnterSwitchStmtNode(node *ast.SwitchStmtNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveSwitchStmtNode(node *ast.SwitchStmtNode) {
+	testExprTyping := node.TestExpr.GetTyping()
+
+	for _, caseExpr := range node.CaseExprs {
+		caseExprTyping := caseExpr.GetTyping()
+
+		if !testExprTyping.Equals(caseExprTyping) {
+			node.SetTyping(typing.ERROR_TYPE)
+			visitor.log(caseExpr.GetLocation(), "has type "+caseExprTyping.String()+"does not match type of "+testExprTyping.String())
+		}
+	}
+
+	node.SetTyping(typing.VOID)
+}
+
 func (visitor *SemanticAnalysisVisitor) VisitBreakNode(node *ast.BreakNode) {
 	if node.FindNearestValidStatementNode() != nil {
 		node.SetTyping(typing.VOID)

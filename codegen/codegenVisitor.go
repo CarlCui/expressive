@@ -408,6 +408,14 @@ func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
 	fragment.AddLabel(forEndLabel)
 }
 
+func (visitor *CodegenVisitor) VisitEnterSwitchStmtNode(node *ast.SwitchStmtNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveSwitchStmtNode(node *ast.SwitchStmtNode) {
+
+}
+
 func (visitor *CodegenVisitor) VisitBreakNode(node *ast.BreakNode) {
 	fragment := visitor.newVoidCode(node)
 

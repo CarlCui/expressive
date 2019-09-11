@@ -1,0 +1,6 @@
+let a = 4;
+
+switch (a) {
+case 'a':
+    break;
+}
