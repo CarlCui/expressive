@@ -1,8 +1,11 @@
 package codegen
 
-import "github.com/carlcui/expressive/signature"
-import "github.com/carlcui/expressive/typing"
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/carlcui/expressive/signature"
+	"github.com/carlcui/expressive/typing"
+)
 
 type OperatorCodegen struct {
 	fragment *Fragment
@@ -52,7 +55,7 @@ func (gen *OperatorCodegen) GenerateCode() {
 	}
 }
 
-func (gen *OperatorCodegen) generateComparison() {
+func (gen *OperatorCodegen) GenerateComparisonOpcode() string {
 	var opcode string
 
 	var conditionCodePrefix string // signed, unsigned, ordered or unordered depending on the typing
@@ -108,6 +111,12 @@ func (gen *OperatorCodegen) generateComparison() {
 	default:
 		gen.panicOnMismatchCodegen()
 	}
+
+	return opcode
+}
+
+func (gen *OperatorCodegen) generateComparison() {
+	opcode := gen.GenerateComparisonOpcode()
 
 	gen.generateBinary(opcode)
 }

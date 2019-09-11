@@ -2,6 +2,7 @@ package ast
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
@@ -52,6 +53,48 @@ func (node *SwitchStmtNode) AppendCaseBlock(block Node) {
 func (node *SwitchStmtNode) SetDefaultBlock(block Node) {
 	node.DefaultBlock = block
 	block.SetParent(node)
+}
+
+func (node *SwitchStmtNode) IsEmptyCaseBlockAt(i int) bool {
+	cases := len(node.CaseBlocks)
+
+	if i >= cases {
+		panic(node.GetLocation() + " is trying to resolve case block " + strconv.Itoa(i) + " out of range of all case blocks " + strconv.Itoa(cases))
+	}
+
+	caseBlock, ok := node.CaseBlocks[i].(*BlockNode)
+
+	if !ok {
+		panic(node.CaseBlocks[i].GetLocation() + " is not a block stmt node")
+	}
+
+	return caseBlock.IsEmptyBlock()
+}
+
+func (node *SwitchStmtNode) IsEmptyDefaultBlock() bool {
+	if node.DefaultBlock == nil {
+		return true
+	}
+
+	defaultBlock, ok := node.DefaultBlock.(*BlockNode)
+
+	if !ok {
+		panic(node.DefaultBlock.GetLocation() + " is not a block stmt node")
+	}
+
+	return defaultBlock.IsEmptyBlock()
+}
+
+func (node *SwitchStmtNode) FindTheNextNonEmptyBlockIndexAt(i int) int {
+	cases := len(node.CaseBlocks)
+
+	for ; i < cases; i++ {
+		if !node.IsEmptyCaseBlockAt(i) {
+			break
+		}
+	}
+
+	return i
 }
 
 func (node *SwitchStmtNode) MarshalJSON() ([]byte, error) {

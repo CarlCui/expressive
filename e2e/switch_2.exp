@@ -2,11 +2,12 @@ let a = 5;
 
 let b: int;
 
+// switch with more complex cases
 switch (true) {
-case a > 4:
+case a > 7:
     b = 7;
     break;
-case a >= 0 && a <= 4:
+case a >= 0 && a <= 7:
     b = 10;
     break;
 }

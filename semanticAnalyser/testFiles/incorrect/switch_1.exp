@@ -1,6 +1,27 @@
-let a = 4;
+let a = 5;
 
-switch (a) {
-case 'a':
+let b: int;
+
+switch (a + 1) {
+case 1:
+    b = 3;
+    break;
+case 2:
+    b = 4;
+    break;
+default:
+    b = 5;
+}
+
+print "%d\n", b;
+
+switch (true) {
+case a > 4:
+    b = 7;
+    break;
+case a >= 0 && a <= 4:
+    b = 10;
     break;
 }
+
+print "%d\n", b;

@@ -1,0 +1,17 @@
+let a = 5;
+
+let b: int;
+
+// switch with multiple cases
+switch (a) {
+case 5:
+case 6:
+case 7:
+    b = 7;
+    break;
+case 8:
+    b = 8;
+    break;
+}
+
+print "%d\n", b;
