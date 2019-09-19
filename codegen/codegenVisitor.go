@@ -488,6 +488,10 @@ func (visitor *CodegenVisitor) VisitLeaveSwitchStmtNode(node *ast.SwitchStmtNode
 		equalOperator := operatorCodegen.GenerateComparisonInstr(fragment)
 
 		comparisonResult := equalOperator(testExprResult, caseExprResult)
+
+		instr := comparisonResult.(ir.Instruction)
+		fragment.CurrentBlock.Insts = append(fragment.CurrentBlock.Insts, instr)
+
 		truthResult := fragment.CurrentBlock.NewICmp(enum.IPredEQ, comparisonResult, constant.True)
 
 		// If the current case passes, it should jump to the next non-empty block
