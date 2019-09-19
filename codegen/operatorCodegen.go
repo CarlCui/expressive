@@ -287,7 +287,7 @@ func (gen *OperatorCodegen) generateLogicalAnd() {
 
 	gen.checkOperandsLength(2)
 
-	frag := NewBlocksFragment(VALUE)
+	frag := gen.fragment
 
 	frag1 := gen.operands[0]
 	frag2 := gen.operands[1]
@@ -304,10 +304,10 @@ func (gen *OperatorCodegen) generateLogicalAnd() {
 	condFalseBlock := ir.NewBlock(condFalse)
 	condFalseEvalBlock := ir.NewBlock(condFalseEval)
 
+	frag.Append(frag1)
+
 	frag.NewBlock(entry)
 	entryBlock := frag.CurrentBlock
-
-	frag.Append(frag1)
 
 	frag1IsTrue := frag.CurrentBlock.NewICmp(enum.IPredEQ, op1, constant.False)
 	frag.CurrentBlock.NewCondBr(frag1IsTrue, condTrueBlock, condFalseBlock)
@@ -322,8 +322,6 @@ func (gen *OperatorCodegen) generateLogicalAnd() {
 	instrPhi := frag.CurrentBlock.NewPhi(ir.NewIncoming(constant.False, entryBlock), ir.NewIncoming(instrAnd, condFalseEvalBlock))
 
 	frag.resultValue = instrPhi
-
-	gen.fragment.Append(frag)
 }
 
 func (gen *OperatorCodegen) generateLogicalOr() {
@@ -353,10 +351,11 @@ func (gen *OperatorCodegen) generateLogicalOr() {
 	condFalseBlock := ir.NewBlock(condFalse)
 	condFalseEvalBlock := ir.NewBlock(condFalseEval)
 
-	frag := NewBlocksFragment(VALUE)
-	frag.AddBlock(entryBlock)
+	frag := gen.fragment
 
 	frag.Append(frag1)
+
+	frag.AddBlock(entryBlock)
 
 	frag1IsTrue := frag.CurrentBlock.NewICmp(enum.IPredEQ, op1, constant.True)
 	frag.CurrentBlock.NewCondBr(frag1IsTrue, condTrueBlock, condFalseBlock)
@@ -392,7 +391,7 @@ func (gen *OperatorCodegen) generateLogicalNot() {
 
 	op1 := frag1.GetResult()
 
-	frag := NewBlocksFragment(VALUE)
+	frag := gen.fragment
 	frag.NewBlock("")
 
 	frag.Append(frag1)
@@ -400,8 +399,6 @@ func (gen *OperatorCodegen) generateLogicalNot() {
 	result := frag.CurrentBlock.NewXor(op1, constant.True)
 
 	frag.resultValue = result
-
-	gen.fragment.Append(frag)
 }
 
 func (gen *OperatorCodegen) generateIfElse() {
@@ -423,7 +420,7 @@ func (gen *OperatorCodegen) generateIfElse() {
 	op2 := frag2.GetResult()
 	op3 := frag3.GetResult()
 
-	frag := NewBlocksFragment(VALUE)
+	frag := gen.fragment
 
 	frag.AddBlock(entry)
 
