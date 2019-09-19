@@ -347,6 +347,7 @@ func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
 
 		fragment.Append(visitor.removeVoidFragment(node.ConditionBlocks[i]))
 
+		fragment.NewBlock("")
 		fragment.CurrentBlock.NewBr(ifEnd)
 	}
 
@@ -383,6 +384,7 @@ func (visitor *CodegenVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) 
 
 	fragment.Append(visitor.removeVoidFragment(node.Block))
 
+	fragment.NewBlock("")
 	fragment.CurrentBlock.NewBr(whileStart)
 
 	fragment.AddBlock(whileEnd)
@@ -434,6 +436,7 @@ func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
 		fragment.Append(visitor.removeVoidFragment(node.IterationStmt))
 	}
 
+	fragment.NewBlock("")
 	fragment.CurrentBlock.NewBr(conditionExpr)
 
 	fragment.AddBlock(forEnd)
@@ -530,6 +533,7 @@ func (visitor *CodegenVisitor) VisitLeaveSwitchStmtNode(node *ast.SwitchStmtNode
 				jumpBlockAfterCaseBlock = end
 			}
 
+			fragment.NewBlock("")
 			fragment.CurrentBlock.NewBr(jumpBlockAfterCaseBlock)
 		}
 	}
@@ -538,6 +542,7 @@ func (visitor *CodegenVisitor) VisitLeaveSwitchStmtNode(node *ast.SwitchStmtNode
 	if !node.IsEmptyDefaultBlock() {
 		fragment.AddBlock(defaultBlock)
 		fragment.Append(visitor.removeVoidFragment(node.DefaultBlock))
+		fragment.NewBlock("")
 		fragment.CurrentBlock.NewBr(end)
 	}
 
