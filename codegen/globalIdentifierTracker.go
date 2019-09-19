@@ -15,15 +15,11 @@ func (globalIdentifierTracker *GlobalIdentifierTracker) Reset() {
 }
 
 func (globalIdentifierTracker *GlobalIdentifierTracker) CurrentIdentifier() string {
-	return AsGlobalIdentifier("g" + strconv.Itoa(globalIdentifierTracker.index))
+	return "g" + strconv.Itoa(globalIdentifierTracker.index)
 }
 
 func (globalIdentifierTracker *GlobalIdentifierTracker) NewIdentifier() string {
 	globalIdentifierTracker.index++
 
 	return globalIdentifierTracker.CurrentIdentifier()
-}
-
-func AsGlobalIdentifier(identifier string) string {
-	return "@" + identifier
 }

@@ -19,12 +19,12 @@ import (
 
 // CodegenVisitor visits each node and generates llvm IR.
 type CodegenVisitor struct {
-	logger                 logger.Logger
-	labeller               *Labeller
-	constants              []*ir.Global // global constants
-	externals              []*ir.Func   // external function declarations
-	codeMap                map[ast.Node]Fragment
-	localIdentifierTracker *LocalIdentifierTracker
+	logger                  logger.Logger
+	labeller                *Labeller
+	constants               []*ir.Global // global constants
+	externals               []*ir.Func   // external function declarations
+	codeMap                 map[ast.Node]Fragment
+	globalIdentifierTracker *GlobalIdentifierTracker
 }
 
 // Init with a logger
@@ -34,7 +34,7 @@ func (visitor *CodegenVisitor) Init(logger logger.Logger) {
 	visitor.constants = make([]*ir.Global, 0)
 	visitor.externals = make([]*ir.Func, 0)
 	visitor.codeMap = make(map[ast.Node]Fragment)
-	visitor.localIdentifierTracker = &LocalIdentifierTracker{0}
+	visitor.globalIdentifierTracker = &GlobalIdentifierTracker{index: 0}
 }
 
 func (visitor *CodegenVisitor) checkIfFragmentExists(node ast.Node) {
@@ -45,7 +45,7 @@ func (visitor *CodegenVisitor) checkIfFragmentExists(node ast.Node) {
 
 func (visitor *CodegenVisitor) newModuleFragment(node ast.Node) *ModuleFragment {
 	visitor.checkIfFragmentExists(node)
-	frag := NewModuleFragment()
+	frag := NewModuleFragment(nil)
 	visitor.codeMap[node] = frag
 
 	return frag
@@ -650,7 +650,7 @@ func (visitor *CodegenVisitor) VisitStringNode(node *ast.StringNode) {
 	stringValue := node.StringValue()
 
 	stringConstant := constant.NewCharArrayFromString(stringValue)
-	stringGlobal := ir.NewGlobal("", stringConstant.Type())
+	stringGlobal := ir.NewGlobal(visitor.globalIdentifierTracker.NewIdentifier(), stringConstant.Type())
 	stringGlobal.Init = stringConstant
 	stringGlobal.Linkage = enum.LinkagePrivate
 	stringGlobal.Align = 1

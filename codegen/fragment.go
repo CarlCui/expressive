@@ -36,8 +36,10 @@ type ModuleFragment struct {
 	Module *ir.Module
 }
 
-func NewModuleFragment() *ModuleFragment {
-	module := ir.NewModule()
+func NewModuleFragment(module *ir.Module) *ModuleFragment {
+	if module == nil {
+		module = ir.NewModule()
+	}
 
 	return &ModuleFragment{Module: module}
 }
