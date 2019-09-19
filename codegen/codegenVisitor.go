@@ -9,70 +9,65 @@ import (
 
 	"github.com/carlcui/expressive/ast"
 	"github.com/carlcui/expressive/logger"
+
+	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
+	"github.com/llir/llvm/ir/types"
+	"github.com/llir/llvm/ir/value"
 )
 
 // CodegenVisitor visits each node and generates llvm IR.
 type CodegenVisitor struct {
 	logger                 logger.Logger
 	labeller               *Labeller
-	constants              *Fragment // global constants
-	codeMap                map[ast.Node]*Fragment
+	constants              []*ir.Global // global constants
+	externals              []*ir.Func   // external function declarations
+	codeMap                map[ast.Node]Fragment
 	localIdentifierTracker *LocalIdentifierTracker
-	externals              *Fragment
-}
-
-func (visitor *CodegenVisitor) externalFragment() *Fragment {
-	fragment := NewFragment(VOID, nil)
-
-	fragment.AddInstruction("declare i32 @printf(i8* noalias nocapture, ...) nounwind")
-
-	return fragment
 }
 
 // Init with a logger
 func (visitor *CodegenVisitor) Init(logger logger.Logger) {
 	visitor.logger = logger
 	visitor.labeller = &Labeller{0}
-	visitor.constants = NewFragment(VOID, &GlobalIdentifierTracker{0})
-	visitor.codeMap = make(map[ast.Node]*Fragment)
+	visitor.constants = make([]*ir.Global, 0)
+	visitor.externals = make([]*ir.Func, 0)
+	visitor.codeMap = make(map[ast.Node]Fragment)
 	visitor.localIdentifierTracker = &LocalIdentifierTracker{0}
-	visitor.externals = visitor.externalFragment()
 }
 
-func (visitor *CodegenVisitor) newVoidCode(node ast.Node) *Fragment {
+func (visitor *CodegenVisitor) checkIfFragmentExists(node ast.Node) {
 	if _, exists := visitor.codeMap[node]; exists {
 		panic(fmt.Sprintf("Code for node %v already exists.", node))
 	}
-
-	fragment := NewFragment(VOID, visitor.localIdentifierTracker)
-	visitor.codeMap[node] = fragment
-
-	return fragment
 }
 
-func (visitor *CodegenVisitor) newValueCode(node ast.Node) *Fragment {
-	if _, exists := visitor.codeMap[node]; exists {
-		panic(fmt.Sprintf("Code for node %v already exists.", node))
-	}
+func (visitor *CodegenVisitor) newModuleFragment(node ast.Node) *ModuleFragment {
+	visitor.checkIfFragmentExists(node)
+	frag := NewModuleFragment()
+	visitor.codeMap[node] = frag
 
-	fragment := NewFragment(VALUE, visitor.localIdentifierTracker)
-	visitor.codeMap[node] = fragment
-
-	return fragment
+	return frag
 }
 
-func (visitor *CodegenVisitor) newAddressCode(node ast.Node) *Fragment {
-	if _, exists := visitor.codeMap[node]; exists {
-		panic(fmt.Sprintf("Code for node %v already exists.", node))
-	}
+func (visitor *CodegenVisitor) newFunctionsFragment(node ast.Node) *FunctionsFragment {
+	visitor.checkIfFragmentExists(node)
+	frag := NewFunctionsFragment()
+	visitor.codeMap[node] = frag
 
-	fragment := NewFragment(ADDRESS, visitor.localIdentifierTracker)
-	visitor.codeMap[node] = fragment
-
-	return fragment
+	return frag
 }
 
-func (visitor *CodegenVisitor) getAndRemoveCode(node ast.Node) *Fragment {
+func (visitor *CodegenVisitor) newBlocksFragment(node ast.Node, resultType ResultType) *BlocksFragment {
+	visitor.checkIfFragmentExists(node)
+	frag := NewBlocksFragment(resultType)
+	visitor.codeMap[node] = frag
+
+	return frag
+}
+
+func (visitor *CodegenVisitor) getAndRemoveFragment(node ast.Node) Fragment {
 	fragment, exists := visitor.codeMap[node]
 
 	if !exists {
@@ -84,68 +79,106 @@ func (visitor *CodegenVisitor) getAndRemoveCode(node ast.Node) *Fragment {
 	return fragment
 }
 
-func (visitor *CodegenVisitor) removeVoidCode(node ast.Node) *Fragment {
-	fragment := visitor.getAndRemoveCode(node)
+func (visitor *CodegenVisitor) removeVoidFragment(node ast.Node) Fragment {
+	fragment := visitor.getAndRemoveFragment(node)
 
-	if fragment.ResultType != VOID {
+	if fragment.GetResultType() != VOID {
 		panic(fmt.Sprintf("Code fragment does not produce void result: %v", node))
 	}
 
 	return fragment
 }
 
-func (visitor *CodegenVisitor) removeAddressCode(node ast.Node) *Fragment {
-	fragment := visitor.getAndRemoveCode(node)
+func (visitor *CodegenVisitor) removePointerFragment(node ast.Node) Fragment {
+	fragment := visitor.getAndRemoveFragment(node)
 
-	if fragment.ResultType != ADDRESS {
-		panic(fmt.Sprintf("Code fragment does not produce address result: %v", node))
+	if fragment.GetResultType() != POINTER {
+		panic(fmt.Sprintf("Code fragment does not produce pointer result: %v", node))
 	}
 
 	return fragment
 }
 
-func (visitor *CodegenVisitor) removeValueCode(node ast.Node) *Fragment {
-	fragment := visitor.getAndRemoveCode(node)
+func (visitor *CodegenVisitor) removeValueFragment(node ast.Node) Fragment {
+	fragment := visitor.getAndRemoveFragment(node)
 
-	if fragment.ResultType != VALUE && fragment.ResultType != ADDRESS {
+	if fragment.GetResultType() != VALUE && fragment.GetResultType() != POINTER {
 		panic(fmt.Sprintf("Code fragment does not produce value result: %v", node))
 	}
 
-	if fragment.ResultType == ADDRESS {
-		visitor.turnAddressIntoValue(node, fragment)
+	if fragment.GetResultType() == POINTER {
+		visitor.dereferencePointer(node, fragment)
 	}
 
 	return fragment
 }
 
-func (visitor *CodegenVisitor) turnAddressIntoValue(node ast.Node, fragment *Fragment) {
-	fragment.ResultType = VALUE
+func (visitor *CodegenVisitor) dereferencePointer(node ast.Node, fragment Fragment) {
+	switch f := fragment.(type) {
+	case *ModuleFragment:
+	case *FunctionsFragment:
+		panic("Fragment should be of void result type")
+	case *BlocksFragment:
+		f.resultType = VALUE
 
-	result := fragment.result
-	typing := node.GetTyping()
-	irType := typing.IrType()
+		result := f.GetResult()
 
-	fragment.AddOperation("load %v, %v* %v", irType, irType, result)
+		if len(f.Blocks) == 0 {
+			f.NewBlock("")
+		}
+
+		load := f.CurrentBlock.NewLoad(result)
+		f.resultValue = load
+	}
 }
 
 // VisitEnterProgramNode creates program scope
 func (visitor *CodegenVisitor) VisitEnterProgramNode(node *ast.ProgramNode) {
 
+	printfDeclaration := ir.NewFunc("printf", types.I32, ir.NewParam("", types.I8Ptr))
+	printfDeclaration.Sig.Variadic = true
+	printfDeclaration.FuncAttrs = append(printfDeclaration.FuncAttrs, enum.FuncAttrNoUnwind)
+
+	visitor.externals = append(visitor.externals, printfDeclaration)
 }
 
 // VisitLeaveProgramNode closes program scope
 func (visitor *CodegenVisitor) VisitLeaveProgramNode(node *ast.ProgramNode) {
 	// generates main function
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newModuleFragment(node)
 
-	fragment.AddInstruction("define i32 @main() {")
-
-	for _, child := range node.Chilren {
-		fragment.Append(visitor.removeVoidCode(child))
+	for _, external := range visitor.externals {
+		external.Parent = fragment.Module
 	}
 
-	fragment.AddInstruction("ret i32 0")
-	fragment.AddInstruction("}")
+	fragment.Module.Funcs = append(fragment.Module.Funcs, visitor.externals...)
+
+	mainFunc := ir.NewFunc("main", types.I32)
+
+	mainFunc.Blocks = make([]*ir.Block, 0)
+
+	functionsFragment := NewFunctionsFragment()
+	functionsFragment.AddFunc(mainFunc)
+
+	for _, child := range node.Chilren {
+		functionsFragment.Append(visitor.removeVoidFragment(child))
+	}
+
+	var lastBlock *ir.Block
+
+	numberOfBlocks := len(mainFunc.Blocks)
+
+	if numberOfBlocks == 0 {
+		lastBlock = mainFunc.NewBlock("")
+	} else {
+		lastBlock = mainFunc.Blocks[numberOfBlocks-1]
+	}
+
+	zeroConstant := constant.NewInt(types.I32, 0)
+
+	lastBlock.NewRet(zeroConstant)
+
+	fragment.Append(functionsFragment)
 }
 
 func (visitor *CodegenVisitor) VisitEnterBlockNode(node *ast.BlockNode) {
@@ -153,10 +186,10 @@ func (visitor *CodegenVisitor) VisitEnterBlockNode(node *ast.BlockNode) {
 }
 
 func (visitor *CodegenVisitor) VisitLeaveBlockNode(node *ast.BlockNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
 
 	for _, child := range node.Stmts {
-		fragment.Append(visitor.removeVoidCode(child))
+		fragment.Append(visitor.removeVoidFragment(child))
 	}
 }
 
@@ -169,34 +202,38 @@ func (visitor *CodegenVisitor) VisitEnterVariableDeclarationNode(node *ast.Varia
 
 // VisitLeaveVariableDeclarationNode do something
 func (visitor *CodegenVisitor) VisitLeaveVariableDeclarationNode(node *ast.VariableDeclarationNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
 
 	identifierNode := node.Identifier.(*ast.IdentifierNode)
 	identifierTyping := identifierNode.GetTyping()
 	irType := identifierTyping.IrType()
-	alignment := identifierTyping.Size()
 
-	variable := AsLocalVariable(identifierNode.LocalIdentifier())
-
-	// allocate space
-	fragment.AddInstruction("%v = alloca %v, align %v", variable, irType, alignment)
+	fragment.NewBlock("")
+	allocaInstr := fragment.CurrentBlock.NewAlloca(irType)
+	allocaInstr.SetName(identifierNode.LocalIdentifier())
 
 	if node.Expr == nil {
 		// load default value
-		defaultValue := "0"
-		if identifierTyping == typing.FLOAT {
-			defaultValue = "0.0"
+		var defaultValue value.Value
+
+		// TODO: finish default values for types
+		switch identifierTyping {
+		case typing.INT:
+			intIrType := types.I32
+			defaultValue = constant.NewInt(intIrType, 0)
+		case typing.FLOAT:
+			defaultValue = constant.NewFloat(types.FP128, 0)
 		}
 
-		fragment.AddInstruction("store %v %v, %v* %v, align %v", irType, defaultValue, irType, variable, alignment)
+		fragment.CurrentBlock.NewStore(defaultValue, allocaInstr)
 	} else {
-		exprFragment := visitor.removeValueCode(node.Expr)
+		exprFragment := visitor.removeValueFragment(node.Expr)
 
-		exprResultVariable := exprFragment.GetResult()
+		exprResult := exprFragment.GetResult()
 
 		fragment.Append(exprFragment)
 
-		fragment.AddInstruction("store %v %v, %v* %v, align %v", irType, exprResultVariable, irType, variable, alignment)
+		fragment.CurrentBlock.NewStore(exprResult, allocaInstr)
 	}
 }
 
@@ -206,22 +243,23 @@ func (visitor *CodegenVisitor) VisitEnterAssignmentNode(node *ast.AssignmentNode
 
 // VisitLeaveAssignmentNode do something
 func (visitor *CodegenVisitor) VisitLeaveAssignmentNode(node *ast.AssignmentNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
+	fragment.NewBlock("")
 
 	identifierNode := node.Identifier.(*ast.IdentifierNode)
-	typing := identifierNode.GetTyping()
-	irType := typing.IrType()
-	alignment := typing.Size()
+	irType := identifierNode.GetTyping().IrType()
+	variableName := identifierNode.LocalIdentifier()
 
-	variable := AsLocalVariable(identifierNode.LocalIdentifier())
+	exprFragment := visitor.removeValueFragment(node.Expr)
 
-	exprFragment := visitor.removeValueCode(node.Expr)
-
-	exprResultVariable := exprFragment.GetResult()
+	exprResult := exprFragment.GetResult()
 
 	fragment.Append(exprFragment)
 
-	fragment.AddInstruction("store %v %v, %v* %v, align %v", irType, exprResultVariable, irType, variable, alignment)
+	allocaInstr := ir.NewAlloca(irType)
+	allocaInstr.SetName(variableName)
+
+	fragment.CurrentBlock.NewStore(exprResult, allocaInstr)
 }
 
 // VisitEnterPrintNode do something
@@ -231,36 +269,33 @@ func (visitor *CodegenVisitor) VisitEnterPrintNode(node *ast.PrintNode) {
 
 // VisitLeavePrintNode do something
 func (visitor *CodegenVisitor) VisitLeavePrintNode(node *ast.PrintNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
+	fragment.NewBlock("")
 
-	stringExprFrag := visitor.removeAddressCode(node.StringExpr)
+	stringExprFrag := visitor.removePointerFragment(node.StringExpr)
 
 	instructionArgs := make([]interface{}, 0)
 
-	localIdentifier := stringExprFrag.GetResult()
+	stringExprResult := stringExprFrag.GetResult()
 
-	instructionArgs = append(instructionArgs, localIdentifier)
+	instructionArgs = append(instructionArgs, stringExprResult)
 
 	fragment.Append(stringExprFrag)
 
-	callInstruction := "call i32 (i8*, ...) @printf(i8* %v"
+	argResults := make([]value.Value, 0)
 
 	for _, arg := range node.Args {
-		argFrag := visitor.removeValueCode(arg)
-		localIdentifier = argFrag.GetResult()
-
-		irType := arg.GetTyping().IrType()
+		argFrag := visitor.removeValueFragment(arg)
+		argResult := argFrag.GetResult()
 
 		fragment.Append(argFrag)
 
-		instructionArgs = append(instructionArgs, irType, localIdentifier)
-
-		callInstruction += ", %v %v"
+		argResults = append(argResults, argResult)
 	}
 
-	callInstruction += ")"
+	args := append([]value.Value{stringExprResult}, argResults...)
 
-	fragment.AddInstruction(callInstruction, instructionArgs...)
+	fragment.CurrentBlock.NewCall(visitor.externals[0], args...)
 }
 
 func (visitor *CodegenVisitor) VisitEnterIfStmtNode(node *ast.IfStmtNode) {
@@ -268,94 +303,93 @@ func (visitor *CodegenVisitor) VisitEnterIfStmtNode(node *ast.IfStmtNode) {
 }
 
 func (visitor *CodegenVisitor) VisitLeaveIfStmtNode(node *ast.IfStmtNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
 
-	ifEndLabel := visitor.labeller.NewSet("if", "end")
-	ifElseLabel := visitor.labeller.Label("if", "else")
+	fragment.NewBlock(visitor.labeller.NewSet("if", "start"))
+	ifEnd := ir.NewBlock(visitor.labeller.NewSet("if", "end"))
+	ifElse := ir.NewBlock(visitor.labeller.Label("if", "else"))
 
 	numberOfConditions := len(node.ConditionExprs)
 
-	ifConditionLabels := make([]string, numberOfConditions)
+	ifConditions := make([]*ir.Block, numberOfConditions)
+	ifBlocks := make([]*ir.Block, numberOfConditions)
 
-	for i := range ifConditionLabels {
-		ifConditionLabels[i] = visitor.labeller.Label("if", "condition", strconv.Itoa(i))
+	for i := range ifConditions {
+		ifConditions[i] = ir.NewBlock(visitor.labeller.Label("if", "condition", strconv.Itoa(i)))
+		ifBlocks[i] = ir.NewBlock(visitor.labeller.Label("if", "block", strconv.Itoa(i)))
 	}
 
 	for i, conditionExpr := range node.ConditionExprs {
-		conditionLabel := ifConditionLabels[i]
-		blockLabel := visitor.labeller.Label("if", "block", strconv.Itoa(i))
+		condition := ifConditions[i]
+		block := ifBlocks[i]
 
-		exprFragment := visitor.removeValueCode(conditionExpr)
+		exprFragment := visitor.removeValueFragment(conditionExpr)
 
-		fragment.AddInstruction("br label %v", AsLocalVariable(conditionLabel))
-		fragment.AddLabel(conditionLabel)
+		fragment.AddBlock(condition)
 
 		fragment.Append(exprFragment)
 
 		exprResult := exprFragment.GetResult()
 
-		conditionResult := fragment.AddOperation("icmp eq i1 %v, 1", exprResult)
+		conditionResult := fragment.CurrentBlock.NewICmp(enum.IPredEQ, exprResult, constant.True)
 
-		finalLabel := ifEndLabel
+		finalBlock := ifEnd
 
 		if i+1 != numberOfConditions {
-			finalLabel = ifConditionLabels[i+1]
+			finalBlock = ifConditions[i+1]
 		} else if node.ElseBlock != nil {
-			finalLabel = ifElseLabel
+			finalBlock = ifElse
 		}
 
-		fragment.AddInstruction("br i1 %v, label %v, label %v", conditionResult, AsLocalVariable(blockLabel), AsLocalVariable(finalLabel))
+		fragment.CurrentBlock.NewCondBr(conditionResult, block, finalBlock)
 
-		fragment.AddLabel(blockLabel)
-		fragment.Append(visitor.removeVoidCode(node.ConditionBlocks[i]))
-		fragment.AddInstruction("br label %v", AsLocalVariable(ifEndLabel))
+		fragment.AddBlock(block)
+
+		fragment.Append(visitor.removeVoidFragment(node.ConditionBlocks[i]))
+
+		fragment.CurrentBlock.NewBr(ifEnd)
 	}
 
 	if node.ElseBlock != nil {
-		fragment.AddInstruction("br label %v", AsLocalVariable(ifElseLabel))
-		fragment.AddLabel(ifElseLabel)
-		fragment.Append(visitor.removeVoidCode(node.ElseBlock))
+		fragment.AddBlock(ifElse)
+		fragment.Append(visitor.removeVoidFragment(node.ElseBlock))
 	}
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(ifEndLabel))
-	fragment.AddLabel(ifEndLabel)
+	fragment.AddBlock(ifEnd)
 }
 
 func (visitor *CodegenVisitor) VisitEnterWhileStmtNode(node *ast.WhileStmtNode) {
-	node.EndLabel = visitor.labeller.NewSet("while", "end")
+	node.EndBlock = ir.NewBlock(visitor.labeller.NewSet("while", "end"))
 }
 
 func (visitor *CodegenVisitor) VisitLeaveWhileStmtNode(node *ast.WhileStmtNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
 
-	whileStartLabel := visitor.labeller.NewSet("while", "start")
-	whileEndLabel := node.EndLabel
-	whileConditionExprLabel := visitor.labeller.Label("while", "condition")
-	whileBlockLabel := visitor.labeller.Label("while", "block")
+	whileStart := ir.NewBlock(visitor.labeller.NewSet("while", "start"))
+	whileEnd := node.EndBlock
+	whileBlock := ir.NewBlock(visitor.labeller.Label("while", "block"))
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(whileStartLabel))
-	fragment.AddLabel(whileStartLabel)
-	fragment.AddInstruction("br label %v", AsLocalVariable(whileConditionExprLabel))
-	fragment.AddLabel(whileConditionExprLabel)
+	fragment.AddBlock(whileStart)
 
-	conditionExprFragment := visitor.removeValueCode(node.ConditionExpr)
+	conditionExprFragment := visitor.removeValueFragment(node.ConditionExpr)
 
 	fragment.Append(conditionExprFragment)
 
-	conditionResult := fragment.AddOperation("icmp eq i1 %v, 1", conditionExprFragment.GetResult())
+	conditionResult := fragment.CurrentBlock.NewICmp(enum.IPredEQ, conditionExprFragment.GetResult(), constant.True)
 
-	fragment.AddInstruction("br i1 %v, label %v, label %v", conditionResult, AsLocalVariable(whileBlockLabel), AsLocalVariable(whileEndLabel))
+	fragment.CurrentBlock.NewCondBr(conditionResult, whileBlock, whileEnd)
 
-	fragment.AddLabel(whileBlockLabel)
-	fragment.Append(visitor.removeVoidCode(node.Block))
+	fragment.AddBlock(whileBlock)
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(whileConditionExprLabel))
+	fragment.Append(visitor.removeVoidFragment(node.Block))
 
-	fragment.AddLabel(whileEndLabel)
+	fragment.CurrentBlock.NewBr(whileStart)
+
+	fragment.AddBlock(whileEnd)
 }
 
 func (visitor *CodegenVisitor) VisitEnterForStmtNode(node *ast.ForStmtNode) {
-	node.EndLabel = visitor.labeller.NewSet("for", "end")
+	node.EndBlock = ir.NewBlock(visitor.labeller.NewSet("for", "end"))
 }
 
 func (visitor *CodegenVisitor) VisitEnterForStmtNodeBeforeBlockNode(node *ast.ForStmtNode) {
@@ -363,165 +397,160 @@ func (visitor *CodegenVisitor) VisitEnterForStmtNodeBeforeBlockNode(node *ast.Fo
 }
 
 func (visitor *CodegenVisitor) VisitLeaveForStmtNode(node *ast.ForStmtNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
 
-	forStartLabel := visitor.labeller.NewSet("for", "start")
-	forEndLabel := node.EndLabel
+	forStart := ir.NewBlock(visitor.labeller.NewSet("for", "start"))
+	forEnd := node.EndBlock
 
-	initializationLabel := visitor.labeller.Label("for", "initialization")
-	conditionExprLabel := visitor.labeller.Label("for", "condition")
-	iterationStmtLabel := visitor.labeller.Label("for", "iteration")
-	blockLabel := visitor.labeller.Label("for", "block")
+	conditionExpr := ir.NewBlock(visitor.labeller.Label("for", "condition"))
+	iterationStmt := ir.NewBlock(visitor.labeller.Label("for", "iteration"))
+	block := ir.NewBlock(visitor.labeller.Label("for", "block"))
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(forStartLabel))
-	fragment.AddLabel(forStartLabel)
+	fragment.AddBlock(forStart)
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(initializationLabel))
-	fragment.AddLabel(initializationLabel)
 	if node.InitializationStmt != nil {
-		fragment.Append(visitor.removeVoidCode(node.InitializationStmt))
+		fragment.Append(visitor.removeVoidFragment(node.InitializationStmt))
 	}
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(conditionExprLabel))
-	fragment.AddLabel(conditionExprLabel)
+	fragment.AddBlock(conditionExpr)
 
 	if node.ConditionExpr != nil {
-		conditionExprFragment := visitor.removeValueCode(node.ConditionExpr)
+		conditionExprFragment := visitor.removeValueFragment(node.ConditionExpr)
 
 		fragment.Append(conditionExprFragment)
 
-		conditionResult := fragment.AddOperation("icmp eq i1 %v, 1", conditionExprFragment.GetResult())
+		conditionResult := fragment.CurrentBlock.NewICmp(enum.IPredEQ, conditionExprFragment.GetResult(), constant.True)
 
-		fragment.AddInstruction("br i1 %v, label %v, label %v", conditionResult, AsLocalVariable(blockLabel), AsLocalVariable(forEndLabel))
+		fragment.CurrentBlock.NewCondBr(conditionResult, block, forEnd)
 	}
 
-	fragment.AddLabel(blockLabel)
-	fragment.Append(visitor.removeVoidCode(node.Block))
+	fragment.AddBlock(block)
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(iterationStmtLabel))
-	fragment.AddLabel(iterationStmtLabel)
+	fragment.Append(visitor.removeVoidFragment(node.Block))
+
+	fragment.AddBlock(iterationStmt)
+
 	if node.IterationStmt != nil {
-		fragment.Append(visitor.removeVoidCode(node.IterationStmt))
+		fragment.Append(visitor.removeVoidFragment(node.IterationStmt))
 	}
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(conditionExprLabel))
+	fragment.CurrentBlock.NewBr(conditionExpr)
 
-	fragment.AddLabel(forEndLabel)
+	fragment.AddBlock(forEnd)
 }
 
 func (visitor *CodegenVisitor) VisitEnterSwitchStmtNode(node *ast.SwitchStmtNode) {
-	node.EndLabel = visitor.labeller.NewSet("switch", "end")
+	node.EndBlock = ir.NewBlock(visitor.labeller.NewSet("switch", "end"))
 }
 
 func (visitor *CodegenVisitor) VisitLeaveSwitchStmtNode(node *ast.SwitchStmtNode) {
 	testTyping := node.TestExpr.GetTyping()
 	cases := len(node.CaseExprs)
 
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
 
-	startLabel := visitor.labeller.NewSet("switch", "start")
-	endLabel := node.EndLabel
+	start := ir.NewBlock(visitor.labeller.NewSet("switch", "start"))
+	end := node.EndBlock
 
-	caseExprLabels := make([]string, cases)
-	caseBlockLabels := make([]string, cases)
-	defaultBlockLabel := visitor.labeller.Label("switch", "defaultBlock")
+	caseExprs := make([]*ir.Block, cases)
+	caseBlocks := make([]*ir.Block, cases)
+	defaultBlock := ir.NewBlock(visitor.labeller.Label("switch", "defaultBlock"))
 
 	for i := 0; i < cases; i++ {
-		caseExprLabels[i] = visitor.labeller.Label("switch", "caseExpr", strconv.Itoa(i))
-		caseBlockLabels[i] = visitor.labeller.Label("switch", "caseBlock", strconv.Itoa(i))
+		caseExprs[i] = ir.NewBlock(visitor.labeller.Label("switch", "caseExpr", strconv.Itoa(i)))
+		caseBlocks[i] = ir.NewBlock(visitor.labeller.Label("switch", "caseBlock", strconv.Itoa(i)))
 	}
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(startLabel))
-	fragment.AddLabel(startLabel)
+	fragment.AddBlock(start)
 
-	testExprFragment := visitor.removeValueCode(node.TestExpr)
+	testExprFragment := visitor.removeValueFragment(node.TestExpr)
 	testExprResult := testExprFragment.GetResult()
 
 	fragment.Append(testExprFragment)
 
 	// cases
 	for i := 0; i < cases; i++ {
-		caseExprLabel := caseExprLabels[i]
-		caseBlockLabel := caseBlockLabels[i]
+		caseExpr := caseExprs[i]
+		caseBlock := caseBlocks[i]
 
-		fragment.AddInstruction("br label %v", AsLocalVariable(caseExprLabel))
-		fragment.AddLabel(caseExprLabel)
+		fragment.AddBlock(caseExpr)
 
-		caseExprFragment := visitor.removeValueCode(node.CaseExprs[i])
+		caseExprFragment := visitor.removeValueFragment(node.CaseExprs[i])
 		caseExprResult := caseExprFragment.GetResult()
 
 		fragment.Append(caseExprFragment)
 
 		operatorCodegen := NewOperatorCodegen(nil, signature.SHALLOW_EQUAL, testTyping, nil, nil)
 
-		equalOperator := operatorCodegen.GenerateComparisonOpcode()
+		equalOperator := operatorCodegen.GenerateComparisonInstr(fragment)
 
-		comparisonResult := fragment.AddOperation("%v %v %v, %v", equalOperator, testTyping.IrType(), testExprResult, caseExprResult)
-		truthResult := fragment.AddOperation("icmp eq i1 %v, 1", comparisonResult)
+		comparisonResult := equalOperator(testExprResult, caseExprResult)
+		truthResult := fragment.CurrentBlock.NewICmp(enum.IPredEQ, comparisonResult, constant.True)
 
 		// If the current case passes, it should jump to the next non-empty block
 		// If the switch statement does not have a non-empty block, then it should jump to the endLabel
 
-		var jumpLabelWhenTruthy string
+		var jumpBlockWhenTruthy *ir.Block
 
 		nextNonEmptyBlockIndex := node.FindTheNextNonEmptyBlockIndexAt(i)
 
 		if nextNonEmptyBlockIndex < cases {
-			jumpLabelWhenTruthy = caseBlockLabels[nextNonEmptyBlockIndex]
+			jumpBlockWhenTruthy = caseBlocks[nextNonEmptyBlockIndex]
 		} else if !node.IsEmptyDefaultBlock() {
-			jumpLabelWhenTruthy = defaultBlockLabel
+			jumpBlockWhenTruthy = defaultBlock
 		} else {
-			jumpLabelWhenTruthy = endLabel
+			jumpBlockWhenTruthy = end
 		}
 
-		var jumpLabelWhenFalsy string
+		var jumpBlockWhenFalsy *ir.Block
 
 		if i+1 < cases {
-			jumpLabelWhenFalsy = caseExprLabels[i+1]
+			jumpBlockWhenFalsy = caseExprs[i+1]
 		} else if !node.IsEmptyDefaultBlock() {
-			jumpLabelWhenFalsy = defaultBlockLabel
+			jumpBlockWhenFalsy = defaultBlock
 		} else {
-			jumpLabelWhenFalsy = endLabel
+			jumpBlockWhenFalsy = end
 		}
 
-		fragment.AddInstruction("br i1 %v, label %v, label %v", truthResult, AsLocalVariable(jumpLabelWhenTruthy), AsLocalVariable(jumpLabelWhenFalsy))
+		fragment.CurrentBlock.NewCondBr(truthResult, jumpBlockWhenTruthy, jumpBlockWhenFalsy)
 
 		if !node.IsEmptyCaseBlockAt(i) {
-			fragment.AddLabel(caseBlockLabel)
-			fragment.Append(visitor.removeVoidCode(node.CaseBlocks[i]))
+			fragment.AddBlock(caseBlock)
+			fragment.Append(visitor.removeVoidFragment(node.CaseBlocks[i]))
 
-			var jumpLabelAfterCaseBlock string
+			var jumpBlockAfterCaseBlock *ir.Block
 
 			nextNonEmptyBlockIndex := node.FindTheNextNonEmptyBlockIndexAt(i + 1)
 
 			if nextNonEmptyBlockIndex < cases {
-				jumpLabelAfterCaseBlock = caseBlockLabels[nextNonEmptyBlockIndex]
+				jumpBlockAfterCaseBlock = caseBlocks[nextNonEmptyBlockIndex]
 			} else if !node.IsEmptyDefaultBlock() {
-				jumpLabelAfterCaseBlock = defaultBlockLabel
+				jumpBlockAfterCaseBlock = defaultBlock
 			} else {
-				jumpLabelAfterCaseBlock = endLabel
+				jumpBlockAfterCaseBlock = end
 			}
 
-			fragment.AddInstruction("br label %v", AsLocalVariable(jumpLabelAfterCaseBlock))
+			fragment.CurrentBlock.NewBr(jumpBlockAfterCaseBlock)
 		}
 	}
 
 	// default
 	if !node.IsEmptyDefaultBlock() {
-		fragment.AddLabel(defaultBlockLabel)
-		fragment.Append(visitor.removeVoidCode(node.DefaultBlock))
-		fragment.AddInstruction("br label %v", AsLocalVariable(endLabel))
+		fragment.AddBlock(defaultBlock)
+		fragment.Append(visitor.removeVoidFragment(node.DefaultBlock))
+		fragment.CurrentBlock.NewBr(end)
 	}
 
-	fragment.AddLabel(endLabel)
+	fragment.AddBlock(end)
 }
 
 func (visitor *CodegenVisitor) VisitBreakNode(node *ast.BreakNode) {
-	fragment := visitor.newVoidCode(node)
+	fragment := visitor.newBlocksFragment(node, VOID)
 
-	breakLabel := node.FindBreakLabel()
+	breakBlock := node.FindBreakBlock()
 
-	fragment.AddInstruction("br label %v", AsLocalVariable(breakLabel))
+	fragment.NewBlock("")
+	fragment.CurrentBlock.NewBr(breakBlock)
 }
 
 // exprs
@@ -533,11 +562,12 @@ func (visitor *CodegenVisitor) VisitEnterTernaryOperatorNode(node *ast.TernaryOp
 
 // VisitLeaveTernaryOperatorNode do something
 func (visitor *CodegenVisitor) VisitLeaveTernaryOperatorNode(node *ast.TernaryOperatorNode) {
-	fragment := visitor.newValueCode(node)
+	fragment := visitor.newBlocksFragment(node, VALUE)
+	fragment.NewBlock("")
 
-	fragment1 := visitor.removeValueCode(node.Expr1)
-	fragment2 := visitor.removeValueCode(node.Expr2)
-	fragment3 := visitor.removeValueCode(node.Expr3)
+	fragment1 := visitor.removeValueFragment(node.Expr1)
+	fragment2 := visitor.removeValueFragment(node.Expr2)
+	fragment3 := visitor.removeValueFragment(node.Expr3)
 
 	operator := node.Operator
 	typing := node.GetTyping()
@@ -554,10 +584,11 @@ func (visitor *CodegenVisitor) VisitEnterBinaryOepratorNode(node *ast.BinaryOper
 
 // VisitLeaveBinaryOperatorNode do something
 func (visitor *CodegenVisitor) VisitLeaveBinaryOperatorNode(node *ast.BinaryOperatorNode) {
-	fragment := visitor.newValueCode(node)
+	fragment := visitor.newBlocksFragment(node, VALUE)
+	fragment.NewBlock("")
 
-	fragment1 := visitor.removeValueCode(node.Lhs)
-	fragment2 := visitor.removeValueCode(node.Rhs)
+	fragment1 := visitor.removeValueFragment(node.Lhs)
+	fragment2 := visitor.removeValueFragment(node.Rhs)
 
 	operator := node.Operator
 	typing := node.Lhs.GetTyping()
@@ -574,9 +605,10 @@ func (visitor *CodegenVisitor) VisitEnterUnaryOperatorNode(node *ast.UnaryOperat
 
 // VisitLeaveUnaryOperatorNode do something
 func (visitor *CodegenVisitor) VisitLeaveUnaryOperatorNode(node *ast.UnaryOperatorNode) {
-	fragment := visitor.newValueCode(node)
+	fragment := visitor.newBlocksFragment(node, VALUE)
+	fragment.NewBlock("")
 
-	fragment1 := visitor.removeValueCode(node.Expr)
+	fragment1 := visitor.removeValueFragment(node.Expr)
 
 	operator := node.Operator
 	typing := node.GetTyping()
@@ -590,20 +622,20 @@ func (visitor *CodegenVisitor) VisitLeaveUnaryOperatorNode(node *ast.UnaryOperat
 
 // VisitIntegerNode do something
 func (visitor *CodegenVisitor) VisitIntegerNode(node *ast.IntegerNode) {
-	fragment := visitor.newValueCode(node)
+	fragment := visitor.newBlocksFragment(node, VALUE)
 
-	fragment.result = strconv.Itoa(node.Val)
+	irType := node.GetTyping().IrType()
+
+	fragment.resultValue = constant.NewInt(irType.(*types.IntType), (int64)(node.Val))
 }
 
 // VisitFloatNode do something
 func (visitor *CodegenVisitor) VisitFloatNode(node *ast.FloatNode) {
-	fragment := visitor.newValueCode(node)
+	fragment := visitor.newBlocksFragment(node, VALUE)
 
-	if node.Val == 0 {
-		fragment.result = "0.0"
-	} else {
-		fragment.result = strconv.FormatFloat(float64(node.Val), 'f', 6, 32)
-	}
+	irType := node.GetTyping().IrType()
+
+	fragment.resultValue = constant.NewFloat(irType.(*types.FloatType), (float64)(node.Val))
 }
 
 // VisitCharacterNode do something
@@ -613,38 +645,49 @@ func (visitor *CodegenVisitor) VisitCharacterNode(node *ast.CharacterNode) {
 
 // VisitStringNode do something
 func (visitor *CodegenVisitor) VisitStringNode(node *ast.StringNode) {
-	fragment := visitor.newAddressCode(node)
+	fragment := visitor.newBlocksFragment(node, POINTER)
 
-	stringValue := node.EscapeVal()
-	stringLength := node.EscapedStringLength()
+	stringValue := node.StringValue()
 
-	stringGlobalIdentifier := visitor.constants.AddOperation("private constant [%v x i8] c\"%v\", align 1", stringLength, stringValue)
+	stringConstant := constant.NewCharArrayFromString(stringValue)
+	stringGlobal := ir.NewGlobal("", stringConstant.Type())
+	stringGlobal.Init = stringConstant
+	stringGlobal.Linkage = enum.LinkagePrivate
+	stringGlobal.Align = 1
 
-	fragment.AddOperation("getelementptr inbounds [%v x i8], [%v x i8]* %v, i32 0, i32 0", stringLength, stringLength, stringGlobalIdentifier)
+	visitor.constants = append(visitor.constants, stringGlobal)
+
+	fragment.NewBlock("")
+	result := fragment.CurrentBlock.NewGetElementPtr(stringGlobal, constant.NewInt(types.I32, 0), constant.NewInt(types.I32, 0))
+	fragment.resultValue = result
 }
 
 // VisitIdentifierNode do something
 func (visitor *CodegenVisitor) VisitIdentifierNode(node *ast.IdentifierNode) {
-	fragment := visitor.newAddressCode(node)
+	fragment := visitor.newBlocksFragment(node, POINTER)
 
 	identifier := node.LocalIdentifier()
 
-	fragment.result = AsLocalVariable(identifier)
+	allocaInstr := ir.NewAlloca(node.GetTyping().IrType())
+	allocaInstr.SetName(identifier)
+
+	fragment.resultValue = allocaInstr
+
 }
 
 // VisitBooleanNode do something
 func (visitor *CodegenVisitor) VisitBooleanNode(node *ast.BooleanNode) {
-	fragment := visitor.newValueCode(node)
+	fragment := visitor.newBlocksFragment(node, VALUE)
 
-	var booleanValue string
+	var booleanValue value.Value
 
 	if node.Val == true {
-		booleanValue = "1"
+		booleanValue = constant.True
 	} else {
-		booleanValue = "0"
+		booleanValue = constant.False
 	}
 
-	fragment.result = booleanValue
+	fragment.resultValue = booleanValue
 }
 
 // VisitTypeLiteralNode do something

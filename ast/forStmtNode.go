@@ -5,6 +5,7 @@ import (
 
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
+	"github.com/llir/llvm/ir"
 )
 
 // ForStmtNode represents a node with for statement
@@ -14,7 +15,7 @@ type ForStmtNode struct {
 	ConditionExpr      Node
 	IterationStmt      Node
 	Block              Node
-	EndLabel           string
+	EndBlock           *ir.Block
 }
 
 // Accept is part of visitor pattern.

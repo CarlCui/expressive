@@ -1,7 +1,9 @@
 package codegen
 
-import "github.com/carlcui/expressive/ast"
-import "github.com/carlcui/expressive/logger"
+import (
+	"github.com/carlcui/expressive/ast"
+	"github.com/carlcui/expressive/logger"
+)
 
 // Generate llvm IR for ast
 func Generate(node ast.Node, logger logger.Logger) string {
@@ -10,13 +12,13 @@ func Generate(node ast.Node, logger logger.Logger) string {
 
 	node.Accept(&visitor)
 
-	rootFragment := visitor.removeVoidCode(node)
+	rootFragment := visitor.removeVoidFragment(node)
 
 	globalConstants := visitor.constants
-	externals := visitor.externals
 
-	rootFragment.AppendBefore(externals)
-	rootFragment.AppendBefore(globalConstants)
+	moduleFragment := rootFragment.(*ModuleFragment)
 
-	return rootFragment.String()
+	moduleFragment.Module.Globals = append(globalConstants)
+
+	return moduleFragment.Module.String()
 }

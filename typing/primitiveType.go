@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+
+	"github.com/llir/llvm/ir/types"
 )
 
 type PrimitiveType int
@@ -30,15 +32,15 @@ var literals = [...]string{
 	NO_TYPE:    "",
 }
 
-var irTypes = [...]string{
-	INT:        "i32",
-	FLOAT:      "double",
-	CHAR:       "i8*",
-	STRING:     "i8*",
-	BOOL:       "i1",
-	VOID:       "void",
-	ERROR_TYPE: "",
-	NO_TYPE:    "",
+var irTypes = [...]types.Type{
+	INT:        types.I32,
+	FLOAT:      types.Double,
+	CHAR:       types.I8Ptr,
+	STRING:     types.I8Ptr,
+	BOOL:       types.I1,
+	VOID:       types.Void,
+	ERROR_TYPE: types.Void,
+	NO_TYPE:    types.Void,
 }
 
 var sizes = [...]int{
@@ -70,7 +72,7 @@ func (primitiveType PrimitiveType) Size() int {
 	panic(fmt.Sprintf("Illegal primitive type: %v \n", primitiveType))
 }
 
-func (primitiveType PrimitiveType) IrType() string {
+func (primitiveType PrimitiveType) IrType() types.Type {
 	if primitiveType >= 0 && int(primitiveType) < len(literals) {
 		return irTypes[primitiveType]
 	}

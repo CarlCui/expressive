@@ -5,23 +5,56 @@ import (
 
 	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/typing"
+	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
+	"github.com/llir/llvm/ir/value"
 )
 
 type OperatorCodegen struct {
-	fragment *Fragment
-	operands []*Fragment
-	operator signature.Operator
-	typing   typing.Typing
-	labeller *Labeller
+	fragment   *BlocksFragment
+	operands   []Fragment
+	operator   signature.Operator
+	typing     typing.Typing
+	labeller   *Labeller
+	compIPreds map[string]enum.IPred
+	compFPreds map[string]enum.FPred
 }
 
-func NewOperatorCodegen(fragment *Fragment, operator signature.Operator, typing typing.Typing, labeller *Labeller, operands ...*Fragment) *OperatorCodegen {
+func NewOperatorCodegen(fragment *BlocksFragment, operator signature.Operator, typing typing.Typing, labeller *Labeller, operands ...Fragment) *OperatorCodegen {
+	compIPreds := map[string]enum.IPred{
+		"eq":  enum.IPredEQ,
+		"ne":  enum.IPredNE,
+		"sge": enum.IPredSGE,
+		"sgt": enum.IPredSGT,
+		"sle": enum.IPredSLE,
+		"slt": enum.IPredSLT,
+		"uge": enum.IPredUGE,
+		"ugt": enum.IPredUGT,
+		"ule": enum.IPredULE,
+		"ult": enum.IPredULT,
+	}
+
+	// only implemented ordered ones
+	compFPreds := map[string]enum.FPred{
+		"false": enum.FPredFalse,
+		"oeq":   enum.FPredOEQ,
+		"oge":   enum.FPredOGE,
+		"ogt":   enum.FPredOGT,
+		"ole":   enum.FPredOLE,
+		"olt":   enum.FPredOLT,
+		"one":   enum.FPredONE,
+		"ord":   enum.FPredORD,
+	}
+
 	return &OperatorCodegen{
 		fragment,
 		operands,
 		operator,
 		typing,
 		labeller,
+		compIPreds,
+		compFPreds,
 	}
 }
 
@@ -55,20 +88,17 @@ func (gen *OperatorCodegen) GenerateCode() {
 	}
 }
 
-func (gen *OperatorCodegen) GenerateComparisonOpcode() string {
-	var opcode string
+func (gen *OperatorCodegen) GenerateComparisonInstr(frag *BlocksFragment) func(value.Value, value.Value) value.Value {
 
 	var conditionCodePrefix string // signed, unsigned, ordered or unordered depending on the typing
 
+	var opcode string
 	switch gen.typing {
 	case typing.INT:
-		opcode = "icmp "
 		conditionCodePrefix = "s" // signed
 	case typing.BOOL:
-		opcode = "icmp "
 		conditionCodePrefix = "u" // does not matter if signed or unsigned
 	case typing.FLOAT:
-		opcode = "fcmp "
 		conditionCodePrefix = "o" // ordered, since neither can be QNAN
 	// TODO: implement string and char
 	default:
@@ -112,100 +142,139 @@ func (gen *OperatorCodegen) GenerateComparisonOpcode() string {
 		gen.panicOnMismatchCodegen()
 	}
 
-	return opcode
+	switch gen.typing {
+	case typing.INT:
+	case typing.BOOL:
+		predicate := gen.compIPreds[opcode]
+		return func(op1, op2 value.Value) value.Value {
+			return ir.NewICmp(predicate, op1, op2)
+		}
+	case typing.FLOAT:
+		predicate := gen.compFPreds[opcode]
+		return func(op1, op2 value.Value) value.Value {
+			return ir.NewFCmp(predicate, op1, op2)
+		}
+	default:
+		panic("does not support comparison on type %v " + gen.typing.String())
+	}
+
+	return nil
 }
 
 func (gen *OperatorCodegen) generateComparison() {
-	opcode := gen.GenerateComparisonOpcode()
 
-	gen.generateBinary(opcode)
+	instr := gen.GenerateComparisonInstr(gen.fragment)
+
+	gen.generateBinary(instr)
 }
 
-func (gen *OperatorCodegen) generateBinary(opcode string) {
+func (gen *OperatorCodegen) generateBinary(instrFunction func(value.Value, value.Value) value.Value) {
+	frag := gen.fragment
+
 	gen.checkOperandsLength(2)
 
 	frag1 := gen.operands[0]
 	frag2 := gen.operands[1]
 
-	localIdentifier1 := frag1.GetResult()
-	localIdentifier2 := frag2.GetResult()
+	op1 := frag1.GetResult()
+	op2 := frag2.GetResult()
 
-	gen.fragment.Append(frag1)
-	gen.fragment.Append(frag2)
+	frag.Append(frag1)
+	frag.Append(frag2)
 
-	gen.fragment.AddOperation("%v %v %v, %v", opcode, gen.typing.IrType(), localIdentifier1, localIdentifier2)
+	result := instrFunction(op1, op2)
+	instr := result.(ir.Instruction)
+	frag.CurrentBlock.Insts = append(frag.CurrentBlock.Insts, instr)
+
+	frag.resultValue = result
 }
 
 func (gen *OperatorCodegen) generateAdd() {
-	var opcode string
+	var instr func(value.Value, value.Value) value.Value
+
 	switch gen.typing {
 	case typing.INT:
-		opcode = "add"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewAdd(op1, op2)
+		}
 	case typing.FLOAT:
-		opcode = "fadd"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewFAdd(op1, op2)
+		}
 	default:
 		gen.panicOnMismatchCodegen()
 	}
 
-	gen.generateBinary(opcode)
+	gen.generateBinary(instr)
 }
 
 func (gen *OperatorCodegen) generateSubtract() {
+	var instr func(value.Value, value.Value) value.Value
 
-	var opcode string
 	switch gen.typing {
 	case typing.INT:
-		opcode = "sub"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewSub(op1, op2)
+		}
 	case typing.FLOAT:
-		opcode = "fsub"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewFSub(op1, op2)
+		}
 	default:
 		gen.panicOnMismatchCodegen()
 	}
 
-	gen.generateBinary(opcode)
+	gen.generateBinary(instr)
 }
 
 func (gen *OperatorCodegen) generateMultiply() {
-
-	var opcode string
+	var instr func(value.Value, value.Value) value.Value
 	switch gen.typing {
 	case typing.INT:
-		opcode = "mul"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewMul(op1, op2)
+		}
 	case typing.FLOAT:
-		opcode = "fmul"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewFMul(op1, op2)
+		}
 	default:
 		gen.panicOnMismatchCodegen()
 	}
 
-	gen.generateBinary(opcode)
+	gen.generateBinary(instr)
 }
 
 func (gen *OperatorCodegen) generateDivide() {
-
-	var opcode string
+	var instr func(value.Value, value.Value) value.Value
 	switch gen.typing {
 	case typing.INT:
-		opcode = "sdiv"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewSDiv(op1, op2)
+		}
 	case typing.FLOAT:
-		opcode = "fdiv"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewFDiv(op1, op2)
+		}
 	default:
 		gen.panicOnMismatchCodegen()
 	}
 
-	gen.generateBinary(opcode)
+	gen.generateBinary(instr)
 }
 
 func (gen *OperatorCodegen) generateRemainder() {
-
-	var opcode string
+	var instr func(value.Value, value.Value) value.Value
 	switch gen.typing {
 	case typing.INT:
-		opcode = "srem"
+		instr = func(op1, op2 value.Value) value.Value {
+			return ir.NewSRem(op1, op2)
+		}
 	default:
 		gen.panicOnMismatchCodegen()
 	}
 
-	gen.generateBinary(opcode)
+	gen.generateBinary(instr)
 }
 
 func (gen *OperatorCodegen) generateLogicalAnd() {
@@ -219,40 +288,43 @@ func (gen *OperatorCodegen) generateLogicalAnd() {
 
 	gen.checkOperandsLength(2)
 
+	frag := NewBlocksFragment(VALUE)
+
 	frag1 := gen.operands[0]
 	frag2 := gen.operands[1]
 
-	localIdentifier1 := frag1.GetResult()
-	localIdentifier2 := frag2.GetResult()
+	op1 := frag1.GetResult()
+	op2 := frag2.GetResult()
 
 	entry := gen.labeller.NewSet("LAND", "entry")
 	condTrue := gen.labeller.Label("LAND", "cond", "true")
 	condFalse := gen.labeller.Label("LAND", "cond", "false")
 	condFalseEval := gen.labeller.Label("LAND", "cond", "false", "eval")
-	condEnd := gen.labeller.Label("LAND", "cond", "end")
 
-	gen.fragment.Append(frag1)
+	condTrueBlock := ir.NewBlock(condTrue)
+	condFalseBlock := ir.NewBlock(condFalse)
+	condFalseEvalBlock := ir.NewBlock(condFalseEval)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(entry))
-	gen.fragment.AddLabel(entry)
+	frag.NewBlock(entry)
+	entryBlock := frag.CurrentBlock
 
-	frag1IsTrue := gen.fragment.AddOperation("icmp eq i1 %v, 0", localIdentifier1)
-	gen.fragment.AddInstruction("br i1 %v, label %v, label %v", frag1IsTrue, AsLocalVariable(condTrue), AsLocalVariable(condFalse))
+	frag.Append(frag1)
 
-	gen.fragment.AddLabel(condFalse)
-	gen.fragment.Append(frag2)
+	frag1IsTrue := frag.CurrentBlock.NewICmp(enum.IPredEQ, op1, constant.False)
+	frag.CurrentBlock.NewCondBr(frag1IsTrue, condTrueBlock, condFalseBlock)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condFalseEval))
-	gen.fragment.AddLabel(condFalseEval)
+	frag.AddBlock(condFalseBlock)
+	frag.Append(frag2)
 
-	result := gen.fragment.AddOperation("and i1 %v, %v", localIdentifier1, localIdentifier2)
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condTrue))
+	frag.AddBlock(condFalseEvalBlock)
+	instrAnd := frag.CurrentBlock.NewAnd(op1, op2)
 
-	gen.fragment.AddLabel(condTrue)
-	gen.fragment.AddOperation("phi i1 [false, %v], [%v, %v]", AsLocalVariable(entry), result, AsLocalVariable(condFalseEval))
+	frag.AddBlock(condTrueBlock)
+	instrPhi := frag.CurrentBlock.NewPhi(ir.NewIncoming(constant.False, entryBlock), ir.NewIncoming(instrAnd, condFalseEvalBlock))
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
-	gen.fragment.AddLabel(condEnd)
+	frag.resultValue = instrPhi
+
+	gen.fragment.Append(frag)
 }
 
 func (gen *OperatorCodegen) generateLogicalOr() {
@@ -269,37 +341,41 @@ func (gen *OperatorCodegen) generateLogicalOr() {
 	frag1 := gen.operands[0]
 	frag2 := gen.operands[1]
 
-	localIdentifier1 := frag1.GetResult()
-	localIdentifier2 := frag2.GetResult()
+	op1 := frag1.GetResult()
+	op2 := frag2.GetResult()
 
 	entry := gen.labeller.NewSet("LOR", "entry")
 	condTrue := gen.labeller.Label("LOR", "cond", "true")
 	condFalse := gen.labeller.Label("LOR", "cond", "false")
 	condFalseEval := gen.labeller.Label("LOR", "cond", "false", "eval")
-	condEnd := gen.labeller.Label("LOR", "cond", "end")
 
-	gen.fragment.Append(frag1)
+	entryBlock := ir.NewBlock(entry)
+	condTrueBlock := ir.NewBlock(condTrue)
+	condFalseBlock := ir.NewBlock(condFalse)
+	condFalseEvalBlock := ir.NewBlock(condFalseEval)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(entry))
-	gen.fragment.AddLabel(entry)
+	frag := NewBlocksFragment(VALUE)
+	frag.AddBlock(entryBlock)
 
-	frag1IsTrue := gen.fragment.AddOperation("icmp eq i1 %v, 1", localIdentifier1)
-	gen.fragment.AddInstruction("br i1 %v, label %v, label %v", frag1IsTrue, AsLocalVariable(condTrue), AsLocalVariable(condFalse))
+	frag.Append(frag1)
 
-	gen.fragment.AddLabel(condFalse)
-	gen.fragment.Append(frag2)
+	frag1IsTrue := frag.CurrentBlock.NewICmp(enum.IPredEQ, op1, constant.True)
+	frag.CurrentBlock.NewCondBr(frag1IsTrue, condTrueBlock, condFalseBlock)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condFalseEval))
-	gen.fragment.AddLabel(condFalseEval)
+	frag.AddBlock(condFalseBlock)
+	frag.Append(frag2)
 
-	result := gen.fragment.AddOperation("or i1 %v, %v", localIdentifier1, localIdentifier2)
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condTrue))
+	frag.AddBlock(condFalseEvalBlock)
 
-	gen.fragment.AddLabel(condTrue)
-	gen.fragment.AddOperation("phi i1 [true, %v], [%v, %v]", AsLocalVariable(entry), result, AsLocalVariable(condFalseEval))
+	result := frag.CurrentBlock.NewOr(op1, op2)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
-	gen.fragment.AddLabel(condEnd)
+	frag.CurrentBlock.NewBr(condTrueBlock)
+
+	frag.AddBlock(condTrueBlock)
+
+	phiInstr := frag.CurrentBlock.NewPhi(ir.NewIncoming(constant.True, entryBlock), ir.NewIncoming(result, condFalseEvalBlock))
+
+	frag.resultValue = phiInstr
 }
 
 func (gen *OperatorCodegen) generateLogicalNot() {
@@ -313,60 +389,66 @@ func (gen *OperatorCodegen) generateLogicalNot() {
 
 	gen.checkOperandsLength(1)
 
-	frag := gen.operands[0]
+	frag1 := gen.operands[0]
 
-	fragResult := frag.GetResult()
+	op1 := frag1.GetResult()
+
+	frag := NewBlocksFragment(VALUE)
+	frag.NewBlock("")
+
+	frag.Append(frag1)
+
+	result := frag.CurrentBlock.NewXor(op1, constant.True)
+
+	frag.resultValue = result
 
 	gen.fragment.Append(frag)
-
-	gen.fragment.AddOperation("xor i1 %v, 1", fragResult)
 }
 
 func (gen *OperatorCodegen) generateIfElse() {
 
 	gen.checkOperandsLength(3)
 
-	entry := gen.labeller.NewSet("ifelse", "entry")
-	condTrue := gen.labeller.Label("ifelse", "cond", "true")
-	condTrueEval := gen.labeller.Label("ifelse", "cond", "true", "eval")
-	condFalse := gen.labeller.Label("ifelse", "cond", "false")
-	condFalseEval := gen.labeller.Label("ifelse", "cond", "false", "eval")
-	condEnd := gen.labeller.Label("ifelse", "cond", "end")
+	entry := ir.NewBlock(gen.labeller.NewSet("ifelse", "entry"))
+	condTrue := ir.NewBlock(gen.labeller.Label("ifelse", "cond", "true"))
+	condTrueEval := ir.NewBlock(gen.labeller.Label("ifelse", "cond", "true", "eval"))
+	condFalse := ir.NewBlock(gen.labeller.Label("ifelse", "cond", "false"))
+	condFalseEval := ir.NewBlock(gen.labeller.Label("ifelse", "cond", "false", "eval"))
+	condEnd := ir.NewBlock(gen.labeller.Label("ifelse", "cond", "end"))
 
 	frag1 := gen.operands[0]
 	frag2 := gen.operands[1]
 	frag3 := gen.operands[2]
 
-	localIdentifier1 := frag1.GetResult()
-	localIdentifier2 := frag2.GetResult()
-	localIdentifier3 := frag3.GetResult()
+	op1 := frag1.GetResult()
+	op2 := frag2.GetResult()
+	op3 := frag3.GetResult()
+
+	frag := NewBlocksFragment(VALUE)
+
+	frag.AddBlock(entry)
 
 	gen.fragment.Append(frag1)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(entry))
-	gen.fragment.AddLabel(entry)
+	comp := frag.CurrentBlock.NewICmp(enum.IPredEQ, op1, constant.True)
+	frag.CurrentBlock.NewCondBr(comp, condTrue, condFalse)
 
-	comp := gen.fragment.AddOperation("icmp eq i1 %v, 1", localIdentifier1)
-	gen.fragment.AddInstruction("br i1 %v, label %v, label %v", comp, AsLocalVariable(condTrue), AsLocalVariable(condFalse))
+	frag.AddBlock(condTrue)
+	frag.Append(frag2)
 
-	gen.fragment.AddLabel(condTrue)
-	gen.fragment.Append(frag2)
+	frag.AddBlock(condTrueEval)
+	frag.CurrentBlock.NewBr(condEnd)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condTrueEval))
-	gen.fragment.AddLabel(condTrueEval)
-
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
-
-	gen.fragment.AddLabel(condFalse)
+	frag.AddBlock(condFalse)
 	gen.fragment.Append(frag3)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condFalseEval))
-	gen.fragment.AddLabel(condFalseEval)
+	frag.AddBlock(condFalseEval)
+	frag.CurrentBlock.NewBr(condEnd)
 
-	gen.fragment.AddInstruction("br label %v", AsLocalVariable(condEnd))
+	frag.AddBlock(condEnd)
+	phiInstr := frag.CurrentBlock.NewPhi(ir.NewIncoming(op2, condTrueEval), ir.NewIncoming(op3, condFalseEval))
 
-	gen.fragment.AddLabel(condEnd)
-	gen.fragment.AddOperation("phi %v [%v, %v], [%v, %v]", gen.typing.IrType(), localIdentifier2, AsLocalVariable(condTrueEval), localIdentifier3, AsLocalVariable(condFalseEval))
+	frag.resultValue = phiInstr
 }
 
 func (gen *OperatorCodegen) checkOperandsLength(needed int) {

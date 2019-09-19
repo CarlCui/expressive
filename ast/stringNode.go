@@ -2,7 +2,6 @@ package ast
 
 import (
 	"encoding/json"
-	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -36,26 +35,10 @@ func (node *StringNode) Init(tok *token.Token) {
 	node.Val = tok.Raw[start : len(tok.Raw)-lastSize]
 }
 
-func (node *StringNode) EscapeVal() string {
-	escapedString := node.Val
+func (node *StringNode) StringValue() string {
+	value := node.Val + "\x00" // append terminating character
 
-	escapedString += "\\00" // append terminating character
-
-	escapedString = strings.Replace(escapedString, "\\n", "\\0A", -1)
-
-	return escapedString
-}
-
-func (node *StringNode) EscapedStringLength() int {
-	escapedString := node.EscapeVal()
-
-	totalLength := len(escapedString)
-
-	matchEscapedCharacters := regexp.MustCompile("\\\\..")
-
-	escapedCharacters := matchEscapedCharacters.FindAllString(escapedString, -1)
-
-	return totalLength - len(escapedCharacters)*2
+	return strings.Replace(value, "\\n", "\n", -1)
 }
 
 func (node *StringNode) MarshalJSON() ([]byte, error) {

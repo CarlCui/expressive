@@ -45,12 +45,10 @@
             "type": "go",
             "request": "launch",
             "mode": "test",
-            "program": "${workspaceRoot}/codegen",
-            "env": {
-
-            },
+            "program": "${workspaceFolder}/codegen",
             "args": [
-                "-test.run"
+                "-test.run",
+                "TestCodegen"
             ]
         },
         {
