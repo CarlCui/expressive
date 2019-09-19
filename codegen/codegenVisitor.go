@@ -219,10 +219,9 @@ func (visitor *CodegenVisitor) VisitLeaveVariableDeclarationNode(node *ast.Varia
 		// TODO: finish default values for types
 		switch identifierTyping {
 		case typing.INT:
-			intIrType := types.I32
-			defaultValue = constant.NewInt(intIrType, 0)
+			defaultValue = constant.NewInt(typing.INT.IrType().(*types.IntType), 0)
 		case typing.FLOAT:
-			defaultValue = constant.NewFloat(types.FP128, 0)
+			defaultValue = constant.NewFloat(typing.FLOAT.IrType().(*types.FloatType), 0)
 		}
 
 		fragment.CurrentBlock.NewStore(defaultValue, allocaInstr)
