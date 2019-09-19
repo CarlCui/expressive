@@ -143,8 +143,7 @@ func (gen *OperatorCodegen) GenerateComparisonInstr(frag *BlocksFragment) func(v
 	}
 
 	switch gen.typing {
-	case typing.INT:
-	case typing.BOOL:
+	case typing.INT, typing.BOOL:
 		predicate := gen.compIPreds[opcode]
 		return func(op1, op2 value.Value) value.Value {
 			return ir.NewICmp(predicate, op1, op2)
