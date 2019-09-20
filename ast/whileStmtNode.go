@@ -5,6 +5,7 @@ import (
 
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
+	"github.com/llir/llvm/ir"
 )
 
 // WhileStmtNode represents a node with while statement
@@ -12,7 +13,7 @@ type WhileStmtNode struct {
 	*BaseNode
 	ConditionExpr Node
 	Block         Node
-	EndLabel      string
+	EndBlock      *ir.Block
 }
 
 // Accept is part of visitor pattern.

@@ -6,7 +6,7 @@ jobs:
   build:
     docker:
       # specify the version
-      - image: circleci/golang:1.8
+      - image: circleci/golang:1.13.0
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -20,6 +20,8 @@ jobs:
       - checkout
 
       - run: mkdir -p $TEST_RESULTS
+
+      - run: sudo apt install libncurses5
 
       - run: go get github.com/jstemmer/go-junit-report
 

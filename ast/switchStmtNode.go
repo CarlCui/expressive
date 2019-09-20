@@ -6,6 +6,7 @@ import (
 
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
+	"github.com/llir/llvm/ir"
 )
 
 // SwitchStmtNode represents a node with for statement
@@ -15,7 +16,7 @@ type SwitchStmtNode struct {
 	CaseExprs    []Node
 	CaseBlocks   []Node
 	DefaultBlock Node
-	EndLabel     string
+	EndBlock     *ir.Block
 }
 
 // Accept is part of visitor pattern.

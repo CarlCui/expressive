@@ -5,12 +5,13 @@ import (
 
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
+	"github.com/llir/llvm/ir"
 )
 
 // BreakNode represents a node with break.
 type BreakNode struct {
 	*BaseNode
-	label string // the label break should branch to
+	endBlock *ir.Block // the block break should branch to
 }
 
 // Accept is part of visitor pattern.
@@ -37,7 +38,7 @@ func (node *BreakNode) FindNearestValidStatementNode() Node {
 	return nil
 }
 
-func (node *BreakNode) FindBreakLabel() string {
+func (node *BreakNode) FindBreakBlock() *ir.Block {
 	nearestValidStatementNode := node.FindNearestValidStatementNode()
 
 	if nearestValidStatementNode == nil {
@@ -46,11 +47,11 @@ func (node *BreakNode) FindBreakLabel() string {
 
 	switch stmtNode := nearestValidStatementNode.(type) {
 	case *ForStmtNode:
-		return stmtNode.EndLabel
+		return stmtNode.EndBlock
 	case *WhileStmtNode:
-		return stmtNode.EndLabel
+		return stmtNode.EndBlock
 	case *SwitchStmtNode:
-		return stmtNode.EndLabel
+		return stmtNode.EndBlock
 	default:
 		panic(node.GetLocation() + "expecting finding valid statement node (for, while or switch)")
 	}
@@ -60,11 +61,9 @@ func (node *BreakNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		NodeType string
 		Token    *token.Token
-		Label    string
 	}{
 		NodeType: "break",
 		Token:    node.BaseNode.Tok,
-		Label:    node.label,
 	})
 }
 
