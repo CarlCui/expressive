@@ -104,6 +104,9 @@ func (functionsFragment *FunctionsFragment) Append(fragment Fragment) {
 			functionsFragment.currentFunction = f.currentFunction
 		}
 	case *BlocksFragment:
+		if functionsFragment.currentFunction == nil {
+			panic("FunctionsFragment does not contain any function")
+		}
 		blocks := functionsFragment.currentFunction.Blocks
 
 		// Chain new blocks to existing blocks
