@@ -217,11 +217,13 @@ func (blocksFragment *BlocksFragment) NewBlock(name string) {
 }
 
 func (blocksFragment *BlocksFragment) AddBlock(block *ir.Block) {
-	if block != nil {
-		blocksFragment.ChainBlocks(block)
-		blocksFragment.Blocks = append(blocksFragment.Blocks, block)
-		blocksFragment.CurrentBlock = block
+	if block == nil {
+		return
 	}
+	blocksFragment.ChainBlocks(block)
+	blocksFragment.Blocks = append(blocksFragment.Blocks, block)
+	blocksFragment.CurrentBlock = block
+
 }
 
 func (blocksFragment *BlocksFragment) ChainBlocks(blocks ...*ir.Block) {
