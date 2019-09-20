@@ -98,9 +98,11 @@ func (functionsFragment *FunctionsFragment) Append(fragment Fragment) {
 	case *ModuleFragment:
 		panic("Cannot append module to function")
 	case *FunctionsFragment:
-		functionsFragment.Functions = append(functionsFragment.Functions, f.Functions...)
+		if f.Functions != nil && len(f.Functions) > 0 {
+			functionsFragment.Functions = append(functionsFragment.Functions, f.Functions...)
 
-		functionsFragment.currentFunction = f.currentFunction
+			functionsFragment.currentFunction = f.currentFunction
+		}
 	case *BlocksFragment:
 		blocks := functionsFragment.currentFunction.Blocks
 
