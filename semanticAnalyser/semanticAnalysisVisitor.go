@@ -124,30 +124,31 @@ func (visitor *SemanticAnalysisVisitor) VisitEnterAssignmentNode(node *ast.Assig
 // VisitLeaveAssignmentNode do something
 func (visitor *SemanticAnalysisVisitor) VisitLeaveAssignmentNode(node *ast.AssignmentNode) {
 
-	identifier := node.Identifier.(*ast.IdentifierNode)
+	// check if assigning to constant
+	if identifier, ok := node.LHS.(*ast.IdentifierNode); ok {
+		binding := identifier.GetBinding()
 
-	binding := identifier.GetBinding()
+		// If the binding is nil, then error is handled inside VisitIdentifierNode. If we pass a
+		// null instance (not nil) to signature matching, it will log another error, which will
+		// be miss-leading.
+		if binding == nil {
+			node.SetTyping(typing.ERROR_TYPE)
+			return
+		}
 
-	// If the binding is nil, then error is handled inside VisitIdentifierNode. If we pass a
-	// null instance (not nil) to signature matching, it will log another error, which will
-	// be miss-leading.
-	if binding == nil {
-		node.SetTyping(typing.ERROR_TYPE)
-		return
+		if !binding.IsVariable {
+			node.SetTyping(typing.ERROR_TYPE)
+			visitor.log(identifier.GetLocation(), "variable cannot be re-assigned")
+			return
+		}
 	}
 
-	if !binding.IsVariable {
-		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(identifier.GetLocation(), "variable cannot be re-assigned")
-		return
-	}
-
-	declaredType := identifier.GetTyping()
-	exprType := node.Expr.GetTyping()
+	declaredType := node.LHS.GetTyping()
+	exprType := node.RHS.GetTyping()
 
 	if !declaredType.Equals(exprType) {
 		node.SetTyping(typing.ERROR_TYPE)
-		visitor.log(node.Expr.GetLocation(), "variable declared as "+declaredType.String()+", "+
+		visitor.log(node.RHS.GetLocation(), "variable declared as "+declaredType.String()+", "+
 			" but got "+exprType.String())
 		return
 	}

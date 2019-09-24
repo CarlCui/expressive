@@ -11,9 +11,9 @@ import (
 // AssignmentNode represents a node with assignment statement
 type AssignmentNode struct {
 	*BaseNode
-	Identifier Node
-	Expr       Node
-	Operator   signature.Operator // if assignment is a compound assignment
+	LHS      Node
+	RHS      Node
+	Operator signature.Operator // if assignment is a compound assignment
 }
 
 // Accept is part of visitor pattern.
@@ -25,24 +25,31 @@ func (node *AssignmentNode) Accept(visitor Visitor) {
 
 // VisitChildren is part of visitor pattern. Visit left-hand side node, then right-hand side node.
 func (node *AssignmentNode) VisitChildren(visitor Visitor) {
-	Accept(node.Identifier, visitor)
-	Accept(node.Expr, visitor)
+	Accept(node.LHS, visitor)
+	Accept(node.RHS, visitor)
 }
 
 func (node *AssignmentNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		NodeType   string
-		Token      *token.Token
-		Identifier Node
-		Typing     typing.Typing
-		Expr       Node
-		Operator   signature.Operator
+		NodeType string
+		Token    *token.Token
+		LHS      Node
+		Typing   typing.Typing
+		RHS      Node
+		Operator signature.Operator
 	}{
-		NodeType:   "assignment",
-		Token:      node.BaseNode.Tok,
-		Identifier: node.Identifier,
-		Typing:     node.Typing,
-		Expr:       node.Expr,
-		Operator:   node.Operator,
+		NodeType: "assignment",
+		Token:    node.BaseNode.Tok,
+		LHS:      node.LHS,
+		Typing:   node.Typing,
+		RHS:      node.RHS,
+		Operator: node.Operator,
 	})
+}
+
+func CreateAssignmentStmtNode(tok *token.Token) *AssignmentNode {
+	var node AssignmentNode
+	node.BaseNode = CreateBaseNode(tok, nil)
+
+	return &node
 }

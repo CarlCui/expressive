@@ -244,12 +244,12 @@ func (visitor *CodegenVisitor) VisitEnterAssignmentNode(node *ast.AssignmentNode
 func (visitor *CodegenVisitor) VisitLeaveAssignmentNode(node *ast.AssignmentNode) {
 	fragment := visitor.newBlocksFragment(node, VOID)
 
-	lhs := node.Identifier
+	lhs := node.LHS
 
-	lhsExprFragment := visitor.removePointerFragment(node.Identifier)
+	lhsExprFragment := visitor.removePointerFragment(node.LHS)
 	lhsExprResult := lhsExprFragment.GetResult()
 
-	rhsExprFragment := visitor.removeValueFragment(node.Expr)
+	rhsExprFragment := visitor.removeValueFragment(node.RHS)
 
 	rhsExprResult := rhsExprFragment.GetResult()
 

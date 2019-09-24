@@ -207,7 +207,7 @@ func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
 }
 
 func (parser *Parser) isAssignmentStmtStart(tok *token.Token) bool {
-	return tok.TokenType == token.IDENTIFIER
+	return parser.isExprStart(tok)
 }
 
 func (parser *Parser) parseAssignmentStmt() ast.Node {
@@ -215,13 +215,11 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 		return parser.syntaxErrorNode("assignment statement")
 	}
 
-	var node ast.AssignmentNode
-	node.BaseNode = ast.CreateBaseNode(parser.cur, nil)
+	node := ast.CreateAssignmentStmtNode(parser.cur)
 
-	identifier := parser.parseIdentifier()
-	identifier.SetParent(&node)
-
-	node.Identifier = identifier
+	lhs := parser.parseExpr()
+	lhs.SetParent(node)
+	node.LHS = lhs
 
 	var rhs ast.Node
 
@@ -240,10 +238,10 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 	}
 
 	rhs = parser.parseExpr()
-	rhs.SetParent(&node)
+	rhs.SetParent(node)
 
-	node.Expr = rhs
-	return &node
+	node.RHS = rhs
+	return node
 }
 
 func (parser *Parser) isIfStmtStart(tok *token.Token) bool {
