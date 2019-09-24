@@ -5,3 +5,17 @@ print "%d\n", a;
 a = 6;
 
 print "%d\n", a;
+
+a = 5 + 7;
+
+print "%d\n", a;
+
+// compound assignment
+
+a += 3;
+
+print "%d\n", a;
+
+a -= 5;
+
+print "%d\n", a;

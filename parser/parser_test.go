@@ -321,6 +321,61 @@ func TestNoEOFShouldFail(t *testing.T) {
 	parseWithMockTokens(toks, shouldHaveError(t))
 }
 
+func TestParsingAssignmentStmt(t *testing.T) {
+	// a = 5;
+	toks := []*token.Token{
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.ASSIGN},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingAssignmentStmtWithLHSExpression(t *testing.T) {
+	// a = 5 + 3;
+	toks := []*token.Token{
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.ASSIGN},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
+		&token.Token{TokenType: token.ADD},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "3"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingAssignmentStmtWithLHSEmpty(t *testing.T) {
+	// a =;
+	toks := []*token.Token{
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.ASSIGN},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}
+
+func TestParsingCompoundAssignment(t *testing.T) {
+	// a += 5 + 3;
+	toks := []*token.Token{
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.ASSIGN_ADD},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
+		&token.Token{TokenType: token.ADD},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "3"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
 func TestParsingPrintStmt(t *testing.T) {
 	// print "123";
 	toks := []*token.Token{

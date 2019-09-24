@@ -5,10 +5,10 @@
 A primitive type including:
 
 1. int
+1. long
 1. float
-1. bool
-1. char
-1. string
+1. boolean
+1. byte
 
 ## Compound types
 

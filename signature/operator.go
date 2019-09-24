@@ -23,6 +23,7 @@ const (
 	DEEP_EQUAL
 	SHALLOW_NOT_EQUAL
 	DEEP_NOT_EQUAL
+	VOID_OPERATOR
 	ERROR_OPERATOR
 )
 
@@ -45,6 +46,7 @@ var operatorStrings = [...]string{
 	SHALLOW_NOT_EQUAL: "!=(Shallow not euqal)",
 	DEEP_EQUAL:        "===(Deep equal)",
 	DEEP_NOT_EQUAL:    "!== (Deep not equal)",
+	VOID_OPERATOR:     "void",
 	ERROR_OPERATOR:    "??? (Error operator)",
 }
 
@@ -58,17 +60,17 @@ func (operator Operator) String() string {
 
 func GetOperator(tok *token.Token) Operator {
 	switch tok.TokenType {
-	case token.ADD:
+	case token.ADD, token.ASSIGN_ADD:
 		return ADD
-	case token.SUB:
+	case token.SUB, token.ASSIGN_SUB:
 		return SUBTRACT
-	case token.MUL:
+	case token.MUL, token.ASSIGN_MUL:
 		return MULTIPLY
-	case token.DIV:
+	case token.DIV, token.ASSIGN_DIV:
 		return DIVIDE
-	case token.MOD:
+	case token.MOD, token.ASSIGN_MOD:
 		return MODULO
-	case token.POW:
+	case token.POW, token.ASSIGN_POW:
 		return EXPONENTIATE
 	case token.LAND:
 		return LOGIC_AND
