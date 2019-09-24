@@ -10,7 +10,7 @@ _importStmt_ := `import` _fileName_ (`as` _identifier)? `;`
 
 _fileName_ := _stringExpr_
 
-_exportStmt_ := `export` (_declarationStmt_ | _identifier)
+_exportStmt_ := `export` (_declarationStmt_ | _identifier_)
 
 _stmt_ := _declarationStmt_ | _assignmentStmt_
 
