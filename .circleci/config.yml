@@ -42,7 +42,7 @@ jobs:
       - run:
           name: e2e tests
           command: |
-            bash test_e2e.sh
+            bash test_e2e.sh ci
 
       - store_artifacts:
           path: /tmp/test-results

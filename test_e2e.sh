@@ -2,8 +2,11 @@
 
 echo "Starting e2e tests"
 
-LLI_PATH=./llvm-prebuilt/lli
-# LLI_PATH=lli # for local development
+if [ "$1" = "ci" ]; then
+    LLI_PATH=./llvm-prebuilt/lli
+else
+    LLI_PATH=lli # for local development
+fi
 
 for file in ./e2e/*.exp; do
     echo $file
