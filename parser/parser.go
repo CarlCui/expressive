@@ -223,13 +223,26 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 
 	node.Identifier = identifier
 
-	parser.expect(token.ASSIGN)
+	var rhs ast.Node
 
-	expr := parser.parseExpr()
-	expr.SetParent(&node)
+	switch parser.cur.TokenType {
+	case token.ASSIGN:
+		parser.expect(token.ASSIGN)
 
-	node.Expr = expr
+		node.Operator = signature.VOID_OPERATOR
 
+	case token.ASSIGN_ADD, token.ASSIGN_SUB, token.ASSIGN_MUL, token.ASSIGN_DIV, token.ASSIGN_MOD, token.ASSIGN_POW:
+		node.Operator = signature.GetOperator(parser.cur)
+
+		parser.read()
+	default:
+		return parser.syntaxErrorNode("assignment operator")
+	}
+
+	rhs = parser.parseExpr()
+	rhs.SetParent(&node)
+
+	node.Expr = rhs
 	return &node
 }
 

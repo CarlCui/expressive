@@ -107,13 +107,13 @@ func (visitor *CodegenVisitor) removeValueFragment(node ast.Node) Fragment {
 	}
 
 	if fragment.GetResultType() == POINTER {
-		visitor.dereferencePointer(node, fragment)
+		visitor.dereferencePointer(fragment)
 	}
 
 	return fragment
 }
 
-func (visitor *CodegenVisitor) dereferencePointer(node ast.Node, fragment Fragment) {
+func (visitor *CodegenVisitor) dereferencePointer(fragment Fragment) {
 	switch f := fragment.(type) {
 	case *ModuleFragment:
 	case *FunctionsFragment:
@@ -243,22 +243,42 @@ func (visitor *CodegenVisitor) VisitEnterAssignmentNode(node *ast.AssignmentNode
 // VisitLeaveAssignmentNode do something
 func (visitor *CodegenVisitor) VisitLeaveAssignmentNode(node *ast.AssignmentNode) {
 	fragment := visitor.newBlocksFragment(node, VOID)
-	fragment.NewBlock("")
 
-	identifierNode := node.Identifier.(*ast.IdentifierNode)
-	irType := identifierNode.GetTyping().IrType()
-	variableName := identifierNode.LocalIdentifier()
+	lhs := node.Identifier
 
-	exprFragment := visitor.removeValueFragment(node.Expr)
+	lhsExprFragment := visitor.removePointerFragment(node.Identifier)
+	lhsExprResult := lhsExprFragment.GetResult()
 
-	exprResult := exprFragment.GetResult()
+	rhsExprFragment := visitor.removeValueFragment(node.Expr)
 
-	fragment.Append(exprFragment)
+	rhsExprResult := rhsExprFragment.GetResult()
 
-	allocaInstr := ir.NewAlloca(irType)
-	allocaInstr.SetName(variableName)
+	if node.Operator == signature.VOID_OPERATOR {
+		fragment.NewBlock("")
 
-	fragment.CurrentBlock.NewStore(exprResult, allocaInstr)
+		fragment.Append(lhsExprFragment)
+		fragment.Append(rhsExprFragment)
+		fragment.CurrentBlock.NewStore(rhsExprResult, lhsExprResult)
+	} else {
+		binaryOperationFragment := NewBlocksFragment(VALUE)
+
+		visitor.dereferencePointer(lhsExprFragment)
+
+		operatorCodegen := NewOperatorCodegen(
+			binaryOperationFragment,
+			node.Operator,
+			lhs.GetTyping(),
+			visitor.labeller,
+			lhsExprFragment,
+			rhsExprFragment)
+
+		operatorCodegen.GenerateCode()
+
+		operationResult := binaryOperationFragment.GetResult()
+
+		fragment.Append(binaryOperationFragment)
+		fragment.CurrentBlock.NewStore(operationResult, lhsExprResult)
+	}
 }
 
 // VisitEnterPrintNode do something

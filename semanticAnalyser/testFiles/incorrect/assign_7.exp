@@ -1,0 +1,5 @@
+// compound assignment type unsupported
+
+let foo = 5;
+
+foo += 5.3;

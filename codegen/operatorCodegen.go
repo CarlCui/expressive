@@ -156,8 +156,6 @@ func (gen *OperatorCodegen) GenerateComparisonInstr(frag *BlocksFragment) func(v
 	default:
 		panic("does not support comparison on type %v " + gen.typing.String())
 	}
-
-	return nil
 }
 
 func (gen *OperatorCodegen) generateComparison() {
@@ -169,6 +167,10 @@ func (gen *OperatorCodegen) generateComparison() {
 
 func (gen *OperatorCodegen) generateBinary(instrFunction func(value.Value, value.Value) value.Value) {
 	frag := gen.fragment
+
+	if len(frag.Blocks) == 0 {
+		frag.NewBlock("")
+	}
 
 	gen.checkOperandsLength(2)
 

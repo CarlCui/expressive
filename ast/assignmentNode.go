@@ -3,6 +3,7 @@ package ast
 import (
 	"encoding/json"
 
+	"github.com/carlcui/expressive/signature"
 	"github.com/carlcui/expressive/token"
 	"github.com/carlcui/expressive/typing"
 )
@@ -12,6 +13,7 @@ type AssignmentNode struct {
 	*BaseNode
 	Identifier Node
 	Expr       Node
+	Operator   signature.Operator // if assignment is a compound assignment
 }
 
 // Accept is part of visitor pattern.
@@ -34,11 +36,13 @@ func (node *AssignmentNode) MarshalJSON() ([]byte, error) {
 		Identifier Node
 		Typing     typing.Typing
 		Expr       Node
+		Operator   signature.Operator
 	}{
 		NodeType:   "assignment",
 		Token:      node.BaseNode.Tok,
 		Identifier: node.Identifier,
 		Typing:     node.Typing,
 		Expr:       node.Expr,
+		Operator:   node.Operator,
 	})
 }

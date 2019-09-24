@@ -152,6 +152,13 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveAssignmentNode(node *ast.Assig
 		return
 	}
 
+	// in the case of a compound assignment
+	if node.Operator != signature.VOID_OPERATOR && !signature.HasSignature(node.Operator, declaredType, exprType) {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.TypeCheckError(node.GetLocation(), node.Operator, declaredType, exprType)
+		return
+	}
+
 	node.SetTyping(typing.VOID)
 }
 

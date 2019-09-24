@@ -35,6 +35,12 @@ const (
 	LNOT
 
 	ASSIGN
+	ASSIGN_ADD
+	ASSIGN_SUB
+	ASSIGN_MUL
+	ASSIGN_DIV
+	ASSIGN_MOD
+	ASSIGN_POW
 
 	EQUAL
 	NOT_EQUAL // not equal
@@ -112,7 +118,13 @@ var tokens = [...]string{
 	LOR:  "||", // logic or
 	LNOT: "!",  // logic not
 
-	ASSIGN: "=",
+	ASSIGN:     "=",
+	ASSIGN_ADD: "+=",
+	ASSIGN_SUB: "-=",
+	ASSIGN_MUL: "*=",
+	ASSIGN_DIV: "/=",
+	ASSIGN_MOD: "%=",
+	ASSIGN_POW: "^^=",
 
 	EQUAL:            "==",
 	NOT_EQUAL:        "!=",

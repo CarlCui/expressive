@@ -12,3 +12,10 @@ str1 = "def";
 
 let char1 = 'a';
 char1 = 'b';
+
+foo += 5;
+foo -=5;
+foo *= 5;
+foo /= 5;
+foo %= 5;
+foo ^^= 5;
