@@ -224,8 +224,8 @@ func (parser *Parser) parseStmtsStartWithExpr() ast.Node {
 	switch {
 	case parser.isAssignmentOperators(parser.cur):
 		return parser.parseAssignmentStmt(leftMostToken, lhs)
-	case parser.cur.TokenType == token.INCREMENT || parser.cur.TokenType == token.DECREMENT:
-		return nil
+	case parser.isIncrementDecrementOperator(parser.cur):
+		return parser.parseIncrementDecrementStmt(leftMostToken, lhs)
 	default:
 		return parser.syntaxErrorNode(parseErrorMsg)
 	}
@@ -274,6 +274,31 @@ func (parser *Parser) parseAssignmentStmt(baseToken *token.Token, lhs ast.Node) 
 	rhs.SetParent(node)
 
 	node.RHS = rhs
+	return node
+}
+
+func (parser *Parser) isIncrementDecrementOperator(tok *token.Token) bool {
+	return tok.TokenType == token.INCREMENT || tok.TokenType == token.DECREMENT
+}
+
+func (parser *Parser) parseIncrementDecrementStmt(baseToken *token.Token, lhs ast.Node) ast.Node {
+	if !parser.isIncrementDecrementOperator(parser.cur) {
+		return parser.syntaxErrorNode("increment/decrement statement")
+	}
+
+	node := ast.CreateIncDecNode(baseToken)
+
+	if parser.cur.TokenType == token.INCREMENT {
+		node.IsIncrement = true
+	} else {
+		node.IsIncrement = false
+	}
+
+	parser.read()
+
+	node.LHS = lhs
+	lhs.SetParent(node)
+
 	return node
 }
 

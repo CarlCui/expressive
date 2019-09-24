@@ -1,0 +1,11 @@
+let a = 5;
+
+print "%d\n", a;
+
+a++;
+
+print "%d\n", a;
+
+a--;
+
+print "%d\n", a;

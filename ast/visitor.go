@@ -16,6 +16,9 @@ type Visitor interface {
 	VisitEnterAssignmentNode(node *AssignmentNode)
 	VisitLeaveAssignmentNode(node *AssignmentNode)
 
+	VisitEnterIncDecNode(node *IncDecNode)
+	VisitLeaveIncDecNode(node *IncDecNode)
+
 	VisitEnterIfStmtNode(node *IfStmtNode)
 	VisitLeaveIfStmtNode(node *IfStmtNode)
 
