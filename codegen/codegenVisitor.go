@@ -281,6 +281,33 @@ func (visitor *CodegenVisitor) VisitLeaveAssignmentNode(node *ast.AssignmentNode
 	}
 }
 
+func (visitor *CodegenVisitor) VisitEnterIncDecNode(node *ast.IncDecNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveIncDecNode(node *ast.IncDecNode) {
+	fragment := visitor.newBlocksFragment(node, VOID)
+	fragment.NewBlock("")
+
+	lhsFragment := visitor.removePointerFragment(node.LHS)
+	lhsResult := lhsFragment.GetResult()
+
+	fragment.Append(lhsFragment)
+
+	load := fragment.CurrentBlock.NewLoad(lhsResult)
+
+	intType := (typing.INT.IrType()).(*types.IntType)
+
+	if node.IsIncrement {
+		add := fragment.CurrentBlock.NewAdd(load, constant.NewInt(intType, 1))
+		fragment.CurrentBlock.NewStore(add, lhsResult)
+	} else {
+		sub := fragment.CurrentBlock.NewSub(load, constant.NewInt(intType, 1))
+		fragment.CurrentBlock.NewStore(sub, lhsResult)
+	}
+
+}
+
 // VisitEnterPrintNode do something
 func (visitor *CodegenVisitor) VisitEnterPrintNode(node *ast.PrintNode) {
 

@@ -109,9 +109,9 @@ func (parser *Parser) parseStmt() ast.Node {
 
 func (parser *Parser) isStmtWithSemiStart(tok *token.Token) bool {
 	return parser.isVariableDeclarationStmtStart(tok) ||
-		parser.isAssignmentStmtStart(tok) ||
 		parser.isPrintStmtStart(tok) ||
-		parser.isBreakStmtStart(tok)
+		parser.isBreakStmtStart(tok) ||
+		parser.isStmtStartWithExprStart(tok)
 }
 
 func (parser *Parser) parseStmtWithSemi() ast.Node {
@@ -123,12 +123,12 @@ func (parser *Parser) parseStmtWithSemi() ast.Node {
 
 	if parser.isVariableDeclarationStmtStart(parser.cur) {
 		node = parser.parseVariableDeclarationStmt()
-	} else if parser.isAssignmentStmtStart(parser.cur) {
-		node = parser.parseAssignmentStmt()
 	} else if parser.isPrintStmtStart(parser.cur) {
 		node = parser.parsePrintStmt()
 	} else if parser.isBreakStmtStart(parser.cur) {
 		node = parser.parseBreakStmt()
+	} else if parser.isStmtStartWithExprStart(parser.cur) {
+		node = parser.parseStmtsStartWithExpr()
 	}
 
 	return node
@@ -206,18 +206,51 @@ func (parser *Parser) parseVariableDeclarationStmt() ast.Node {
 	return &node
 }
 
-func (parser *Parser) isAssignmentStmtStart(tok *token.Token) bool {
+func (parser *Parser) isStmtStartWithExprStart(tok *token.Token) bool {
 	return parser.isExprStart(tok)
 }
 
-func (parser *Parser) parseAssignmentStmt() ast.Node {
-	if !parser.isAssignmentStmtStart(parser.cur) {
+func (parser *Parser) parseStmtsStartWithExpr() ast.Node {
+	parseErrorMsg := "statement with expression start (assignment statement, increment/decrement statement, function call)"
+
+	if !parser.isStmtStartWithExprStart(parser.cur) {
+		return parser.syntaxErrorNode(parseErrorMsg)
+	}
+
+	leftMostToken := parser.cur
+
+	lhs := parser.parseExpr()
+
+	switch {
+	case parser.isAssignmentOperators(parser.cur):
+		return parser.parseAssignmentStmt(leftMostToken, lhs)
+	case parser.isIncrementDecrementOperator(parser.cur):
+		return parser.parseIncrementDecrementStmt(leftMostToken, lhs)
+	default:
+		return parser.syntaxErrorNode(parseErrorMsg)
+	}
+
+}
+
+func (parser *Parser) isAssignmentOperators(tok *token.Token) bool {
+	tokenType := tok.TokenType
+
+	return tokenType == token.ASSIGN ||
+		tokenType == token.ASSIGN_ADD ||
+		tokenType == token.ASSIGN_SUB ||
+		tokenType == token.ASSIGN_MUL ||
+		tokenType == token.ASSIGN_DIV ||
+		tokenType == token.ASSIGN_MOD ||
+		tokenType == token.ASSIGN_POW
+}
+
+func (parser *Parser) parseAssignmentStmt(baseToken *token.Token, lhs ast.Node) ast.Node {
+	if !parser.isAssignmentOperators(parser.cur) {
 		return parser.syntaxErrorNode("assignment statement")
 	}
 
 	node := ast.CreateAssignmentStmtNode(parser.cur)
 
-	lhs := parser.parseExpr()
 	lhs.SetParent(node)
 	node.LHS = lhs
 
@@ -241,6 +274,31 @@ func (parser *Parser) parseAssignmentStmt() ast.Node {
 	rhs.SetParent(node)
 
 	node.RHS = rhs
+	return node
+}
+
+func (parser *Parser) isIncrementDecrementOperator(tok *token.Token) bool {
+	return tok.TokenType == token.INCREMENT || tok.TokenType == token.DECREMENT
+}
+
+func (parser *Parser) parseIncrementDecrementStmt(baseToken *token.Token, lhs ast.Node) ast.Node {
+	if !parser.isIncrementDecrementOperator(parser.cur) {
+		return parser.syntaxErrorNode("increment/decrement statement")
+	}
+
+	node := ast.CreateIncDecNode(baseToken)
+
+	if parser.cur.TokenType == token.INCREMENT {
+		node.IsIncrement = true
+	} else {
+		node.IsIncrement = false
+	}
+
+	parser.read()
+
+	node.LHS = lhs
+	lhs.SetParent(node)
+
 	return node
 }
 
@@ -342,11 +400,10 @@ func (parser *Parser) parseForStmt() ast.Node {
 	// condition
 	parser.expect(token.LEFT_PAREN)
 
-	if parser.isAssignmentStmtStart(parser.cur) {
-		node.SetInitializationStmtNode(parser.parseAssignmentStmt())
-	} else if parser.isVariableDeclarationStmtStart(parser.cur) {
-		node.SetInitializationStmtNode(parser.parseVariableDeclarationStmt())
+	if parser.isStmtWithSemiStart(parser.cur) {
+		node.SetInitializationStmtNode(parser.parseStmtWithSemi())
 	}
+
 	parser.expect(token.SEMI)
 
 	if parser.isExprStart(parser.cur) {

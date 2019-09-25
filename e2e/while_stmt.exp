@@ -3,7 +3,7 @@ let a = 5;
 while (a < 10) {
     print "%d", a;
 
-    a = a + 1;
+    a++;
 }
 
 print "\n";

@@ -376,6 +376,59 @@ func TestParsingCompoundAssignment(t *testing.T) {
 	parseWithMockTokens(toks, shouldHaveNoError(t))
 }
 
+func TestParsingIncrementStatement(t *testing.T) {
+	// a++;
+	toks := []*token.Token{
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.INCREMENT},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingDecrementStatement(t *testing.T) {
+	// a--;
+	toks := []*token.Token{
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.DECREMENT},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingIncrementStatementWithExpr(t *testing.T) {
+	// (a+1)++; -- although not semantically correct in expressive, the parser still permits this
+	toks := []*token.Token{
+		&token.Token{TokenType: token.LEFT_PAREN},
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.ADD},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
+		&token.Token{TokenType: token.RIGHT_PAREN},
+		&token.Token{TokenType: token.INCREMENT},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveNoError(t))
+}
+
+func TestParsingIncrementStatementIncorrect(t *testing.T) {
+	// a++5;
+	toks := []*token.Token{
+		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
+		&token.Token{TokenType: token.INCREMENT},
+		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
+		&token.Token{TokenType: token.SEMI},
+		&token.Token{TokenType: token.EOF},
+	}
+
+	parseWithMockTokens(toks, shouldHaveError(t))
+}
+
 func TestParsingPrintStmt(t *testing.T) {
 	// print "123";
 	toks := []*token.Token{

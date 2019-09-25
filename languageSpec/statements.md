@@ -2,7 +2,7 @@
 
 ## Productions
 
-_stmt_ := _variableDeclarationStmt_ | _assignmentStmt_ | _printStmt_ | _ifStmt_ | _forStmt_ | _whileStmt_ | _switchStmt_ | _breakStmt_
+_stmt_ := _variableDeclarationStmt_ | _assignmentStmt_ | _printStmt_ | _ifStmt_ | _forStmt_ | _whileStmt_ | _switchStmt_ | _breakStmt_ | _incrementStmt_ | _decrementStmt_
 
 _variableDeclarationStmt_ := (`let`|`const`) _identifier_ _typeAnnotation_? (`=` _expr_)? `;`
 

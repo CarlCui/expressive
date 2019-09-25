@@ -30,6 +30,9 @@ const (
 	MOD
 	POW
 
+	INCREMENT
+	DECREMENT
+
 	LAND
 	LOR
 	LNOT
@@ -113,6 +116,9 @@ var tokens = [...]string{
 	DIV: "/",
 	MOD: "%",
 	POW: "^^",
+
+	INCREMENT: "++",
+	DECREMENT: "--",
 
 	LAND: "&&", // logic and
 	LOR:  "||", // logic or

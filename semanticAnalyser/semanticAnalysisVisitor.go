@@ -163,6 +163,28 @@ func (visitor *SemanticAnalysisVisitor) VisitLeaveAssignmentNode(node *ast.Assig
 	node.SetTyping(typing.VOID)
 }
 
+func (visitor *SemanticAnalysisVisitor) VisitEnterIncDecNode(node *ast.IncDecNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveIncDecNode(node *ast.IncDecNode) {
+	if _, ok := node.LHS.(*ast.IdentifierNode); !ok {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.log(node.LHS.GetLocation(), "left-hand side expression must be addressable.")
+		return
+	}
+
+	lhsTyping := node.LHS.GetTyping()
+
+	if !signature.HasSignature(signature.ADD, lhsTyping, typing.INT) {
+		node.SetTyping(typing.ERROR_TYPE)
+		visitor.TypeCheckError(node.GetLocation(), signature.ADD, lhsTyping, typing.INT)
+		return
+	}
+
+	node.SetTyping(typing.VOID)
+}
+
 // VisitEnterPrintNode do something
 func (visitor *SemanticAnalysisVisitor) VisitEnterPrintNode(node *ast.PrintNode) {
 
