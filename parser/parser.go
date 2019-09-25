@@ -400,7 +400,10 @@ func (parser *Parser) parseForStmt() ast.Node {
 	// condition
 	parser.expect(token.LEFT_PAREN)
 
-	node.SetInitializationStmtNode(parser.parseStmtWithSemi())
+	if parser.isStmtWithSemiStart(parser.cur) {
+		node.SetInitializationStmtNode(parser.parseStmtWithSemi())
+	}
+
 	parser.expect(token.SEMI)
 
 	if parser.isExprStart(parser.cur) {
