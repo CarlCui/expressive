@@ -13,6 +13,7 @@ type PrimitiveType int
 const (
 	INT PrimitiveType = iota
 	FLOAT
+	BYTE
 	CHAR
 	STRING
 	BOOL
@@ -24,6 +25,7 @@ const (
 var literals = [...]string{
 	INT:        "INT",
 	FLOAT:      "FLOAT",
+	BYTE:       "BYTE",
 	CHAR:       "CHAR",
 	STRING:     "STRING",
 	BOOL:       "BOOL",
@@ -35,6 +37,7 @@ var literals = [...]string{
 var irTypes = [...]types.Type{
 	INT:        types.I32,
 	FLOAT:      types.Double,
+	BYTE:       types.I8,
 	CHAR:       types.I8Ptr,
 	STRING:     types.I8Ptr,
 	BOOL:       types.I1,
@@ -46,8 +49,9 @@ var irTypes = [...]types.Type{
 var sizes = [...]int{
 	INT:        4,
 	FLOAT:      8,
-	CHAR:       4,
-	STRING:     4,
+	BYTE:       1,
+	CHAR:       1,
+	STRING:     1,
 	BOOL:       1,
 	VOID:       0,
 	ERROR_TYPE: 0,

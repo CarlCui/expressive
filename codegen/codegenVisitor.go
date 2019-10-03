@@ -318,7 +318,7 @@ func (visitor *CodegenVisitor) VisitLeavePrintNode(node *ast.PrintNode) {
 	fragment := visitor.newBlocksFragment(node, VOID)
 	fragment.NewBlock("")
 
-	stringExprFrag := visitor.removePointerFragment(node.StringExpr)
+	stringExprFrag := visitor.removeValueFragment(node.StringExpr)
 
 	instructionArgs := make([]interface{}, 0)
 
@@ -695,12 +695,24 @@ func (visitor *CodegenVisitor) VisitFloatNode(node *ast.FloatNode) {
 
 // VisitCharacterNode do something
 func (visitor *CodegenVisitor) VisitCharacterNode(node *ast.CharacterNode) {
+	fragment := visitor.newBlocksFragment(node, VALUE)
 
+	stringConstant := constant.NewCharArrayFromString(node.StringValue())
+	stringGlobal := ir.NewGlobal(visitor.globalIdentifierTracker.NewIdentifier(), stringConstant.Type())
+	stringGlobal.Init = stringConstant
+	stringGlobal.Linkage = enum.LinkagePrivate
+	stringGlobal.Align = 1
+
+	visitor.constants = append(visitor.constants, stringGlobal)
+
+	fragment.NewBlock("")
+	result := fragment.CurrentBlock.NewGetElementPtr(stringGlobal, constant.NewInt(types.I32, 0), constant.NewInt(types.I32, 0))
+	fragment.resultValue = result
 }
 
 // VisitStringNode do something
 func (visitor *CodegenVisitor) VisitStringNode(node *ast.StringNode) {
-	fragment := visitor.newBlocksFragment(node, POINTER)
+	fragment := visitor.newBlocksFragment(node, VALUE)
 
 	stringValue := node.StringValue()
 
