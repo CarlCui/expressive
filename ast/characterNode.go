@@ -8,7 +8,7 @@ import (
 	"github.com/carlcui/expressive/typing"
 )
 
-// CharacterNode represents an integer constant node.
+// CharacterNode represents a character node.
 type CharacterNode struct {
 	*BaseNode
 	Val rune
@@ -19,17 +19,21 @@ func (node *CharacterNode) Accept(visitor Visitor) {
 	visitor.VisitCharacterNode(node)
 }
 
-// VisitChildren is part of visitor pattern. Literal node does not have any child.
-func (node *CharacterNode) VisitChildren(visitor Visitor) {
-
-}
-
 // Size returns the size of the rune in number of bytes
 func (node *CharacterNode) Size() int {
 	return utf8.RuneLen(node.Val)
 }
 
-// Init initializes an integer node with a token
+// IsASCII checks whether the character node has a value of a ASCII character
+func (node *CharacterNode) IsASCII() bool {
+	return node.Size() == 1
+}
+
+func (node *CharacterNode) StringValue() string {
+	return string(node.Val) + "\x00"
+}
+
+// Init initializes an char node with a token
 func (node *CharacterNode) Init(tok *token.Token) {
 	node.BaseNode = CreateBaseNode(tok, nil)
 

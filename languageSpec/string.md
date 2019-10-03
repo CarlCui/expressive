@@ -1,8 +1,8 @@
 # String
 
-## Intro 
+## Intro
 
-Strings are immutable, as in all other programming languages. It means that any operation on string will create a new one instead of modifying the existing one.
+A string is an array of expressive characters, meaning that the user does not need to parse UTF-8 characters specifically with string operations. Strings are immutable, as in all other programming languages.
 
 ## Production
 
