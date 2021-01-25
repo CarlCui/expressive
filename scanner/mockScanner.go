@@ -19,7 +19,7 @@ func (scanner *MockScanner) Next() *token.Token {
 	}
 
 	cur := scanner.toks[scanner.pos]
-	cur.Locator = &locator.IndexLocation{scanner.pos}
+	cur.Locator = &locator.IndexLocation{Index: scanner.pos}
 
 	scanner.pos++
 
