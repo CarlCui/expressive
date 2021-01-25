@@ -1,8 +1,10 @@
 package ast
 
-import "encoding/json"
+import (
+	"encoding/json"
 
-import "github.com/carlcui/expressive/token"
+	"github.com/carlcui/expressive/token"
+)
 
 // VariableDeclarationNode represents a node with variable declaration statement
 type VariableDeclarationNode struct {

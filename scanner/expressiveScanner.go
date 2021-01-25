@@ -1,9 +1,12 @@
 package scanner
 
-import "github.com/carlcui/expressive/token"
-import "github.com/carlcui/expressive/input"
-import "github.com/carlcui/expressive/locator"
-import "unicode"
+import (
+	"unicode"
+
+	"github.com/carlcui/expressive/input"
+	"github.com/carlcui/expressive/locator"
+	"github.com/carlcui/expressive/token"
+)
 
 // ExpressiveScanner is a lexical analyzer for expressive
 type ExpressiveScanner struct {

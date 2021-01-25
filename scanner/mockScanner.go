@@ -1,7 +1,9 @@
 package scanner
 
-import "github.com/carlcui/expressive/token"
-import "github.com/carlcui/expressive/locator"
+import (
+	"github.com/carlcui/expressive/locator"
+	"github.com/carlcui/expressive/token"
+)
 
 type MockScanner struct {
 	toks []*token.Token

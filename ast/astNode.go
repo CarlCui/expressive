@@ -1,7 +1,9 @@
 package ast
 
-import "github.com/carlcui/expressive/symbolTable"
-import "github.com/carlcui/expressive/typing"
+import (
+	"github.com/carlcui/expressive/symbolTable"
+	"github.com/carlcui/expressive/typing"
+)
 
 // Node represents a node in the ast
 type Node interface {

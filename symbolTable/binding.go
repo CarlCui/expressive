@@ -1,7 +1,9 @@
 package symbolTable
 
-import "github.com/carlcui/expressive/locator"
-import "github.com/carlcui/expressive/typing"
+import (
+	"github.com/carlcui/expressive/locator"
+	"github.com/carlcui/expressive/typing"
+)
 
 // Binding reperents the location in memory of an identifier
 type Binding struct {
