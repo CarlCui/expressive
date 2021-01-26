@@ -1,7 +1,10 @@
 package signature
 
-import "github.com/carlcui/expressive/typing"
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/carlcui/expressive/typing"
+)
 
 type Signature struct {
 	Params []typing.Typing

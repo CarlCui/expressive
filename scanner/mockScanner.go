@@ -1,7 +1,9 @@
 package scanner
 
-import "github.com/carlcui/expressive/token"
-import "github.com/carlcui/expressive/locator"
+import (
+	"github.com/carlcui/expressive/locator"
+	"github.com/carlcui/expressive/token"
+)
 
 type MockScanner struct {
 	toks []*token.Token
@@ -19,7 +21,7 @@ func (scanner *MockScanner) Next() *token.Token {
 	}
 
 	cur := scanner.toks[scanner.pos]
-	cur.Locator = &locator.IndexLocation{scanner.pos}
+	cur.Locator = &locator.IndexLocation{Index: scanner.pos}
 
 	scanner.pos++
 

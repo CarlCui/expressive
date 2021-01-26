@@ -1,7 +1,9 @@
 package semanticAnalyser
 
-import "github.com/carlcui/expressive/ast"
-import "github.com/carlcui/expressive/logger"
+import (
+	"github.com/carlcui/expressive/ast"
+	"github.com/carlcui/expressive/logger"
+)
 
 func Analyze(node ast.Node, logger logger.Logger) {
 	var visitor SemanticAnalysisVisitor

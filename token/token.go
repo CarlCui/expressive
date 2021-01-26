@@ -1,8 +1,10 @@
 package token
 
-import "strings"
+import (
+	"strings"
 
-import "github.com/carlcui/expressive/locator"
+	"github.com/carlcui/expressive/locator"
+)
 
 // A Token represents a mainingful word in a program.
 type Token struct {

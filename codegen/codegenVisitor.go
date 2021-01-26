@@ -127,7 +127,8 @@ func (visitor *CodegenVisitor) dereferencePointer(fragment Fragment) {
 			f.NewBlock("")
 		}
 
-		load := f.CurrentBlock.NewLoad(result)
+		resultType := result.Type().(*types.PointerType).ElemType
+		load := f.CurrentBlock.NewLoad(resultType, result)
 		f.resultValue = load
 	}
 }
@@ -294,7 +295,8 @@ func (visitor *CodegenVisitor) VisitLeaveIncDecNode(node *ast.IncDecNode) {
 
 	fragment.Append(lhsFragment)
 
-	load := fragment.CurrentBlock.NewLoad(lhsResult)
+	resultType := lhsResult.Type().(*types.PointerType).ElemType
+	load := fragment.CurrentBlock.NewLoad(resultType, lhsResult)
 
 	intType := (typing.INT.IrType()).(*types.IntType)
 
@@ -706,7 +708,7 @@ func (visitor *CodegenVisitor) VisitCharacterNode(node *ast.CharacterNode) {
 	visitor.constants = append(visitor.constants, stringGlobal)
 
 	fragment.NewBlock("")
-	result := fragment.CurrentBlock.NewGetElementPtr(stringGlobal, constant.NewInt(types.I32, 0), constant.NewInt(types.I32, 0))
+	result := fragment.CurrentBlock.NewGetElementPtr(stringConstant.Type(), stringGlobal, constant.NewInt(types.I32, 0), constant.NewInt(types.I32, 0))
 	fragment.resultValue = result
 }
 
@@ -725,7 +727,7 @@ func (visitor *CodegenVisitor) VisitStringNode(node *ast.StringNode) {
 	visitor.constants = append(visitor.constants, stringGlobal)
 
 	fragment.NewBlock("")
-	result := fragment.CurrentBlock.NewGetElementPtr(stringGlobal, constant.NewInt(types.I32, 0), constant.NewInt(types.I32, 0))
+	result := fragment.CurrentBlock.NewGetElementPtr(stringConstant.Type(), stringGlobal, constant.NewInt(types.I32, 0), constant.NewInt(types.I32, 0))
 	fragment.resultValue = result
 }
 

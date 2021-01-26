@@ -21,18 +21,21 @@ jobs:
 
       - run: mkdir -p $TEST_RESULTS
 
-      - run: sudo apt install libncurses5
+      - run:
+          name: install package dependency for lli
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y libncurses5
 
-      - run: go get github.com/jstemmer/go-junit-report
-
-      # specify any bash command here prefixed with `run: `
-      - run: go get -v ./...
+      - run:
+          name: install go dependenies
+          command: |
+            go get -v ./...
 
       - run:
           name: Run unit tests
           command: |
-            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
-            go test -v ./... | tee ${TEST_RESULTS}/go-test.out
+            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml
 
       - run:
           name: Build expressive

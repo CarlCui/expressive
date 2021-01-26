@@ -9,10 +9,10 @@ import (
 
 func TestParseValidVariableDelarationStmt_LetStmt(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.LET, Raw: "let"},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.LET, Raw: "let"},
+		{TokenType: token.IDENTIFIER, Raw: "foo"},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	root := parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -42,12 +42,12 @@ func TestParseValidVariableDelarationStmt_LetStmt(t *testing.T) {
 
 func TestParseValidVariableDeclarationStmt_LetStmtWithDeclaredType(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "foo"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	root := parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -85,10 +85,10 @@ func TestParseValidVariableDeclarationStmt_LetStmtWithDeclaredType(t *testing.T)
 
 func TestParseIntegerLiteral(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "-1"},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "-0"},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.INT_LITERAL, Raw: "-1"},
+		{TokenType: token.INT_LITERAL, Raw: "-0"},
 	}
 
 	expectedVals := []int{
@@ -113,12 +113,12 @@ func TestParseIntegerLiteral(t *testing.T) {
 
 func TestParseFloatLiteral(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.123"},
-		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.0"},
-		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-1.0"},
-		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-123.5"},
-		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-0.6"},
-		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "-0.0"},
+		{TokenType: token.FLOAT_LITERAL, Raw: "123.123"},
+		{TokenType: token.FLOAT_LITERAL, Raw: "123.0"},
+		{TokenType: token.FLOAT_LITERAL, Raw: "-1.0"},
+		{TokenType: token.FLOAT_LITERAL, Raw: "-123.5"},
+		{TokenType: token.FLOAT_LITERAL, Raw: "-0.6"},
+		{TokenType: token.FLOAT_LITERAL, Raw: "-0.0"},
 	}
 
 	expectedVals := []float32{
@@ -145,8 +145,8 @@ func TestParseFloatLiteral(t *testing.T) {
 
 func TestParseBooleanLiteral(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.TRUE},
-		&token.Token{TokenType: token.FALSE},
+		{TokenType: token.TRUE},
+		{TokenType: token.FALSE},
 	}
 
 	for _, tok := range toks {
@@ -162,8 +162,8 @@ func TestParseBooleanLiteral(t *testing.T) {
 
 func TestParseBooleanLiteralFailed(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.IDENTIFIER},
+		{TokenType: token.ADD},
+		{TokenType: token.IDENTIFIER},
 	}
 
 	for _, tok := range toks {
@@ -179,14 +179,14 @@ func TestParseBooleanLiteralFailed(t *testing.T) {
 
 func TestParseCharacterLiteral(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'a'"},
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'1'"},
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\0'"},
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\''"},
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\\"'"},
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\t'"},
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\n'"},
-		&token.Token{TokenType: token.CHAR_LITERAL, Raw: "'\\\\'"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'a'"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'1'"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'\\0'"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'\\''"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'\\\"'"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'\\t'"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'\\n'"},
+		{TokenType: token.CHAR_LITERAL, Raw: "'\\\\'"},
 	}
 
 	expectedVals := []rune{
@@ -215,15 +215,15 @@ func TestParseCharacterLiteral(t *testing.T) {
 
 func TestParseStringLiteral(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"abc\""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"  \""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\"\""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\'\""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\n\""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\t\""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\0\""},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"\\\\\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"abc\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"  \""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"\\\"\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"\\'\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"\\n\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"\\t\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"\\0\""},
+		{TokenType: token.STRING_LITERAL, Raw: "\"\\\\\""},
 	}
 
 	expectedVals := []string{
@@ -253,13 +253,13 @@ func TestParseStringLiteral(t *testing.T) {
 
 func TestSkipCommentTokenWhenParsing_InFront(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.COMMENT},
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.COMMENT},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "foo"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -267,14 +267,14 @@ func TestSkipCommentTokenWhenParsing_InFront(t *testing.T) {
 
 func TestSkipCommentTokenWhenParsing_InBetween(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
-		&token.Token{TokenType: token.COMMENT},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.COMMENT},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "foo"},
+		{TokenType: token.COMMENT},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.COMMENT},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -282,13 +282,13 @@ func TestSkipCommentTokenWhenParsing_InBetween(t *testing.T) {
 
 func TestSkipCommentTokenWhenParsing_After(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.COMMENT},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "foo"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.SEMI},
+		{TokenType: token.COMMENT},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -296,13 +296,13 @@ func TestSkipCommentTokenWhenParsing_After(t *testing.T) {
 
 func TestSkipCommentTokenWhenParsing_AfterEOF(t *testing.T) {
 	toks := []*token.Token{
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "foo"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
-		&token.Token{TokenType: token.COMMENT},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "foo"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
+		{TokenType: token.COMMENT},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -311,11 +311,11 @@ func TestSkipCommentTokenWhenParsing_AfterEOF(t *testing.T) {
 func TestNoEOFShouldFail(t *testing.T) {
 	// let bar: int; (no EOF)
 	toks := []*token.Token{
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "bar"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.SEMI},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "bar"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.SEMI},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -324,11 +324,11 @@ func TestNoEOFShouldFail(t *testing.T) {
 func TestParsingAssignmentStmt(t *testing.T) {
 	// a = 5;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "5"},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -337,13 +337,13 @@ func TestParsingAssignmentStmt(t *testing.T) {
 func TestParsingAssignmentStmtWithLHSExpression(t *testing.T) {
 	// a = 5 + 3;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "3"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "5"},
+		{TokenType: token.ADD},
+		{TokenType: token.INT_LITERAL, Raw: "3"},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -352,10 +352,10 @@ func TestParsingAssignmentStmtWithLHSExpression(t *testing.T) {
 func TestParsingAssignmentStmtWithLHSEmpty(t *testing.T) {
 	// a =;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -364,13 +364,13 @@ func TestParsingAssignmentStmtWithLHSEmpty(t *testing.T) {
 func TestParsingCompoundAssignment(t *testing.T) {
 	// a += 5 + 3;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.ASSIGN_ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "3"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.ASSIGN_ADD},
+		{TokenType: token.INT_LITERAL, Raw: "5"},
+		{TokenType: token.ADD},
+		{TokenType: token.INT_LITERAL, Raw: "3"},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -379,10 +379,10 @@ func TestParsingCompoundAssignment(t *testing.T) {
 func TestParsingIncrementStatement(t *testing.T) {
 	// a++;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.INCREMENT},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.INCREMENT},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -391,10 +391,10 @@ func TestParsingIncrementStatement(t *testing.T) {
 func TestParsingDecrementStatement(t *testing.T) {
 	// a--;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.DECREMENT},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.DECREMENT},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -403,14 +403,14 @@ func TestParsingDecrementStatement(t *testing.T) {
 func TestParsingIncrementStatementWithExpr(t *testing.T) {
 	// (a+1)++; -- although not semantically correct in expressive, the parser still permits this
 	toks := []*token.Token{
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.INCREMENT},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.ADD},
+		{TokenType: token.INT_LITERAL, Raw: "1"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.INCREMENT},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -419,11 +419,11 @@ func TestParsingIncrementStatementWithExpr(t *testing.T) {
 func TestParsingIncrementStatementIncorrect(t *testing.T) {
 	// a++5;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.INCREMENT},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.INCREMENT},
+		{TokenType: token.INT_LITERAL, Raw: "5"},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -432,10 +432,10 @@ func TestParsingIncrementStatementIncorrect(t *testing.T) {
 func TestParsingPrintStmt(t *testing.T) {
 	// print "123";
 	toks := []*token.Token{
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -444,12 +444,12 @@ func TestParsingPrintStmt(t *testing.T) {
 func TestParsingPrintStmtWithOneArg(t *testing.T) {
 	// print "123", 123;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -458,14 +458,14 @@ func TestParsingPrintStmtWithOneArg(t *testing.T) {
 func TestParsingPrintStmtWithMultipleArgs(t *testing.T) {
 	// print "123", 123, 123.5;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.FLOAT_LITERAL, Raw: "123.5"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.COMMA},
+		{TokenType: token.FLOAT_LITERAL, Raw: "123.5"},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -474,13 +474,13 @@ func TestParsingPrintStmtWithMultipleArgs(t *testing.T) {
 func TestParsingPrintStmtWithMultipleArgs_Fail(t *testing.T) {
 	// print "123", 123,;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.COMMA},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -493,18 +493,18 @@ func TestParsingIfStmtWithNoElse(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.TRUE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.TRUE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -519,26 +519,26 @@ func TestParsingIfStmtWithElse(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.TRUE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.TRUE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -553,30 +553,30 @@ func TestParsingIfStmtWithIfElse(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.TRUE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.FALSE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.TRUE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.FALSE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -593,38 +593,38 @@ func TestParsingIfStmtWithIfElseElse(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.TRUE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.FALSE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.TRUE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.FALSE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -643,50 +643,50 @@ func TestParsingIfStmtWithIfElseIfElseElse(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.TRUE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.FALSE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.FALSE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.TRUE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.FALSE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.FALSE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -703,38 +703,38 @@ func TestParsingIfStmtWithElseIfElseFail(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.TRUE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.ELSE},
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.FALSE},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.PRINT},
-		&token.Token{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
-		&token.Token{TokenType: token.COMMA},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "123"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.TRUE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.ELSE},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.FALSE},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.PRINT},
+		{TokenType: token.STRING_LITERAL, Raw: "\"123\""},
+		{TokenType: token.COMMA},
+		{TokenType: token.INT_LITERAL, Raw: "123"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -743,14 +743,14 @@ func TestParsingIfStmtWithElseIfElseFail(t *testing.T) {
 func TestParsingForStmtWithAllEmpty(t *testing.T) {
 	// for (;;) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.FOR},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.FOR},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.SEMI},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -759,25 +759,25 @@ func TestParsingForStmtWithAllEmpty(t *testing.T) {
 func TestParsingForStmtWithAssignmentInit(t *testing.T) {
 	// for (i = 0; i < 10; i = i + 1) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.FOR},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.LESS},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "10"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.FOR},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.SEMI},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.LESS},
+		{TokenType: token.INT_LITERAL, Raw: "10"},
+		{TokenType: token.SEMI},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.ADD},
+		{TokenType: token.INT_LITERAL, Raw: "1"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -786,28 +786,28 @@ func TestParsingForStmtWithAssignmentInit(t *testing.T) {
 func TestParsingForStmtWithDeclarationInit(t *testing.T) {
 	// for (let i: int = 0; i < 10; i = i + 1) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.FOR},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.LESS},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "10"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.FOR},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.SEMI},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.LESS},
+		{TokenType: token.INT_LITERAL, Raw: "10"},
+		{TokenType: token.SEMI},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.ADD},
+		{TokenType: token.INT_LITERAL, Raw: "1"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -816,17 +816,17 @@ func TestParsingForStmtWithDeclarationInit(t *testing.T) {
 func TestParsingForStmtWithInitEmpty(t *testing.T) {
 	// for (; i < 10; ) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.FOR},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.LESS},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "10"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.FOR},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.SEMI},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.LESS},
+		{TokenType: token.INT_LITERAL, Raw: "10"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -835,25 +835,25 @@ func TestParsingForStmtWithInitEmpty(t *testing.T) {
 func TestParsingForStmtWithConditionEmpty(t *testing.T) {
 	// for (let i: int = 0;;i = i + 1) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.FOR},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.FOR},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.SEMI},
+		{TokenType: token.SEMI},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.ADD},
+		{TokenType: token.INT_LITERAL, Raw: "1"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -862,23 +862,23 @@ func TestParsingForStmtWithConditionEmpty(t *testing.T) {
 func TestParsingForStmtWithIterationEmpty(t *testing.T) {
 	// for (let i: int = 0; i < 10;) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.FOR},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.LESS},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "10"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.FOR},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.SEMI},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.LESS},
+		{TokenType: token.INT_LITERAL, Raw: "10"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -887,15 +887,15 @@ func TestParsingForStmtWithIterationEmpty(t *testing.T) {
 func TestParsingWhileStmt(t *testing.T) {
 	// while (i < 3) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.WHILE},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.LESS},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "3"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.WHILE},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.LESS},
+		{TokenType: token.INT_LITERAL, Raw: "3"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -904,18 +904,18 @@ func TestParsingWhileStmt(t *testing.T) {
 func TestParsingWhileStmtWithInvalidConditionExpr(t *testing.T) {
 	// while (let i: int = 0) {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.WHILE},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "i"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.INT_KEYWORD},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.WHILE},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.LET},
+		{TokenType: token.IDENTIFIER, Raw: "i"},
+		{TokenType: token.COLON},
+		{TokenType: token.INT_KEYWORD},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -924,12 +924,12 @@ func TestParsingWhileStmtWithInvalidConditionExpr(t *testing.T) {
 func TestParsingWhileStmtWithEmptyConditionExpr(t *testing.T) {
 	// while () {}
 	toks := []*token.Token{
-		&token.Token{TokenType: token.WHILE},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.WHILE},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -938,9 +938,9 @@ func TestParsingWhileStmtWithEmptyConditionExpr(t *testing.T) {
 func TestBreakNode(t *testing.T) {
 	// break;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.BREAK},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -949,10 +949,10 @@ func TestBreakNode(t *testing.T) {
 func TestBreakNodeInvalid(t *testing.T) {
 	// break let;
 	toks := []*token.Token{
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.LET},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.BREAK},
+		{TokenType: token.LET},
+		{TokenType: token.SEMI},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -984,80 +984,80 @@ func TestSwitchStmt1(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.SWITCH},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "6"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "2"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "3"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "7"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "4"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IF},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.GREATER},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "8"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "10"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
-		&token.Token{TokenType: token.ADD},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "1"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "7"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.DEFAULT},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "9"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.SWITCH},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.COLON},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "5"},
+		{TokenType: token.SEMI},
+		{TokenType: token.BREAK},
+		{TokenType: token.SEMI},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "1"},
+		{TokenType: token.COLON},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "6"},
+		{TokenType: token.SEMI},
+		{TokenType: token.BREAK},
+		{TokenType: token.SEMI},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "2"},
+		{TokenType: token.COLON},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "3"},
+		{TokenType: token.COLON},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "7"},
+		{TokenType: token.SEMI},
+		{TokenType: token.BREAK},
+		{TokenType: token.SEMI},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "4"},
+		{TokenType: token.COLON},
+		{TokenType: token.BREAK},
+		{TokenType: token.SEMI},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "5"},
+		{TokenType: token.COLON},
+		{TokenType: token.IF},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.GREATER},
+		{TokenType: token.INT_LITERAL, Raw: "8"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "10"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "1"},
+		{TokenType: token.ADD},
+		{TokenType: token.INT_LITERAL, Raw: "1"},
+		{TokenType: token.COLON},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "7"},
+		{TokenType: token.SEMI},
+		{TokenType: token.BREAK},
+		{TokenType: token.SEMI},
+		{TokenType: token.DEFAULT},
+		{TokenType: token.COLON},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "9"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -1072,22 +1072,22 @@ func TestSwitchStmtWithoutDefault(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.SWITCH},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.CASE},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "0"},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "5"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.BREAK},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.SWITCH},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.CASE},
+		{TokenType: token.INT_LITERAL, Raw: "0"},
+		{TokenType: token.COLON},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "5"},
+		{TokenType: token.SEMI},
+		{TokenType: token.BREAK},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveNoError(t))
@@ -1101,19 +1101,19 @@ func TestSwitchStmtWithEmptyCase(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.SWITCH},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.DEFAULT},
-		&token.Token{TokenType: token.COLON},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "b"},
-		&token.Token{TokenType: token.ASSIGN},
-		&token.Token{TokenType: token.INT_LITERAL, Raw: "9"},
-		&token.Token{TokenType: token.SEMI},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.SWITCH},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.DEFAULT},
+		{TokenType: token.COLON},
+		{TokenType: token.IDENTIFIER, Raw: "b"},
+		{TokenType: token.ASSIGN},
+		{TokenType: token.INT_LITERAL, Raw: "9"},
+		{TokenType: token.SEMI},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))
@@ -1125,13 +1125,13 @@ func TestSwitchStmtWithEmpty(t *testing.T) {
 		}
 	*/
 	toks := []*token.Token{
-		&token.Token{TokenType: token.SWITCH},
-		&token.Token{TokenType: token.LEFT_PAREN},
-		&token.Token{TokenType: token.IDENTIFIER, Raw: "a"},
-		&token.Token{TokenType: token.RIGHT_PAREN},
-		&token.Token{TokenType: token.LEFT_CURLY_BRACE},
-		&token.Token{TokenType: token.RIGHT_CURLY_BRACE},
-		&token.Token{TokenType: token.EOF},
+		{TokenType: token.SWITCH},
+		{TokenType: token.LEFT_PAREN},
+		{TokenType: token.IDENTIFIER, Raw: "a"},
+		{TokenType: token.RIGHT_PAREN},
+		{TokenType: token.LEFT_CURLY_BRACE},
+		{TokenType: token.RIGHT_CURLY_BRACE},
+		{TokenType: token.EOF},
 	}
 
 	parseWithMockTokens(toks, shouldHaveError(t))

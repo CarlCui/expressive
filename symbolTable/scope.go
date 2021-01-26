@@ -1,8 +1,11 @@
 package symbolTable
 
-import "github.com/carlcui/expressive/typing"
-import "github.com/carlcui/expressive/locator"
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/carlcui/expressive/locator"
+	"github.com/carlcui/expressive/typing"
+)
 
 var nextScopeIndex = 0
 
