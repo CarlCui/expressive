@@ -59,5 +59,8 @@ type Visitor interface {
 
 	VisitTypeLiteralNode(node *TypeLiteralNode)
 
+	VisitEnterArrayTypeNode(node *ArrayTypeNode)
+	VisitLeaveArrayTypeNode(node *ArrayTypeNode)
+
 	VisitErrorNode(node *ErrorNode)
 }

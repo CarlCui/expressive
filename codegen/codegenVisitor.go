@@ -764,6 +764,14 @@ func (visitor *CodegenVisitor) VisitTypeLiteralNode(node *ast.TypeLiteralNode) {
 
 }
 
+func (visitor *CodegenVisitor) VisitEnterArrayTypeNode(node *ast.ArrayTypeNode) {
+
+}
+
+func (visitor *CodegenVisitor) VisitLeaveArrayTypeNode(node *ast.ArrayTypeNode) {
+
+}
+
 // VisitErrorNode should not happen during codegen
 func (visitor *CodegenVisitor) VisitErrorNode(node *ast.ErrorNode) {
 	panic(node.GetLocation() + ": unexpected error node")

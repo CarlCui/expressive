@@ -419,6 +419,14 @@ func (visitor *SemanticAnalysisVisitor) VisitTypeLiteralNode(node *ast.TypeLiter
 	}
 }
 
+func (visitor *SemanticAnalysisVisitor) VisitEnterArrayTypeNode(node *ast.ArrayTypeNode) {
+
+}
+
+func (visitor *SemanticAnalysisVisitor) VisitLeaveArrayTypeNode(node *ast.ArrayTypeNode) {
+
+}
+
 // VisitErrorNode do something
 func (visitor *SemanticAnalysisVisitor) VisitErrorNode(node *ast.ErrorNode) {
 	node.SetTyping(typing.ERROR_TYPE)
